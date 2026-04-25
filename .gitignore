@@ -25,3 +25,16 @@ Thumbs.db
 coverage/
 *.log
 *.tsbuildinfo
+
+# Archivos de documentación
+SPEC.md
+
+# Configuración Firebase local
+firebase.json
+.firebaserc
+database.rules.json
+firestore.rules
+firestore.indexes.json
+
+# Env example (por ahora no tengo variables de entorno, pero es buena práctica incluir un ejemplo)
+.env.example
