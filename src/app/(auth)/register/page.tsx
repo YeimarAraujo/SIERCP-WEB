@@ -8,6 +8,7 @@ export default function RegisterPage() {
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
         identificacion: '', password: '', confirm: '',
+        role: 'ESTUDIANTE', institutionCode: '',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export default function RegisterPage() {
         init();
     }, []);
 
-    function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
 
@@ -55,10 +56,12 @@ export default function RegisterPage() {
                 firstName: form.firstName,
                 lastName: form.lastName,
                 identificacion: form.identificacion,
+                role: form.role,
+                institutionCode: form.institutionCode || undefined,
             });
             // Give Firebase a moment to update, then redirect
             setTimeout(() => {
-                window.location.href = '/home';
+                window.location.href = form.role === 'INSTRUCTOR' ? '/pending-approval' : '/home';
             }, 300);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al registrar');
@@ -74,7 +77,7 @@ export default function RegisterPage() {
                         S
                     </div>
                     <h1 className="text-2xl font-semibold tracking-tight">Crear cuenta</h1>
-                    <p className="text-sm text-muted-foreground">Registro de estudiante</p>
+                    <p className="text-sm text-muted-foreground">Registro de usuario</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -83,6 +86,18 @@ export default function RegisterPage() {
                             {error}
                         </div>
                     )}
+
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium">Tipo de usuario</label>
+                        <select
+                            name="role" value={form.role}
+                            onChange={handleChange as any}
+                            className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            <option value="ESTUDIANTE">Estudiante</option>
+                            <option value="INSTRUCTOR">Instructor</option>
+                        </select>
+                    </div>
 
                     <div className="grid grid-cols-2 gap-3">
                         {[
@@ -98,6 +113,21 @@ export default function RegisterPage() {
                                 />
                             </div>
                         ))}
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium">Código de institución (opcional)</label>
+                        <input
+                            name="institutionCode" type="text"
+                            value={form.institutionCode}
+                            onChange={handleChange} placeholder="Ej: UPC-VALLEDUPAR"
+                            className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            {form.role === 'INSTRUCTOR' 
+                                ? 'Instructores independientes pueden dejar este campo vacío' 
+                                : 'Déjalo vacío si eres estudiante independiente'}
+                        </p>
                     </div>
 
                     {[

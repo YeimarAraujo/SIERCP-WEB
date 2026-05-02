@@ -14,10 +14,12 @@ export interface UserModel {
     email: string;
     firstName: string;
     lastName: string;
-    role: 'ADMIN' | 'INSTRUCTOR' | 'ESTUDIANTE';
+    role: 'ADMIN' | 'INSTRUCTOR' | 'ESTUDIANTE' | 'SUPER_ADMIN';
     avatarUrl?: string;
     identificacion?: string;
     isActive: boolean;
+    institutionId: string;
+    status: 'PENDING' | 'ACTIVE';
     stats?: UserStats;
     fcmTokens?: string[];
     fcmTokensUpdatedAt?: Date;
@@ -35,13 +37,17 @@ export function getFullName(user: UserModel): string {
 }
 
 export function isAdmin(user: UserModel | null): boolean {
-    return user?.role === 'ADMIN';
+    return user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 }
 
 export function isInstructor(user: UserModel | null): boolean {
-    return user?.role === 'INSTRUCTOR' || user?.role === 'ADMIN';
+    return user?.role === 'INSTRUCTOR' || user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 }
 
 export function isStudent(user: UserModel | null): boolean {
     return user?.role === 'ESTUDIANTE';
+}
+
+export function isSuperAdmin(user: UserModel | null): boolean {
+    return user?.role === 'SUPER_ADMIN';
 }

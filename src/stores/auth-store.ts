@@ -12,7 +12,8 @@ import {
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { UserModel } from '@/models/user';
-import { ROLE_STUDENT } from '@/lib/constants';
+import { ROLE_STUDENT, ROLE_INSTRUCTOR, ROLE_SUPER_ADMIN } from '@/lib/constants';
+import { InstitutionService } from '@/services/institution.service';
 
 interface AuthStore {
     user: UserModel | null;
@@ -30,6 +31,7 @@ interface AuthStore {
         lastName: string;
         identificacion?: string;
         role?: string;
+        institutionCode?: string;
     }) => Promise<void>;
     logout: () => Promise<void>;
     clearError: () => void;
@@ -47,6 +49,8 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
                 lastName: '',
                 role: ROLE_STUDENT,
                 isActive: true,
+                institutionId: uid,
+                status: 'ACTIVE',
                 createdAt: new Date(),
                 updatedAt: new Date(),
             };
@@ -61,6 +65,8 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             avatarUrl: d.avatarUrl,
             identificacion: d.identificacion,
             isActive: d.isActive ?? true,
+            institutionId: d.institutionId ?? uid,
+            status: d.status ?? 'ACTIVE',
             stats: d.stats,
             createdAt: d.createdAt?.toDate?.() ?? new Date(),
             updatedAt: d.updatedAt?.toDate?.() ?? new Date(),
@@ -123,18 +129,41 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-            register: async ({ email, password, firstName, lastName, identificacion, role }) => {
+            register: async ({ email, password, firstName, lastName, identificacion, role, institutionCode }) => {
                 set({ loading: true, error: null });
                 try {
+                    const roleValue = (role as UserModel['role']) ?? ROLE_STUDENT;
+                    
+                    if (roleValue === ROLE_SUPER_ADMIN || roleValue === 'ADMIN') {
+                        throw new Error('Rol no permitido en registro público');
+                    }
+
+                    let finalInstitutionId = '';
+                    let finalStatus: 'PENDING' | 'ACTIVE' = 'ACTIVE';
+
+                    if (institutionCode) {
+                        const exists = await InstitutionService.exists(institutionCode);
+                        if (!exists) throw new Error('Código de institución inválido');
+                        finalInstitutionId = institutionCode;
+                        if (roleValue === ROLE_INSTRUCTOR) finalStatus = 'PENDING';
+                    } else {
+                        finalStatus = roleValue === ROLE_INSTRUCTOR ? 'PENDING' : 'ACTIVE';
+                    }
+
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    
+                    if (!finalInstitutionId) finalInstitutionId = cred.user.uid;
+
                     const userModel: Omit<UserModel, 'createdAt' | 'updatedAt'> = {
                         uid: cred.user.uid,
                         email,
                         firstName,
                         lastName,
-                        role: (role as UserModel['role']) ?? ROLE_STUDENT,
+                        role: roleValue,
                         identificacion,
                         isActive: true,
+                        institutionId: finalInstitutionId,
+                        status: finalStatus,
                         stats: {
                             totalSessions: 0,
                             sessionsToday: 0,

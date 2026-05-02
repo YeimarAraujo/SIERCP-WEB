@@ -1,10 +1,11 @@
 export const ROLE_ADMIN = 'ADMIN' as const;
 export const ROLE_INSTRUCTOR = 'INSTRUCTOR' as const;
 export const ROLE_STUDENT = 'ESTUDIANTE' as const;
+export const ROLE_SUPER_ADMIN = 'SUPER_ADMIN' as const;
 
-export const ROLES = [ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_STUDENT] as const;
+export const ROLES = [ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_STUDENT, ROLE_SUPER_ADMIN] as const;
 
-export type Role = typeof ROLE_ADMIN | typeof ROLE_INSTRUCTOR | typeof ROLE_STUDENT;
+export type Role = typeof ROLE_ADMIN | typeof ROLE_INSTRUCTOR | typeof ROLE_STUDENT | typeof ROLE_SUPER_ADMIN;
 
 export const AHA_MIN_DEPTH_MM = 50;
 export const AHA_MAX_DEPTH_MM = 60;
