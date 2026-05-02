@@ -10,8 +10,13 @@ export interface Institution {
 export const InstitutionService = {
     exists: async (code: string): Promise<boolean> => {
         if (!db) return false;
-        const snap = await getDoc(doc(db, 'institutions', code));
-        return snap.exists();
+        try {
+            const snap = await getDoc(doc(db, 'institutions', code));
+            return snap.exists();
+        } catch (e) {
+            console.error('Error checking institution:', e);
+            return false;
+        }
     },
 
     create: async (code: string, data: Omit<Institution, 'id'>): Promise<void> => {
