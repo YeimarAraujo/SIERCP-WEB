@@ -19,6 +19,9 @@ export interface UserModel {
     identificacion?: string;
     isActive: boolean;
     stats?: UserStats;
+    fcmTokens?: string[];
+    fcmTokensUpdatedAt?: Date;
+    appInstalled?: boolean;
     createdAt: Date;
     updatedAt: Date;
 }

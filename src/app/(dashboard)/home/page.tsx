@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { SessionService } from '@/services/firestore.service';
+import { SessionService, CourseService } from '@/services/firestore.service';
 import type { SessionModel } from '@/models/session';
-import { 
+import type { CourseModel } from '@/models/course';
+import {
     Home, BookOpen, Clock, Activity, User,
     Bell, Search, ChevronDown,
     TrendingUp, Zap, Ruler,
@@ -12,30 +14,56 @@ import {
     Circle, Play, Battery
 } from 'lucide-react';
 
-const mockSessions = [
-    { id: '1', date: new Date('2026-04-24'), durationSeconds: 272, score: 91, type: 'Paro cardíaco adulto' },
-    { id: '2', date: new Date('2026-04-23'), durationSeconds: 198, score: 74, type: 'RCP adulto' },
-    { id: '3', date: new Date('2026-04-22'), durationSeconds: 310, score: 62, type: 'Simulación advanced' },
-    { id: '4', date: new Date('2026-04-21'), durationSeconds: 245, score: 88, type: 'Paro cardíaco adulto' },
-];
 
-const mockCourses = [
-    { name: 'BLS Proveedor — Adulto', progress: 78 },
-    { name: 'RCP Pediátrico', progress: 45 },
-    { name: 'Protocolo AED', progress: 12 },
-];
-
-const scoreData = [68, 72, 75, 71, 80, 83, 79, 86, 90, 84];
 
 export default function HomePage() {
-    const { user } = useAuth();
+    const { user, isAdmin, isInstructor, initialized } = useAuth();
+    const router = useRouter();
     const [showPasswordMenu, setShowPasswordMenu] = useState(false);
+    const [sessions, setSessions] = useState<SessionModel[]>([]);
+    const [courses, setCourses] = useState<CourseModel[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Role-based redirect
+    useEffect(() => {
+        if (!initialized || !user) return;
+        if (user.role === 'ADMIN') {
+            router.replace('/admin/users');
+        } else if (user.role === 'INSTRUCTOR') {
+            router.replace('/courses');
+        }
+    }, [initialized, user, router]);
+
+    // Fetch real data from Firebase
+    useEffect(() => {
+        if (!user) return;
+        
+        const fetchData = async () => {
+            try {
+                const [sessionsData, coursesData] = await Promise.all([
+                    SessionService.getByStudent(user.uid, 20),
+                    CourseService.getAll(),
+                ]);
+                setSessions(sessionsData);
+                setCourses(coursesData);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [user]);
 
     const stats = {
-        totalSessions: 47,
-        averageScore: 84,
-        avgDepth: 53.1,
-        avgRate: 112,
+        totalSessions: user?.stats?.totalSessions ?? sessions.length,
+        averageScore: user?.stats?.averageScore ?? 
+            (sessions.length > 0 
+                ? Math.round(sessions.reduce((acc, s) => acc + (s.metrics?.score ?? 0), 0) / sessions.length) 
+                : 0),
+        avgDepth: user?.stats?.averageDepthMm ?? 0,
+        avgRate: user?.stats?.averageRatePerMin ?? 0,
         deviceBattery: 87,
         deviceConnected: true,
     };
@@ -261,21 +289,30 @@ export default function HomePage() {
                                 <span className="text-xs" style={{ color: '#6B7FCC' }}>Últimas 10 sesiones</span>
                             </div>
                             
-                            {/* Chart placeholder */}
+                            {/* Chart with real data */}
                             <div className="h-48 flex items-end justify-between gap-2 px-2">
-                                {scoreData.map((score, i) => (
-                                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                                        <div 
-                                            className="w-full rounded-t-md"
-                                            style={{ 
-                                                height: `${score}%`, 
-                                                background: score >= 80 ? '#38BDF8' : score >= 70 ? '#F59E0B' : '#EF4444',
-                                                opacity: 0.8
-                                            }}
-                                        />
-                                        <span className="text-xs" style={{ color: '#6B7FCC' }}>S{i + 1}</span>
+                                {loading ? (
+                                    <div className="flex items-center justify-center w-full">
+                                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                                     </div>
-                                ))}
+                                ) : (
+                                    sessions.slice(0, 10).reverse().map((session, i) => {
+                                        const score = session.metrics?.score ?? 0;
+                                        return (
+                                            <div key={session.id} className="flex-1 flex flex-col items-center gap-2">
+                                                <div 
+                                                    className="w-full rounded-t-md"
+                                                    style={{ 
+                                                        height: `${score}%`, 
+                                                        background: score >= 80 ? '#38BDF8' : score >= 70 ? '#F59E0B' : '#EF4444',
+                                                        opacity: 0.8
+                                                    }}
+                                                />
+                                                <span className="text-xs" style={{ color: '#6B7FCC' }}>S{i + 1}</span>
+                                            </div>
+                                        );
+                                    })
+                                )}
                             </div>
                             
                             {/* Reference line - fake visual */}
@@ -315,35 +352,45 @@ export default function HomePage() {
                             </div>
 
                             <div className="space-y-0">
-                                {mockSessions.map((session) => (
-                                    <div 
-                                        key={session.id}
-                                        className="flex items-center py-3 border-b"
-                                        style={{ borderColor: 'rgba(255,255,255,0.05)' }}
-                                    >
-                                        <span 
-                                            className="text-xs uppercase px-2 py-1 rounded"
-                                            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(199,210,254,0.12)', color: '#6B7FCC' }}
+                                {loading ? (
+                                    [...Array(4)].map((_, i) => (
+                                        <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
+                                    ))
+                                ) : sessions.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground text-center py-4">
+                                        No hay sesiones recientes. ¡Inicia tu primera sesión!
+                                    </p>
+                                ) : (
+                                    sessions.slice(0, 4).map((session) => (
+                                        <div 
+                                            key={session.id}
+                                            className="flex items-center py-3 border-b"
+                                            style={{ borderColor: 'rgba(255,255,255,0.05)' }}
                                         >
-                                            {formatSessionDate(session.date)}
-                                        </span>
-                                        <div className="flex-1 ml-4">
-                                            <p className="text-sm font-semibold text-white">{session.type}</p>
-                                            <p className="text-xs" style={{ color: '#6B7FCC', marginTop: '2px' }}>{formatDuration(session.durationSeconds)}</p>
+                                            <span 
+                                                className="text-xs uppercase px-2 py-1 rounded"
+                                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(199,210,254,0.12)', color: '#6B7FCC' }}
+                                            >
+                                                {formatSessionDate(session.startedAt)}
+                                            </span>
+                                            <div className="flex-1 ml-4">
+                                                <p className="text-sm font-semibold text-white">{session.scenarioTitle ?? 'Sesión RCP'}</p>
+                                                <p className="text-xs" style={{ color: '#6B7FCC', marginTop: '2px' }}>{formatDuration(session.duration)}</p>
+                                            </div>
+                                            <span 
+                                                className="text-sm font-bold px-2 py-1 rounded-lg"
+                                                style={{ 
+                                                    background: getScoreColor(session.metrics?.score ?? 0).bg, 
+                                                    color: getScoreColor(session.metrics?.score ?? 0).color,
+                                                    border: `1px solid ${getScoreColor(session.metrics?.score ?? 0).border}`
+                                                }}
+                                            >
+                                                {session.metrics?.score ?? 0}%
+                                            </span>
+                                            <ChevronRight className="w-4 h-4 ml-3" style={{ color: '#6B7FCC' }} />
                                         </div>
-                                        <span 
-                                            className="text-sm font-bold px-2 py-1 rounded-lg"
-                                            style={{ 
-                                                background: getScoreColor(session.score).bg, 
-                                                color: getScoreColor(session.score).color,
-                                                border: `1px solid ${getScoreColor(session.score).border}`
-                                            }}
-                                        >
-                                            {session.score}%
-                                        </span>
-                                        <ChevronRight className="w-4 h-4 ml-3" style={{ color: '#6B7FCC' }} />
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
@@ -397,26 +444,34 @@ export default function HomePage() {
                             <h3 className="text-base font-semibold text-white mb-4">Cursos activos</h3>
                             
                             <div className="space-y-4">
-                                {mockCourses.map((course, i) => (
-                                    <div key={i}>
-                                        <div className="flex justify-between text-xs mb-1">
-                                            <span className="text-white font-medium">{course.name}</span>
-                                            <span style={{ color: '#A5B4FC' }}>{course.progress}%</span>
+                                {loading ? (
+                                    [...Array(3)].map((_, i) => (
+                                        <div key={i} className="h-12 rounded-lg bg-muted animate-pulse" />
+                                    ))
+                                ) : courses.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">No hay cursos disponibles.</p>
+                                ) : (
+                                    courses.slice(0, 3).map((course) => (
+                                        <div key={course.id}>
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className="text-white font-medium">{course.title}</span>
+                                                <span style={{ color: '#A5B4FC' }}>{course.studentCount} estudiantes</span>
+                                            </div>
+                                            <div className="h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                                                <div 
+                                                    className="h-1 rounded-full"
+                                                    style={{ 
+                                                        width: `${course.studentCount > 0 ? Math.min(100, (course.studentCount / 20) * 100) : 0}%`, 
+                                                        background: '#38BDF8'
+                                                    }}
+                                                />
+                                            </div>
+                                            <a href={`/courses/${course.id}`} className="text-xs mt-1 inline-flex items-center gap-1" style={{ color: '#38BDF8' }}>
+                                                Ver curso <ChevronRight className="w-3 h-3" />
+                                            </a>
                                         </div>
-                                        <div className="h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
-                                            <div 
-                                                className="h-1 rounded-full"
-                                                style={{ 
-                                                    width: `${course.progress}%`, 
-                                                    background: course.progress > 0 ? '#38BDF8' : '#6B7FCC'
-                                                }}
-                                            />
-                                        </div>
-                                        <a href="/courses" className="text-xs mt-1 inline-flex items-center gap-1" style={{ color: '#38BDF8' }}>
-                                            Continuar <ChevronRight className="w-3 h-3" />
-                                        </a>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
                         </div>
 

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
+import { AppInstallBanner } from '@/components/notifications/app-install-banner';
 
 interface DashboardShellProps {
     children: React.ReactNode;
@@ -32,6 +33,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
     return (
         <div className="min-h-screen" style={{ background: '#0E0080' }}>
             {children}
+            <AppInstallBanner />
         </div>
     );
 }

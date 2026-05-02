@@ -84,6 +84,27 @@ export default function LoginPage() {
                     </nav>
                     <div className="flex items-center gap-4">
                         <a 
+                            href="#"
+                            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all hover:scale-105"
+                            style={{ 
+                                background: 'rgba(56, 189, 248, 0.15)', 
+                                color: '#38BDF8',
+                                border: '1px solid rgba(56, 189, 248, 0.3)'
+                            }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+                                if (appUrl && appUrl !== '#') {
+                                    window.open(appUrl, '_blank');
+                                }
+                            }}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Descargar App
+                        </a>
+                        <a 
                             href="/register" 
                             className="px-3 md:px-5 py-1.5 md:py-2 rounded-lg font-semibold text-sm transition-colors"
                             style={{ 
@@ -255,6 +276,46 @@ export default function LoginPage() {
                                     >
                                         ¿No tienes cuenta? Regístrate aquí
                                     </a>
+                                </div>
+
+                                <div 
+                                    className="mt-4 p-4 rounded-xl"
+                                    style={{ 
+                                        background: 'rgba(56, 189, 248, 0.08)', 
+                                        border: '1px solid rgba(56, 189, 248, 0.2)'
+                                    }}
+                                >
+                                    <div className="flex items-center justify-center gap-3">
+                                        <div 
+                                            className="w-10 h-10 rounded-lg flex items-center justify-center"
+                                            style={{ background: 'rgba(56, 189, 248, 0.15)' }}
+                                        >
+                                            <svg className="w-5 h-5" style={{ color: '#38BDF8' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="text-sm font-medium text-white">Descarga la app móvil</p>
+                                            <p className="text-xs" style={{ color: '#A5B4FC' }}>Entrena sin conexión y recibe notificaciones</p>
+                                        </div>
+                                        <a 
+                                            href="#"
+                                            className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all hover:scale-105"
+                                            style={{ 
+                                                background: '#38BDF8', 
+                                                color: '#0E0080'
+                                            }}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+                                                if (appUrl && appUrl !== '#') {
+                                                    window.open(appUrl, '_blank');
+                                                }
+                                            }}
+                                        >
+                                            Descargar
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </form>

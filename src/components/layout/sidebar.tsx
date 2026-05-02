@@ -7,7 +7,10 @@ import { cn } from '@/lib/utils';
 import {
     HomeIcon, BookOpenIcon, ClipboardListIcon, ClockIcon,
     CpuIcon, UserIcon, UsersIcon, ShieldIcon, LogOutIcon,
+    SmartphoneIcon,
 } from 'lucide-react';
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '#';
 
 interface NavItem {
     href: string;
@@ -33,6 +36,12 @@ export function Sidebar() {
     const visible = NAV_ITEMS.filter((item) =>
         user ? item.roles.includes(user.role) : false,
     );
+
+    const handleDownloadApp = () => {
+        if (APP_URL !== '#') {
+            window.open(APP_URL, '_blank');
+        }
+    };
 
     return (
         <aside className="flex h-screen w-56 flex-col border-r border-border bg-card">
@@ -62,6 +71,21 @@ export function Sidebar() {
                     </Link>
                 ))}
             </nav>
+
+            {/* Descargar App */}
+            <div className="border-t border-border p-3">
+                <button
+                    onClick={handleDownloadApp}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all hover:scale-[1.02]"
+                    style={{
+                        background: 'linear-gradient(135deg, #1800AD 0%, #2D1FD4 100%)',
+                        color: '#FFFFFF',
+                    }}
+                >
+                    <SmartphoneIcon className="h-4 w-4 shrink-0" />
+                    Descargar App
+                </button>
+            </div>
 
             {/* User + Logout */}
             <div className="border-t border-border p-3 space-y-1">
