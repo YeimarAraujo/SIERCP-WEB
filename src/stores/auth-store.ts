@@ -91,11 +91,11 @@ export const useAuthStore = create<AuthStore>()(
                 if (state.firebaseUser && state.user && state.initialized) {
                     return () => {};
                 }
-                
+
                 if (!state.firebaseUser) {
                     set({ loading: true });
                 }
-                
+
                 const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
                     if (firebaseUser) {
                         try {
@@ -198,8 +198,13 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             logout: async () => {
-                await firebaseSignOut(auth);
-                set({ user: null, firebaseUser: null, error: null });
+                try {
+                    await firebaseSignOut(auth);
+                } catch (error) {
+                    console.error('Firebase signOut error:', error);
+                } finally {
+                    set({ user: null, firebaseUser: null, error: null, initialized: true });
+                }
             },
 
             clearError: () => set({ error: null }),

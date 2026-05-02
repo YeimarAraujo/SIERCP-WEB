@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import {
@@ -22,7 +23,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
     { href: '/home', label: 'Inicio', icon: HomeIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
     { href: '/courses', label: 'Cursos', icon: BookOpenIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
-    { href: '/history', label: 'Historial', icon: ClockIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
+    { href: '/history', label: 'Historial', icon: ClipboardListIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
     { href: '/device', label: 'Maniquí', icon: CpuIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
     { href: '/profile', label: 'Perfil', icon: UserIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
     { href: '/admin/users', label: 'Usuarios', icon: UsersIcon, roles: ['ADMIN'] },
@@ -32,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
 export function Sidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
+    const router = useRouter();
 
     const visible = NAV_ITEMS.filter((item) =>
         user ? item.roles.includes(user.role) : false,
@@ -40,6 +42,16 @@ export function Sidebar() {
     const handleDownloadApp = () => {
         if (APP_URL !== '#') {
             window.open(APP_URL, '_blank');
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            router.replace('/');
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+            router.replace('/');
         }
     };
 
@@ -96,7 +108,7 @@ export function Sidebar() {
                     </div>
                 )}
                 <button
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
                     <LogOutIcon className="h-4 w-4" />

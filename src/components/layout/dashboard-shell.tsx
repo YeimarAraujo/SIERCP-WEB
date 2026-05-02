@@ -14,21 +14,34 @@ export function DashboardShell({ children }: DashboardShellProps) {
     const router = useRouter();
 
     useEffect(() => {
-        if (initialized && !user) router.replace('/login');
+        if (initialized && !user) {
+            router.replace('/login');
+        }
     }, [initialized, user, router]);
 
-    if (!initialized) {
+    // Mostrar spinner en AMBOS casos: no inicializado O sin usuario
+    // Nunca retornar null — siempre mostrar algo mientras redirige
+    if (!initialized || !user) {
         return (
-            <div className="flex h-screen items-center justify-center" style={{ background: '#0E0080' }}>
-                <div className="flex flex-col items-center gap-3">
-                    <div className="h-8 w-8 rounded-full border-2" style={{ borderColor: '#38BDF8', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
-                    <p className="text-sm" style={{ color: '#6B7FCC' }}>Cargando...</p>
-                </div>
+            <div style={{
+                minHeight: '100vh',
+                background: '#0a0b1a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+                <div style={{
+                    width: 40,
+                    height: 40,
+                    border: '3px solid rgba(255,255,255,0.1)',
+                    borderTop: '3px solid #1800AD',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                }} />
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         );
     }
-
-    if (!user) return null;
 
     return (
         <div className="min-h-screen" style={{ background: '#0E0080' }}>

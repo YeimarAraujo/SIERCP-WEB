@@ -3,16 +3,18 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 
-let globalInitDone = false;
-
 export function useAuth() {
     const store = useAuthStore();
 
     useEffect(() => {
-        if (!globalInitDone) {
-            globalInitDone = true;
-            store.initialize();
-        }
+        // initialize() retorna la función unsub de onAuthStateChanged
+        // El cleanup la ejecuta cuando el componente se desmonta
+        const unsubscribe = store.initialize();
+        return () => {
+            if (typeof unsubscribe === 'function') {
+                unsubscribe();
+            }
+        };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return {
