@@ -3,15 +3,17 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 
+let globalInitDone = false;
+
 export function useAuth() {
     const store = useAuthStore();
 
     useEffect(() => {
-        if (!store.initialized) {
-            const unsub = store.initialize();
-            return unsub;
+        if (!globalInitDone) {
+            globalInitDone = true;
+            store.initialize();
         }
-    }, [store.initialized]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return {
         user: store.user,

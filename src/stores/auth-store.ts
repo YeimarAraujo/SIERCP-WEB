@@ -87,7 +87,15 @@ export const useAuthStore = create<AuthStore>()(
             error: null,
 
             initialize: () => {
-                set({ loading: true });
+                const state = get();
+                if (state.firebaseUser && state.user && state.initialized) {
+                    return () => {};
+                }
+                
+                if (!state.firebaseUser) {
+                    set({ loading: true });
+                }
+                
                 const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
                     if (firebaseUser) {
                         try {
