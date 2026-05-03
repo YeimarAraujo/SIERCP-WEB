@@ -1,5 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    experimental: {
+        optimizePackageImports: [
+            'lucide-react',
+            'recharts',
+            'firebase',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tabs',
+        ],
+    },
+
+    webpack: (config, { dev, isServer }) => {
+        if (dev && !isServer) {
+            config.devtool = 'eval-cheap-module-source-map';
+        }
+        return config;
+    },
+
     async headers() {
         return [
             {

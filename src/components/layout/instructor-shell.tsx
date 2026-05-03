@@ -78,7 +78,6 @@ export function InstructorShell({ children }: { children: React.ReactNode }) {
             <main style={{
                 flex: 1,
                 overflowY: 'auto',
-                background: 'var(--bg-page)',
                 padding: '32px',
             }}>
                 {children}

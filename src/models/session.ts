@@ -31,6 +31,7 @@ export interface SessionModel {
     id: string;
     studentId: string;
     studentName: string;
+    institutionId?: string;
     scenarioId?: string;
     scenarioTitle?: string;
     patientType: PatientType;

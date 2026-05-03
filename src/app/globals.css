@@ -152,6 +152,13 @@
     --shadow-lg: 0 8px 24px rgba(0,0,0,0.50);
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    min-height: 100vh;
+}
+
 @layer base {
     * {
         border-color: var(--border);

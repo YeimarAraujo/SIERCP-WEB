@@ -13,11 +13,12 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
         const checkAuth = () => {
             const state = useAuthStore.getState();
 
-            if (state.user) {
-                if (state.user.role !== 'ESTUDIANTE') {
-                    if (state.user.role === 'ADMIN' || state.user.role === 'SUPER_ADMIN') {
+            if (state?.user) {
+                const role = state.user.role;
+                if (role !== 'ESTUDIANTE') {
+                    if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
                         router.replace('/admin/dashboard');
-                    } else if (state.user.role === 'INSTRUCTOR') {
+                    } else if (role === 'INSTRUCTOR') {
                         router.replace('/instructor/dashboard');
                     }
                     return;
@@ -26,7 +27,7 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
                 return;
             }
 
-            if (state.initialized && !state.user) {
+            if (state?.initialized && !state?.user) {
                 router.replace('/login');
                 return;
             }
@@ -49,38 +50,16 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
 
     if (!ready) {
         return (
-            <div style={{
-                minHeight: '100vh',
-                background: 'var(--bg-page)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-            }}>
-                <div style={{
-                    width: 36, height: 36,
-                    border: '3px solid var(--border)',
-                    borderTop: '3px solid var(--brand)',
-                    borderRadius: '50%',
-                    animation: 'spin 0.7s linear infinite',
-                }} />
+            <div className="min-h-screen bg-[var(--bg-page)] flex items-center justify-center">
+                <div className="w-9 h-9 border-2 border-slate-200 border-t-blue-600 rounded-full animate-spin" />
             </div>
         );
     }
 
     return (
-        <div style={{
-            display: 'flex',
-            minHeight: '100vh',
-            background: 'var(--bg-page)',
-            color: 'var(--text-primary)',
-        }}>
+        <div className="flex min-h-screen bg-[var(--bg-page)] text-slate-800">
             <StudentSidebar />
-            <main style={{
-                flex: 1,
-                overflowY: 'auto',
-                background: 'var(--bg-page)',
-                padding: '32px',
-            }}>
+            <main className="flex-1 overflow-y-auto p-8">
                 {children}
             </main>
         </div>

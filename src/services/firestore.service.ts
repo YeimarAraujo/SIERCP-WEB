@@ -40,6 +40,36 @@ export const UserService = {
     async delete(uid: string): Promise<void> {
         await deleteDoc(doc(db, 'users', uid));
     },
+
+    async getByInstitution(
+        institutionId: string,
+        role?: 'ADMIN' | 'INSTRUCTOR' | 'ESTUDIANTE' | 'SUPER_ADMIN',
+    ): Promise<UserModel[]> {
+        try {
+            const constraints: QueryConstraint[] = [
+                where('institutionId', '==', institutionId),
+            ];
+            if (role) constraints.push(where('role', '==', role));
+            const snap = await getDocs(query(collection(db, 'users'), ...constraints));
+            return snap.docs.map((d) => ({
+                uid: d.id,
+                ...d.data(),
+                createdAt: tsToDate(d.data().createdAt),
+                updatedAt: tsToDate(d.data().updatedAt),
+            } as UserModel));
+        } catch (e) {
+            console.error('Error fetching users by institution:', e);
+            return [];
+        }
+    },
+
+    async getStudentsByInstitution(institutionId: string): Promise<UserModel[]> {
+        return UserService.getByInstitution(institutionId, 'ESTUDIANTE');
+    },
+
+    async getInstructorsByInstitution(institutionId: string): Promise<UserModel[]> {
+        return UserService.getByInstitution(institutionId, 'INSTRUCTOR');
+    },
 };
 
 // ── Sessions ─────────────────────────────────────────────────────────────────
@@ -84,6 +114,23 @@ export const SessionService = {
 
     async update(id: string, data: Partial<SessionModel>): Promise<void> {
         await updateDoc(doc(db, 'sessions', id), { ...data, updatedAt: serverTimestamp() });
+    },
+
+    async getByInstitution(institutionId: string): Promise<SessionModel[]> {
+        try {
+            const snap = await getDocs(
+                query(
+                    collection(db, 'sessions'),
+                    where('institutionId', '==', institutionId),
+                    orderBy('startedAt', 'desc'),
+                    limit(100),
+                ),
+            );
+            return snap.docs.map((s) => parseSession(s.id, s.data() as Record<string, unknown>));
+        } catch (e) {
+            console.error('Error fetching sessions by institution:', e);
+            return [];
+        }
     },
 };
 

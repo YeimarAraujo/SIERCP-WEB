@@ -1,25 +1,31 @@
 'use client';
 
-import { Header } from '@/components/layout/header';
-import { PageHeader } from '@/components/ui/page-header';
-import { StatCard } from '@/components/ui/stat-card';
+import { DashboardHeader } from '@/components/layout/dashboard-header';
+import { ActiveSessionCard } from '@/components/ui/active-session-card';
+import { DeviceControlCard } from '@/components/ui/device-control-card';
+import { IoTCard } from '@/components/ui/iot-card';
+import { AhaPerformanceChart } from '@/components/ui/aha-performance-chart';
+import { EvaluationList } from '@/components/ui/evaluation-list';
 
 export default function InstructorDashboardPage() {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Header title="Mi panel" />
-            <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
-                <PageHeader title="Mi panel" subtitle="Dashboard de instructor" />
+        <div className="bg-[var(--bg-page)]">
+            <DashboardHeader />
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 24 }}>
-                    <StatCard label="Alumnos activos" value="—" />
-                    <StatCard label="Score promedio" value="—%" />
-                    <StatCard label="Cumplimiento AHA" value="—%" />
-                    <StatCard label="Alertas activas" value="—" color="#EF4444" />
+            <div className="px-8 pb-8 grid grid-cols-3 gap-8">
+                <div className="flex flex-col gap-8">
+                    <ActiveSessionCard session={null} />
+                    <DeviceControlCard device={null} />
                 </div>
 
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 12, padding: 32, textAlign: 'center' }}>
-                    <p style={{ color: '#8892A4', fontSize: 14 }}>Dashboard de instructor — en construcción</p>
+                <div className="flex flex-col gap-8">
+                    <IoTCard device={null} />
+                    {/* TODO: Fetch real evaluations from Firebase for instructor's students */}
+                    <EvaluationList evaluations={[]} />
+                </div>
+
+                <div className="flex flex-col gap-8">
+                    <AhaPerformanceChart data={null} fatiguePoint={null} />
                 </div>
             </div>
         </div>
