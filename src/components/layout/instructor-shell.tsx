@@ -51,27 +51,36 @@ export function InstructorShell({ children }: { children: React.ReactNode }) {
         return (
             <div style={{
                 minHeight: '100vh',
-                background: '#F4F5FF',
+                background: 'var(--bg-page)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
                 <div style={{
                     width: 36, height: 36,
-                    border: '3px solid #E2E4F0',
-                    borderTop: '3px solid #1800AD',
+                    border: '3px solid var(--border)',
+                    borderTop: '3px solid var(--brand)',
                     borderRadius: '50%',
-                    animation: 'spinner 0.7s linear infinite',
+                    animation: 'spin 0.7s linear infinite',
                 }} />
-                <style>{`@keyframes spinner{to{transform:rotate(360deg)}}`}</style>
             </div>
         );
     }
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: '#F4F5FF' }}>
+        <div style={{
+            display: 'flex',
+            minHeight: '100vh',
+            background: 'var(--bg-page)',
+            color: 'var(--text-primary)',
+        }}>
             <InstructorSidebar />
-            <main style={{ flex: 1, overflow: 'auto' }}>
+            <main style={{
+                flex: 1,
+                overflowY: 'auto',
+                background: 'var(--bg-page)',
+                padding: '32px',
+            }}>
                 {children}
             </main>
         </div>

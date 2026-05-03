@@ -3,13 +3,28 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
+import {
+    LayoutDashboard, Monitor, GraduationCap, Users, Cpu,
+    BookOpen, BarChart2, Award, Settings, User, LogOut
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-const ITEMS = [
-    { label: 'Panel de control', href: '/admin/dashboard', icon: '▦' },
-    { label: 'Sesiones en vivo', href: '/admin/sessions', icon: '◉' },
-    { label: 'Usuarios', href: '/admin/users', icon: '👤' },
-    { label: 'Dispositivos', href: '/admin/devices', icon: '⊡' },
-    { label: 'Cursos', href: '/admin/courses', icon: '📚' },
+interface NavItem {
+    label: string;
+    href: string;
+    icon: LucideIcon;
+}
+
+const navItems: NavItem[] = [
+    { label: 'Panel de control',  href: '/admin/dashboard',    icon: LayoutDashboard },
+    { label: 'Sesiones en vivo',  href: '/admin/sessions',     icon: Monitor },
+    { label: 'Instructores',      href: '/admin/instructors',  icon: GraduationCap },
+    { label: 'Estudiantes',       href: '/admin/students',     icon: Users },
+    { label: 'Dispositivos',      href: '/admin/devices',      icon: Cpu },
+    { label: 'Cursos',            href: '/admin/courses',      icon: BookOpen },
+    { label: 'Reportes',          href: '/admin/reports',      icon: BarChart2 },
+    { label: 'Certificados',      href: '/admin/certificates', icon: Award },
+    { label: 'Configuración',     href: '/admin/settings',     icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -18,7 +33,11 @@ export function AdminSidebar() {
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
 
-    const isActive = (href: string) => pathname.startsWith(href);
+    const isActive = (href: string) => {
+        if (href === '/admin/dashboard' && pathname === '/admin/dashboard') return true;
+        if (pathname.startsWith(href)) return true;
+        return false;
+    };
 
     const handleLogout = async () => {
         try { await logout(); } catch {}
@@ -27,104 +46,179 @@ export function AdminSidebar() {
 
     return (
         <aside style={{
-            display: 'flex',
-            flexDirection: 'column',
+            width: '240px',
+            minWidth: '240px',
             height: '100vh',
-            width: 224,
-            flexShrink: 0,
-            background: '#FFFFFF',
-            borderRight: '1px solid #E2E4F0',
             position: 'sticky',
             top: 0,
+            background: 'var(--sidebar-bg)',
+            borderRight: '1px solid var(--sidebar-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '0',
+            overflowY: 'auto',
         }}>
             <div style={{
+                padding: '20px 20px 16px',
+                borderBottom: '1px solid var(--sidebar-border)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                height: 56,
-                borderBottom: '1px solid #E2E4F0',
-                padding: '0 16px',
+                gap: '10px',
             }}>
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: 28, height: 28,
-                    borderRadius: 6,
-                    background: '#1800AD',
-                    color: '#FFFFFF',
-                    fontSize: 12, fontWeight: 700,
+                    width: 32, height: 32,
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--brand)',
+                    color: 'var(--text-on-brand)',
+                    fontSize: 14, fontWeight: 700,
                 }}>S</div>
-                <span style={{ fontWeight: 600, fontSize: 14, color: '#0B1C30' }}>SIERCP</span>
+                <span style={{
+                    fontSize: '16px',
+                    fontWeight: '700',
+                    color: 'var(--text-primary)',
+                    letterSpacing: '-0.3px',
+                }}>
+                    SIERCP
+                </span>
             </div>
 
-            <nav style={{
-                flex: 1,
-                padding: 12,
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-            }}>
-                {ITEMS.map(({ href, label, icon }) => (
-                    <Link key={href} href={href} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        borderRadius: 8,
-                        padding: '10px 12px',
-                        fontSize: 13,
-                        fontWeight: isActive(href) ? 600 : 500,
-                        textDecoration: 'none',
-                        background: isActive(href) ? '#EEF0FF' : 'transparent',
-                        color: isActive(href) ? '#1800AD' : '#4A5568',
-                        transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={(e) => { if (!isActive(href)) e.currentTarget.style.background = '#F4F5FF'; }}
-                    onMouseLeave={(e) => { if (!isActive(href)) e.currentTarget.style.background = 'transparent'; }}
-                    >
-                        <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{icon}</span>
-                        {label}
-                    </Link>
-                ))}
+            <nav style={{ flex: 1, padding: '12px 12px' }}>
+                {navItems.map((item) => {
+                    const active = isActive(item.href);
+                    const Icon = item.icon;
+
+                    return (
+                        <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '10px 12px',
+                                borderRadius: 'var(--radius-md)',
+                                marginBottom: '2px',
+                                background: active
+                                    ? 'var(--sidebar-active-bg)'
+                                    : 'transparent',
+                                color: active
+                                    ? 'var(--sidebar-active-text)'
+                                    : 'var(--sidebar-text)',
+                                fontWeight: active ? '600' : '500',
+                                fontSize: '14px',
+                                borderLeft: active
+                                    ? '3px solid var(--brand)'
+                                    : '3px solid transparent',
+                                transition: 'all 0.15s ease',
+                                cursor: 'pointer',
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!active) {
+                                    e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                                    e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!active) {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = 'var(--sidebar-text)';
+                                }
+                            }}
+                            >
+                                <Icon
+                                    size={18}
+                                    strokeWidth={active ? 2.5 : 2}
+                                />
+                                <span>{item.label}</span>
+                            </div>
+                        </Link>
+                    );
+                })}
             </nav>
 
-            <div style={{ borderTop: '1px solid #E2E4F0', padding: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{
+                padding: '12px',
+                borderTop: '1px solid var(--sidebar-border)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+            }}>
                 {user && (
                     <div style={{ padding: '8px 12px' }}>
-                        <p style={{ fontSize: 12, fontWeight: 500, color: '#0B1C30', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{
+                            fontSize: 12,
+                            fontWeight: 500,
+                            color: 'var(--text-primary)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}>
                             {user.firstName} {user.lastName}
                         </p>
-                        <p style={{ fontSize: 11, color: '#8892A4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{
+                            fontSize: 11,
+                            color: 'var(--text-muted)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}>
                             {user.role}
                         </p>
                     </div>
                 )}
-                <Link href="/student/profile" style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    borderRadius: 8, padding: '10px 12px',
-                    fontSize: 13, fontWeight: 500,
-                    textDecoration: 'none', color: '#4A5568',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#F4F5FF'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                >
-                    <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>👤</span>
-                    Perfil
+
+                <Link href="/admin/profile" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        color: 'var(--sidebar-text)',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'var(--sidebar-text)';
+                    }}
+                    >
+                        <User size={18} />
+                        <span>Mi perfil</span>
+                    </div>
                 </Link>
-                <button onClick={handleLogout} style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    borderRadius: 8, padding: '10px 12px',
-                    fontSize: 13, fontWeight: 500,
-                    border: 'none', cursor: 'pointer',
-                    color: '#4A5568', background: 'transparent',
-                    width: '100%', textAlign: 'left' as const,
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#F4F5FF'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--danger-text)',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                    }}
                 >
-                    <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>↪</span>
-                    Cerrar sesión
+                    <LogOut size={18} />
+                    <span>Cerrar sesión</span>
                 </button>
             </div>
         </aside>

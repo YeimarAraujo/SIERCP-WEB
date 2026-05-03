@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
-import { AdminSidebar } from '@/components/layout/admin-sidebar';
+import { SuperAdminSidebar } from '@/components/layout/super-admin-sidebar';
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function SuperAdminShell({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [ready, setReady] = useState(false);
 
@@ -14,12 +14,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             const state = useAuthStore.getState();
 
             if (state.user) {
-                if (state.user.role !== 'ADMIN' && state.user.role !== 'SUPER_ADMIN') {
-                    if (state.user.role === 'INSTRUCTOR') {
-                        router.replace('/instructor/dashboard');
-                    } else {
-                        router.replace('/student/home');
-                    }
+                if (state.user.role !== 'SUPER_ADMIN') {
+                    router.replace('/login');
                     return;
                 }
                 setReady(true);
@@ -74,7 +70,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             background: 'var(--bg-page)',
             color: 'var(--text-primary)',
         }}>
-            <AdminSidebar />
+            <SuperAdminSidebar />
             <main style={{
                 flex: 1,
                 overflowY: 'auto',

@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import {
-    LayoutDashboard, Monitor, BookOpen, Users, Clock,
-    BarChart2, Award, Trophy, CheckSquare, User, LogOut
+    LayoutDashboard, Building2, UserCheck, CreditCard,
+    ScrollText, Settings, User, LogOut
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -16,25 +16,22 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { label: 'Mi panel',        href: '/instructor/dashboard',    icon: LayoutDashboard },
-    { label: 'Monitor en vivo', href: '/instructor/monitor',      icon: Monitor },
-    { label: 'Mis cursos',      href: '/instructor/courses',      icon: BookOpen },
-    { label: 'Estudiantes',     href: '/instructor/students',     icon: Users },
-    { label: 'Historial',       href: '/instructor/history',      icon: Clock },
-    { label: 'Reportes',        href: '/instructor/reports',      icon: BarChart2 },
-    { label: 'Certificados',    href: '/instructor/certificates', icon: Award },
-    { label: 'Ranking',         href: '/instructor/ranking',      icon: Trophy },
-    { label: 'Evaluaciones',    href: '/instructor/evaluations',  icon: CheckSquare },
+    { label: 'Dashboard',          href: '/super-admin/dashboard',       icon: LayoutDashboard },
+    { label: 'Instituciones',      href: '/super-admin/institutions',    icon: Building2 },
+    { label: 'Admins pendientes',  href: '/super-admin/pending-admins',  icon: UserCheck },
+    { label: 'Planes y licencias', href: '/super-admin/plans',           icon: CreditCard },
+    { label: 'Logs de actividad',  href: '/super-admin/logs',            icon: ScrollText },
+    { label: 'Configuración',      href: '/super-admin/settings',        icon: Settings },
 ];
 
-export function InstructorSidebar() {
+export function SuperAdminSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
 
     const isActive = (href: string) => {
-        if (href === '/instructor/dashboard' && pathname === '/instructor/dashboard') return true;
+        if (href === '/super-admin/dashboard' && pathname === '/super-admin/dashboard') return true;
         if (pathname.startsWith(href)) return true;
         return false;
     };
@@ -168,7 +165,7 @@ export function InstructorSidebar() {
                     </div>
                 )}
 
-                <Link href="/instructor/profile" style={{ textDecoration: 'none' }}>
+                <Link href="/super-admin/profile" style={{ textDecoration: 'none' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
