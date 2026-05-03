@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChangeEvent, FormEvent } from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
@@ -13,21 +13,23 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const initialized = useRef(false);
 
     useEffect(() => {
-        if (initialized.current) return;
-        initialized.current = true;
-        
+        let unsubscribe: (() => void) | undefined;
         async function init() {
             try {
                 const { useAuthStore } = await import('@/stores/auth-store');
-                useAuthStore.getState().initialize();
+                unsubscribe = useAuthStore.getState().initialize();
             } catch (e) {
                 console.error('Auth init error:', e);
             }
         }
         init();
+        return () => {
+            if (typeof unsubscribe === 'function') {
+                unsubscribe();
+            }
+        };
     }, []);
 
     function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -59,9 +61,7 @@ export default function RegisterPage() {
                 role: form.role,
                 institutionCode: form.institutionCode || undefined,
             });
-            setTimeout(() => {
-                window.location.href = form.role === 'INSTRUCTOR' ? '/pending-approval' : '/home';
-            }, 300);
+            router.replace(form.role === 'INSTRUCTOR' ? '/pending-approval' : '/home');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al registrar');
             setLoading(false);

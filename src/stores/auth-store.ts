@@ -97,15 +97,20 @@ export const useAuthStore = create<AuthStore>()(
                 }
 
                 const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-                    if (firebaseUser) {
-                        try {
+                    try {
+                        if (firebaseUser) {
                             const user = await fetchUserModel(firebaseUser.uid);
                             set({ user, firebaseUser, loading: false, initialized: true, error: null });
-                        } catch {
-                            set({ user: null, firebaseUser, loading: false, initialized: true });
+                        } else {
+                            set({ user: null, firebaseUser: null, loading: false, initialized: true });
                         }
-                    } else {
-                        set({ user: null, firebaseUser: null, loading: false, initialized: true });
+                    } catch (error) {
+                        console.error('[AUTH] Error en onAuthStateChanged:', error);
+                        set({
+                            initialized: true,
+                            loading: false,
+                            error: String(error),
+                        });
                     }
                 });
                 return unsub;

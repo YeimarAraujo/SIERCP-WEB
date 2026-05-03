@@ -4,46 +4,40 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { cn } from '@/lib/utils';
-import {
-    HomeIcon, BookOpenIcon, ClipboardListIcon, ClockIcon,
-    CpuIcon, UserIcon, UsersIcon, ShieldIcon, LogOutIcon,
-    SmartphoneIcon,
-} from 'lucide-react';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '#';
-
-interface NavItem {
-    href: string;
-    label: string;
-    icon: React.ElementType;
-    roles: string[];
-}
-
-const NAV_ITEMS: NavItem[] = [
-    { href: '/home', label: 'Inicio', icon: HomeIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
-    { href: '/courses', label: 'Cursos', icon: BookOpenIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
-    { href: '/history', label: 'Historial', icon: ClipboardListIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
-    { href: '/device', label: 'Maniquí', icon: CpuIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
-    { href: '/profile', label: 'Perfil', icon: UserIcon, roles: ['ADMIN', 'INSTRUCTOR', 'ESTUDIANTE'] },
-    { href: '/admin/users', label: 'Usuarios', icon: UsersIcon, roles: ['ADMIN'] },
-    { href: '/admin/devices', label: 'Dispositivos', icon: ShieldIcon, roles: ['ADMIN'] },
-];
+const NAV_ITEMS: Record<string, { label: string; href: string; icon: string }[]> = {
+    ADMIN: [
+        { label: 'Panel de control', href: '/admin/dashboard', icon: '▦' },
+        { label: 'Sesiones en vivo', href: '/admin/sessions', icon: '◉' },
+        { label: 'Usuarios', href: '/admin/users', icon: '👤' },
+        { label: 'Dispositivos', href: '/admin/devices', icon: '⊡' },
+        { label: 'Cursos', href: '/admin/courses', icon: '📚' },
+    ],
+    SUPER_ADMIN: [
+        { label: 'Dashboard', href: '/super-admin/dashboard', icon: '▦' },
+        { label: 'Instituciones', href: '/super-admin/institutions', icon: '🏛' },
+        { label: 'Instructores pendientes', href: '/super-admin/pending-instructors', icon: '⏳' },
+    ],
+    INSTRUCTOR: [
+        { label: 'Mi panel', href: '/instructor/dashboard', icon: '▦' },
+        { label: 'Monitor en vivo', href: '/instructor/monitor', icon: '◉' },
+        { label: 'Mis cursos', href: '/instructor/courses', icon: '📚' },
+        { label: 'Historial del grupo', href: '/instructor/history', icon: '📋' },
+    ],
+    ESTUDIANTE: [
+        { label: 'Inicio', href: '/home', icon: '⌂' },
+        { label: 'Mis sesiones', href: '/history', icon: '📋' },
+        { label: 'Cursos', href: '/courses', icon: '📚' },
+        { label: 'Mi dispositivo', href: '/device', icon: '⊡' },
+    ],
+};
 
 export function Sidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
     const router = useRouter();
 
-    const visible = NAV_ITEMS.filter((item) =>
-        user ? item.roles.includes(user.role) : false,
-    );
-
-    const handleDownloadApp = () => {
-        if (APP_URL !== '#') {
-            window.open(APP_URL, '_blank');
-        }
-    };
+    const visible = user ? (NAV_ITEMS[user.role] ?? []) : [];
 
     const handleLogout = async () => {
         try {
@@ -55,63 +49,177 @@ export function Sidebar() {
         }
     };
 
+    const isActive = (href: string) => {
+        if (href === '/home' && pathname === '/home') return true;
+        if (href !== '/home' && pathname.startsWith(href)) return true;
+        return false;
+    };
+
     return (
-        <aside className="flex h-screen w-56 flex-col border-r border-border bg-card">
+        <aside style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100vh',
+            width: 224,
+            flexShrink: 0,
+            background: '#FFFFFF',
+            borderRight: '1px solid #E2E4F0',
+        }}>
             {/* Logo */}
-            <div className="flex h-14 items-center gap-2 border-b border-border px-4">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                height: 56,
+                borderBottom: '1px solid #E2E4F0',
+                padding: '0 16px',
+            }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 28,
+                    height: 28,
+                    borderRadius: 6,
+                    background: '#1800AD',
+                    color: '#FFFFFF',
+                    fontSize: 12,
+                    fontWeight: 700,
+                }}>
                     S
                 </div>
-                <span className="font-semibold text-sm tracking-tight">SIERCP</span>
+                <span style={{
+                    fontWeight: 600,
+                    fontSize: 14,
+                    color: '#0B1C30',
+                }}>
+                    SIERCP
+                </span>
             </div>
 
             {/* Nav */}
-            <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
-                {visible.map(({ href, label, icon: Icon }) => (
+            <nav style={{
+                flex: 1,
+                padding: 12,
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+            }}>
+                {visible.map(({ href, label, icon }) => (
                     <Link
                         key={href}
                         href={href}
-                        className={cn(
-                            'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
-                            pathname.startsWith(href)
-                                ? 'bg-primary text-primary-foreground'
-                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                        )}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            borderRadius: 8,
+                            padding: '10px 12px',
+                            fontSize: 13,
+                            fontWeight: 500,
+                            textDecoration: 'none',
+                            background: isActive(href) ? '#EEF0FF' : 'transparent',
+                            color: isActive(href) ? '#1800AD' : '#4A5568',
+                            transition: 'background 0.15s',
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!isActive(href)) {
+                                e.currentTarget.style.background = '#F4F5FF';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!isActive(href)) {
+                                e.currentTarget.style.background = 'transparent';
+                            }
+                        }}
                     >
-                        <Icon className="h-4 w-4 shrink-0" />
+                        <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{icon}</span>
                         {label}
                     </Link>
                 ))}
             </nav>
 
-            {/* Descargar App */}
-            <div className="border-t border-border p-3">
-                <button
-                    onClick={handleDownloadApp}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all hover:scale-[1.02]"
-                    style={{
-                        background: 'linear-gradient(135deg, #1800AD 0%, #2D1FD4 100%)',
-                        color: '#FFFFFF',
-                    }}
-                >
-                    <SmartphoneIcon className="h-4 w-4 shrink-0" />
-                    Descargar App
-                </button>
-            </div>
-
             {/* User + Logout */}
-            <div className="border-t border-border p-3 space-y-1">
+            <div style={{
+                borderTop: '1px solid #E2E4F0',
+                padding: 12,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+            }}>
                 {user && (
-                    <div className="px-3 py-2">
-                        <p className="text-xs font-medium truncate">{user.firstName} {user.lastName}</p>
-                        <p className="text-xs text-muted-foreground truncate">{user.role}</p>
+                    <div style={{ padding: '8px 12px' }}>
+                        <p style={{
+                            fontSize: 12,
+                            fontWeight: 500,
+                            color: '#0B1C30',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}>
+                            {user.firstName} {user.lastName}
+                        </p>
+                        <p style={{
+                            fontSize: 11,
+                            color: '#8892A4',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}>
+                            {user.role}
+                        </p>
                     </div>
                 )}
+                <Link
+                    href="/profile"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        borderRadius: 8,
+                        padding: '10px 12px',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        color: '#4A5568',
+                        background: 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#F4F5FF';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                    }}
+                >
+                    <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>👤</span>
+                    Perfil
+                </Link>
                 <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        borderRadius: 8,
+                        padding: '10px 12px',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#4A5568',
+                        background: 'transparent',
+                        width: '100%',
+                        textAlign: 'left',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#F4F5FF';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                    }}
                 >
-                    <LogOutIcon className="h-4 w-4" />
+                    <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>↪</span>
                     Cerrar sesión
                 </button>
             </div>

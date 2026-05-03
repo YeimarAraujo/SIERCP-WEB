@@ -1,7 +1,7 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -12,21 +12,23 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
-    const initialized = useRef(false);
 
     useEffect(() => {
-        if (initialized.current) return;
-        initialized.current = true;
-        
+        let unsubscribe: (() => void) | undefined;
         async function init() {
             try {
                 const { useAuthStore } = await import('@/stores/auth-store');
-                useAuthStore.getState().initialize();
+                unsubscribe = useAuthStore.getState().initialize();
             } catch (e) {
                 console.error('Auth init error:', e);
             }
         }
         init();
+        return () => {
+            if (typeof unsubscribe === 'function') {
+                unsubscribe();
+            }
+        };
     }, []);
 
     async function handleSubmit(e: FormEvent) {
@@ -37,8 +39,19 @@ export default function LoginPage() {
         try {
             const { useAuthStore } = await import('@/stores/auth-store');
             await useAuthStore.getState().login(email, password);
-            await new Promise(resolve => setTimeout(resolve, 200));
-            window.location.replace('/home');
+            const currentUser = useAuthStore.getState().user;
+            const role = currentUser?.role ?? 'ESTUDIANTE';
+            switch (role) {
+                case 'ADMIN':
+                case 'SUPER_ADMIN':
+                    router.replace('/admin/dashboard');
+                    break;
+                case 'INSTRUCTOR':
+                    router.replace('/instructor/dashboard');
+                    break;
+                default:
+                    router.replace('/student/home');
+            }
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Error al iniciar sesión';
             setError(msg);

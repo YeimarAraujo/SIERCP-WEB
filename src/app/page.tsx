@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Moon, Sun } from 'lucide-react';
 import { useThemeStore } from '@/stores/theme-store';
@@ -13,21 +13,24 @@ const regBorder = 'rgba(255,255,255,0.6)';
 export default function LandingPage() {
     const [scrolled, setScrolled] = useState(false);
     const router = useRouter();
-    const initialized = useRef(false);
     const { theme, toggleTheme } = useThemeStore();
 
     useEffect(() => {
-        if (initialized.current) return;
-        initialized.current = true;
+        let unsubscribe: (() => void) | undefined;
         async function init() {
             try {
                 const { useAuthStore } = await import('@/stores/auth-store');
-                useAuthStore.getState().initialize();
+                unsubscribe = useAuthStore.getState().initialize();
             } catch (e) {
                 console.error('Auth init error:', e);
             }
         }
         init();
+        return () => {
+            if (typeof unsubscribe === 'function') {
+                unsubscribe();
+            }
+        };
     }, []);
 
     useEffect(() => {
