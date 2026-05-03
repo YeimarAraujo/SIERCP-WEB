@@ -1,12 +1,10 @@
 'use client';
 
-import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
 
 export default function AdminSessionsPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Header title="Sesiones en vivo" />
             <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
                 <PageHeader
                     title="Sesiones en vivo"

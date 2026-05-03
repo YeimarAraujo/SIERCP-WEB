@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { AdminSidebar } from '@/components/layout/admin-sidebar';
+import { Header } from '@/components/layout/header';
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -75,14 +76,22 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             color: 'var(--text-primary)',
         }}>
             <AdminSidebar />
-            <main style={{
+            <div style={{
                 flex: 1,
-                overflowY: 'auto',
-                background: 'var(--bg-page)',
-                padding: '32px',
+                display: 'flex',
+                flexDirection: 'column',
+                minWidth: 0,
             }}>
-                {children}
-            </main>
+                <Header role="ADMIN" />
+                <main style={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    padding: '32px',
+                    background: 'var(--bg-page)',
+                }}>
+                    {children}
+                </main>
+            </div>
         </div>
     );
 }

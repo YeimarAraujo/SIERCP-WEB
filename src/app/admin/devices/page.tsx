@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '@/components/layout/header';
 import { ManiquiService } from '@/services/firestore.service';
 import { useAllDevices } from '@/hooks/use-realtime';
 import { formatDate } from '@/lib/utils';
@@ -25,7 +24,6 @@ export default function AdminDevicesPage() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Header title="Gestión de dispositivos" />
             <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
 
                 <div className="rounded-lg border border-border bg-card px-4 py-3 flex items-center gap-3">

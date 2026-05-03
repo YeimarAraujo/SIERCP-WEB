@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '@/components/layout/header';
 import { UserService } from '@/services/firestore.service';
 import { getFullName } from '@/models/user';
 import type { UserModel } from '@/models/user';
@@ -28,7 +27,6 @@ export default function AdminUsersPage() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Header title="Gestión de usuarios" />
             <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
 
                 <input
