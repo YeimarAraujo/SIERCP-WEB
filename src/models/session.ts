@@ -22,7 +22,7 @@ export interface SessionMetrics {
     rateScore: number;
     recoilScore: number;
     interruptionScore: number;
-    score: number;
+    qualityScore: number; // Updated name to match AHA Quality Score
     approved: boolean;
     violations: AhaViolation[];
 }
