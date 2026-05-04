@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
+import { PageHeader } from '@/components/ui/page-header';
 import { ManiquiService } from '@/services/firestore.service';
 import { useAllDevices } from '@/hooks/use-realtime';
 import { formatDate } from '@/lib/utils';
 import type { ManiquiModel } from '@/models/device';
+import { Cpu, Wifi, Activity, Battery, Settings2 } from 'lucide-react';
 
-const STATUS_COLORS: Record<string, string> = {
-    disponible: 'bg-green-100 text-green-700',
-    en_uso: 'bg-blue-100 text-blue-700',
-    mantenimiento: 'bg-yellow-100 text-yellow-700',
-    offline: 'bg-red-100 text-red-700',
+const STATUS_STYLES: Record<string, { bg: string, color: string }> = {
+    disponible: { bg: '#DCFCE7', color: '#166534' },
+    en_uso: { bg: '#E0E7FF', color: '#1D4ED8' },
+    mantenimiento: { bg: '#FEF3C7', color: '#92400E' },
+    offline: { bg: '#F1F5F9', color: '#475569' },
 };
 
 export default function AdminDevicesPage() {
@@ -23,71 +25,106 @@ export default function AdminDevicesPage() {
         ManiquiService.getAll().then(setManikins).finally(() => setLoading(false));
     }, []);
 
+    const onlineCount = Object.keys(rtdbDevices).length;
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Header title="Gestión de dispositivos" />
             <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
-
-                <div className="rounded-lg border border-border bg-card px-4 py-3 flex items-center gap-3">
-                    <span className={`h-2 w-2 rounded-full ${Object.keys(rtdbDevices).length > 0 ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-                    <p className="text-sm">
-                        <span className="font-medium">{Object.keys(rtdbDevices).length}</span>
-                        <span className="text-muted-foreground"> dispositivo(s) emitiendo telemetría ahora mismo</span>
-                    </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+                    <PageHeader
+                        title="Gestión de dispositivos"
+                        subtitle="Supervisa el hardware y la telemetría IoT"
+                    />
+                    <div style={{ 
+                        background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 12, padding: '10px 16px',
+                        display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: onlineCount > 0 ? '#10B981' : '#94A3B8', animation: onlineCount > 0 ? 'pulse 2s infinite' : 'none' }} />
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
+                            {onlineCount} dispositivo(s) emitiendo telemetría
+                        </span>
+                    </div>
                 </div>
 
                 {loading ? (
-                    <div className="space-y-2">
-                        {[...Array(4)].map((_, i) => <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />)}
+                    <div style={{ display: 'grid', gap: 12 }}>
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} style={{ height: 100, background: '#F8FAFC', border: '1px solid #F1F5F9', borderRadius: 12, animation: 'pulse 2s infinite' }} />
+                        ))}
                     </div>
                 ) : manikins.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-border p-12 text-center">
-                        <p className="text-sm text-muted-foreground">No hay dispositivos registrados.</p>
-                        <p className="text-xs text-muted-foreground mt-1">Registra un maniquí con el UUID (MAC address) del ESP-32.</p>
+                    <div style={{ background: '#FFFFFF', border: '2px dashed #E2E4F0', borderRadius: 16, padding: 64, textAlign: 'center' }}>
+                        <Cpu size={48} style={{ color: '#E2E4F0', marginBottom: 16 }} />
+                        <p style={{ color: '#64748B', fontSize: 14 }}>No hay dispositivos registrados.</p>
+                        <button style={{ marginTop: 16, background: '#1800AD', color: '#FFFFFF', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                            Registrar primer maniquí
+                        </button>
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: 16 }}>
                         {manikins.map((m) => {
                             const live = rtdbDevices[m.uuid];
+                            const style = STATUS_STYLES[m.status] || STATUS_STYLES.offline;
                             return (
-                                <div key={m.id} className="rounded-lg border border-border bg-card p-4">
-                                    <div className="flex items-center justify-between gap-3">
-                                        <div>
-                                            <p className="font-medium text-sm">{m.name}</p>
-                                            <p className="text-xs text-muted-foreground font-mono">{m.uuid}</p>
-                                            {m.lastConnection && (
-                                                <p className="text-xs text-muted-foreground">
-                                                    Última conexión: {formatDate(m.lastConnection)}
-                                                </p>
-                                            )}
+                                <div key={m.id} style={{ 
+                                    background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 16, padding: 20,
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: 16
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <div style={{ width: 44, height: 44, borderRadius: 12, background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD', border: '1px solid #F1F5F9' }}>
+                                                <Cpu size={22} />
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 700, color: '#0F172A', fontSize: 15 }}>{m.name}</div>
+                                                <div style={{ fontSize: 11, color: '#94A3B8', fontFamily: 'monospace' }}>MAC: {m.uuid}</div>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col items-end gap-1.5">
-                                            <span className={`text-xs rounded-full px-2 py-0.5 font-medium ${STATUS_COLORS[m.status] ?? ''}`}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                                            <span style={{ 
+                                                padding: '4px 10px', borderRadius: 20, fontSize: 10, fontWeight: 800,
+                                                background: style.bg, color: style.color, textTransform: 'uppercase'
+                                            }}>
                                                 {m.status.replace('_', ' ')}
                                             </span>
                                             {live && (
-                                                <span className="text-xs rounded-full px-2 py-0.5 font-medium bg-green-100 text-green-700">
-                                                    ● En línea
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#10B981', fontSize: 11, fontWeight: 600 }}>
+                                                    <Wifi size={12} /> EN LÍNEA
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-                                    {live && (
-                                        <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
-                                            <div className="rounded bg-muted px-2 py-1">
-                                                <span className="text-muted-foreground">Profundidad </span>
-                                                <span className="font-medium">{live.profundidadMm.toFixed(1)}mm</span>
+
+                                    {live ? (
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                                            <div style={{ background: '#F0FDF4', padding: '10px 8px', borderRadius: 12, textAlign: 'center' }}>
+                                                <div style={{ fontSize: 10, color: '#166534', fontWeight: 600 }}>PROF.</div>
+                                                <div style={{ fontSize: 16, fontWeight: 800, color: '#166534' }}>{live.profundidadMm.toFixed(1)}</div>
                                             </div>
-                                            <div className="rounded bg-muted px-2 py-1">
-                                                <span className="text-muted-foreground">Frecuencia </span>
-                                                <span className="font-medium">{live.frecuenciaCpm.toFixed(0)}/min</span>
+                                            <div style={{ background: '#EFF6FF', padding: '10px 8px', borderRadius: 12, textAlign: 'center' }}>
+                                                <div style={{ fontSize: 10, color: '#1D4ED8', fontWeight: 600 }}>FREC.</div>
+                                                <div style={{ fontSize: 16, fontWeight: 800, color: '#1D4ED8' }}>{live.frecuenciaCpm.toFixed(0)}</div>
                                             </div>
-                                            <div className="rounded bg-muted px-2 py-1">
-                                                <span className="text-muted-foreground">Calidad </span>
-                                                <span className="font-medium">{live.calidadPct.toFixed(0)}%</span>
+                                            <div style={{ background: '#F5F3FF', padding: '10px 8px', borderRadius: 12, textAlign: 'center' }}>
+                                                <div style={{ fontSize: 10, color: '#7E22CE', fontWeight: 600 }}>BATERÍA</div>
+                                                <div style={{ fontSize: 16, fontWeight: 800, color: '#7E22CE' }}>{live.bateriaPct || 100}%</div>
                                             </div>
                                         </div>
+                                    ) : (
+                                        <div style={{ padding: '12px', background: '#F8FAFC', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+                                            <Clock size={16} style={{ color: '#94A3B8' }} />
+                                            <span style={{ fontSize: 12, color: '#64748B' }}>
+                                                Última actividad: {m.lastConnection ? formatDate(m.lastConnection) : 'Nunca'}
+                                            </span>
+                                        </div>
                                     )}
+
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 4 }}>
+                                        <button style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                                            <Settings2 size={14} /> Configurar
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })}

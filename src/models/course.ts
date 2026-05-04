@@ -19,10 +19,10 @@ export interface CourseModel {
     instructorEmail?: string;
     inviteCode: string;
     certification: string;
-    requiredScore: number;
+    minScore: number;
     isActive: boolean;
     studentCount: number;
-    totalModules: number;
+    moduleCount: number;
     completedModules: number;
     nextDeadline?: Date;
     nextDeadlineTitle?: string;
