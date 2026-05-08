@@ -19,13 +19,13 @@ export default function EditCoursePage() {
     const [error, setError] = useState<string | null>(null);
 
     // Form state
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<any>({
         title: '',
         description: '',
         certification: '',
-        requiredScore: 85,
+        minScore: 85,
         isActive: true,
-        totalModules: 1,
+        moduleCount: 1,
         inviteCode: '',
     });
 
@@ -38,9 +38,9 @@ export default function EditCoursePage() {
                     title: data.title,
                     description: data.description || '',
                     certification: data.certification,
-                    requiredScore: data.requiredScore,
+                    minScore: data.minScore,
                     isActive: data.isActive,
-                    totalModules: data.totalModules,
+                    moduleCount: data.moduleCount,
                     inviteCode: data.inviteCode,
                 });
             }
@@ -165,8 +165,8 @@ export default function EditCoursePage() {
                                     min="1"
                                     max="100"
                                     required
-                                    value={formData.requiredScore}
-                                    onChange={(e) => setFormData({ ...formData, requiredScore: parseInt(e.target.value) })}
+                                    value={formData.minScore}
+                                    onChange={(e) => setFormData({ ...formData, minScore: parseInt(e.target.value) })}
                                     style={{ 
                                         padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E4F0', fontSize: 14, outline: 'none'
                                     }}
@@ -178,8 +178,8 @@ export default function EditCoursePage() {
                                     type="number"
                                     min="1"
                                     required
-                                    value={formData.totalModules}
-                                    onChange={(e) => setFormData({ ...formData, totalModules: parseInt(e.target.value) })}
+                                    value={formData.moduleCount}
+                                    onChange={(e) => setFormData({ ...formData, moduleCount: parseInt(e.target.value) })}
                                     style={{ 
                                         padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E4F0', fontSize: 14, outline: 'none'
                                     }}

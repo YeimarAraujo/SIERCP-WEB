@@ -8,7 +8,7 @@ import {
     User, Mail, Shield, IdCard, CheckCircle, 
     Camera, Save, LogOut, Loader2, Edit3, 
     Zap, Target, Award, Clock, ShieldCheck, 
-    Bell, Lock, History, Settings
+    Bell, Lock, History, Settings, Monitor
 } from 'lucide-react';
 import { MetricBar } from '@/components/charts/metric-bar';
 
@@ -236,7 +236,7 @@ function TabLink({ active, onClick, icon: Icon, label }: any) {
     );
 }
 
-function InputGroup({ label, value, onChange, disabled, icon: Icon }: any) {
+function InputGroup({ label, value, onChange, disabled, icon: Icon }: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean; icon: any }) {
     return (
         <div style={{ display: 'grid', gap: 10 }}>
             <label style={{ fontSize: 13, fontWeight: 800, color: '#475569', letterSpacing: '0.02em' }}>{label}</label>

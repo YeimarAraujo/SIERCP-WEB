@@ -7,7 +7,7 @@ import { ManiquiService } from '@/services/firestore.service';
 import { useAllDevices } from '@/hooks/use-realtime';
 import { formatDate } from '@/lib/utils';
 import type { ManiquiModel } from '@/models/device';
-import { Cpu, Wifi, Activity, Battery, Settings2 } from 'lucide-react';
+import { Cpu, Wifi, Activity, Battery, Settings2, Clock } from 'lucide-react';
 
 const STATUS_STYLES: Record<string, { bg: string, color: string }> = {
     disponible: { bg: '#DCFCE7', color: '#166534' },
@@ -108,7 +108,7 @@ export default function AdminDevicesPage() {
                                             </div>
                                             <div style={{ background: '#F5F3FF', padding: '10px 8px', borderRadius: 12, textAlign: 'center' }}>
                                                 <div style={{ fontSize: 10, color: '#7E22CE', fontWeight: 600 }}>BATERÍA</div>
-                                                <div style={{ fontSize: 16, fontWeight: 800, color: '#7E22CE' }}>{live.bateriaPct || 100}%</div>
+                                                <div style={{ fontSize: 16, fontWeight: 800, color: '#7E22CE' }}>{(live as any).bateriaPct || 100}%</div>
                                             </div>
                                         </div>
                                     ) : (

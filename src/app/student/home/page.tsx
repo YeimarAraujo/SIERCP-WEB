@@ -37,7 +37,7 @@ export default function StudentHomePage() {
         totalSessions: user?.stats?.totalSessions ?? sessions.length,
         averageScore: user?.stats?.averageScore ??
             (sessions.length > 0
-                ? Math.round(sessions.reduce((acc, s) => acc + (s.metrics?.score ?? 0), 0) / sessions.length)
+                ? Math.round(sessions.reduce((acc, s) => acc + (s.metrics?.qualityScore ?? 0), 0) / sessions.length)
                 : 0),
         bestScore: user?.stats?.bestScore ?? 0,
         activeCourses: courses.length,
@@ -109,7 +109,7 @@ export default function StudentHomePage() {
                         <p style={{ color: '#8892A4', fontSize: 13 }}>No hay sesiones registradas</p>
                     ) : (
                         sessions.slice(0, 5).map((s) => {
-                            const c = getScoreBg(s.metrics?.score ?? 0);
+                            const c = getScoreBg(s.metrics?.qualityScore ?? 0);
                             return (
                                 <div key={s.id} style={{
                                     display: 'flex',
@@ -121,7 +121,7 @@ export default function StudentHomePage() {
                                 }}>
                                     <span style={{ color: '#8892A4' }}>{formatSessionDate(s.startedAt)}</span>
                                     <span style={{ color: '#4A5568' }}>{s.scenarioTitle ?? 'Sesión RCP'}</span>
-                                    <span style={{ fontWeight: 600, color: c.color }}>{s.metrics?.score ?? 0}%</span>
+                                    <span style={{ fontWeight: 600, color: c.color }}>{s.metrics?.qualityScore ?? 0}%</span>
                                 </div>
                             );
                         })

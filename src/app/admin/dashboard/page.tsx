@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
-import { SessionService, DeviceService, CourseService } from '@/services/firestore.service';
+import { SessionService, ManiquiService } from '@/services/firestore.service';
 import { 
     Cpu, Globe, Shield, Users, Server, 
     Signal, AlertTriangle, TrendingUp,
@@ -29,7 +29,7 @@ export default function AdminDashboardPage() {
             try {
                 setLoading(true);
                 const [devices, allRecent] = await Promise.all([
-                    DeviceService.getAll(),
+                    ManiquiService.getAll(),
                     SessionService.getAllRecent(10)
                 ]);
 
@@ -56,7 +56,7 @@ export default function AdminDashboardPage() {
                         id: s.id,
                         event: 'Nueva Sesión RCP',
                         user: s.studentName,
-                        status: s.metrics.qualityScore >= 85 ? 'success' : 'warning',
+                        status: (s.metrics?.qualityScore ?? 0) >= 85 ? 'success' : 'warning',
                         time: s.startedAt
                     }))
                 });

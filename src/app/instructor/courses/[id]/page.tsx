@@ -81,7 +81,7 @@ export default function InstructorCoursePage() {
     if (!course) return <div style={{ padding: 40, textAlign: 'center', color: '#EF4444' }}>Curso no encontrado</div>;
 
     const avgScore = sessions.length > 0 
-        ? Math.round(sessions.reduce((acc, s) => acc + s.metrics.qualityScore, 0) / sessions.length) 
+        ? Math.round(sessions.reduce((acc, s) => acc + (s.metrics?.qualityScore ?? 0), 0) / sessions.length) 
         : 0;
 
     const tabs: { id: TabType, label: string, icon: any }[] = [
@@ -247,7 +247,7 @@ export default function InstructorCoursePage() {
                                                 </div>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                <button onClick={() => window.open(g.pdfUrl, '_blank')} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '10px', color: '#64748B', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} title="Ver PDF">
+                                                <button onClick={() => window.open(g.contentUrl, '_blank')} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '10px', color: '#64748B', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} title="Ver PDF">
                                                     <FileText size={18} /> <span style={{ fontSize: 13, fontWeight: 700 }}>Ver Material</span>
                                                 </button>
                                                 <div style={{ width: 1, height: 24, background: '#E2E8F0', margin: '0 8px' }} />
@@ -308,21 +308,20 @@ export default function InstructorCoursePage() {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
                                                 <div style={{ textAlign: 'center' }}>
                                                     <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 800, letterSpacing: '0.05em', marginBottom: 4 }}>DESEMPEÑO</div>
-                                                    <div style={{ fontSize: 20, fontWeight: 900, color: s.metrics.qualityScore >= 85 ? '#10B981' : '#F59E0B' }}>{s.metrics.qualityScore}%</div>
+                                                    <div style={{ fontSize: 20, fontWeight: 900, color: (s.metrics?.qualityScore ?? 0) >= 85 ? '#10B981' : '#F59E0B' }}>{s.metrics?.qualityScore ?? 0}%</div>
                                                 </div>
                                                 <div style={{ width: 100, height: 40, background: '#F8FAFC', borderRadius: 12, overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-end', gap: 2, padding: '4px 8px' }}>
-                                                    {/* Mini Sparkline simulated */}
                                                     {[40, 70, 85, 60, 95, 88].map((h, j) => (
-                                                        <div key={j} style={{ flex: 1, height: `${h}%`, background: s.metrics.qualityScore >= 85 ? '#10B981' : '#F59E0B', opacity: 0.3 + (j * 0.1), borderRadius: 2 }} />
+                                                        <div key={j} style={{ flex: 1, height: `${h}%`, background: (s.metrics?.qualityScore ?? 0) >= 85 ? '#10B981' : '#F59E0B', opacity: 0.3 + (j * 0.1), borderRadius: 2 }} />
                                                     ))}
                                                 </div>
                                                 <div style={{ 
                                                     fontSize: 10, fontWeight: 900, padding: '6px 12px', borderRadius: 10, 
-                                                    background: s.metrics.qualityScore >= 85 ? '#DCFCE7' : '#FEE2E2', 
-                                                    color: s.metrics.qualityScore >= 85 ? '#166534' : '#991B1B',
+                                                    background: (s.metrics?.qualityScore ?? 0) >= 85 ? '#DCFCE7' : '#FEE2E2', 
+                                                    color: (s.metrics?.qualityScore ?? 0) >= 85 ? '#166534' : '#991B1B',
                                                     letterSpacing: '0.05em'
                                                 }}>
-                                                    {s.metrics.qualityScore >= 85 ? 'CERTIFICADO' : 'FALLIDO'}
+                                                    {(s.metrics?.qualityScore ?? 0) >= 85 ? 'CERTIFICADO' : 'FALLIDO'}
                                                 </div>
                                             </div>
                                         </div>

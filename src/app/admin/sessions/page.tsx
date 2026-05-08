@@ -83,7 +83,7 @@ export default function AdminSessionsPage() {
                                         <td style={{ padding: '16px 20px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                 <Book size={14} style={{ color: '#94A3B8' }} />
-                                                <div style={{ color: '#475569', fontWeight: 500 }}>{s.courseTitle || 'Práctica Libre'}</div>
+                                                <div style={{ color: '#475569', fontWeight: 500 }}>{s.courseId || 'Práctica Libre'}</div>
                                             </div>
                                             <div style={{ fontSize: 11, color: '#94A3B8', marginLeft: 22 }}>{s.scenarioTitle}</div>
                                         </td>

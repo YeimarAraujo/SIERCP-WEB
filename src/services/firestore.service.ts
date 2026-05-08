@@ -94,6 +94,18 @@ export const SessionService = {
     async update(id: string, data: Partial<SessionModel>): Promise<void> {
         await updateDoc(doc(db, 'sessions', id), { ...data, updatedAt: serverTimestamp() });
     },
+
+    async getAllRecent(limitN = 50): Promise<SessionModel[]> {
+        try {
+            const snap = await getDocs(
+                query(collection(db, 'sessions'), orderBy('startedAt', 'desc'), limit(limitN)),
+            );
+            return snap.docs.map((s) => parseSession(s.id, s.data() as Record<string, unknown>));
+        } catch (e) {
+            console.error('Error fetching recent sessions:', e);
+            return [];
+        }
+    },
 };
 
 // ── Courses ──────────────────────────────────────────────────────────────────
@@ -142,7 +154,7 @@ export const CourseService = {
         
         // Fetch all courses in parallel
         const courses = await Promise.all(courseIds.map(id => this.get(id)));
-        return courses;
+        return courses.filter((c): c is CourseModel => c !== null);
     },
 
     async getAll(): Promise<CourseModel[]> {

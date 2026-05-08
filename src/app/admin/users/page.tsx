@@ -71,7 +71,7 @@ export default function AdminUsersPage() {
                                     <th style={{ padding: '16px 20px', textAlign: 'right', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.05em' }}>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody style={{ divideY: '1px solid #F1F5F9' }}>
+                            <tbody>
                                 {filtered.map((u) => {
                                     const style = ROLE_STYLES[u.role] || ROLE_STYLES.ESTUDIANTE;
                                     return (

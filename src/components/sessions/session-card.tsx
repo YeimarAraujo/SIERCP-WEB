@@ -11,7 +11,7 @@ interface SessionCardProps {
 
 export function SessionCard({ session, onClick }: SessionCardProps) {
     const { status, metrics, startedAt, endedAt, duration, patientType } = session;
-    const score = metrics?.score ?? 0;
+    const score = metrics?.qualityScore ?? 0;
     const label = getScoreLabel(score);
     const color = getScoreColor(score);
 

@@ -35,6 +35,7 @@ interface AuthStore {
     }) => Promise<void>;
     logout: () => Promise<void>;
     clearError: () => void;
+    updateLocalUser: (data: Partial<UserModel>) => void;
 }
 
 async function fetchUserModel(uid: string): Promise<UserModel | null> {
@@ -213,6 +214,13 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             clearError: () => set({ error: null }),
+
+            updateLocalUser: (data: Partial<UserModel>) => {
+                const current = get().user;
+                if (current) {
+                    set({ user: { ...current, ...data } });
+                }
+            },
         }),
         {
             name: 'siercp-auth',

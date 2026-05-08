@@ -54,33 +54,33 @@ export default function InstructorReportsPage() {
         return matchesCourse && matchesSearch;
     });
 
-    const columns = [
+    const columns: any[] = [
         { 
             key: 'studentName', 
             label: 'Alumno',
-            render: (val: string) => (
+            render: (_: unknown, row: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ width: 28, height: 28, borderRadius: 8, background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366F1', fontWeight: 700, fontSize: 11 }}>
-                        {val.charAt(0)}
+                        {row.studentName?.charAt(0)}
                     </div>
-                    <span style={{ fontWeight: 600, color: '#1E293B' }}>{val}</span>
+                    <span style={{ fontWeight: 600, color: '#1E293B' }}>{row.studentName}</span>
                 </div>
             )
         },
         { 
             key: 'courseName', 
             label: 'Curso',
-            render: (val: string) => <span style={{ fontSize: 13, color: '#64748B' }}>{val}</span>
+            render: (_: unknown, row: any) => <span style={{ fontSize: 13, color: '#64748B' }}>{row.courseName}</span>
         },
         { 
             key: 'scenarioTitle', 
             label: 'Escenario',
-            render: (val: string) => <span style={{ fontSize: 13, fontWeight: 500, color: '#1E293B' }}>{val}</span>
+            render: (_: unknown, row: any) => <span style={{ fontSize: 13, fontWeight: 500, color: '#1E293B' }}>{row.scenarioTitle}</span>
         },
         { 
             key: 'qualityScore', 
             label: 'Score',
-            render: (_: any, row: any) => {
+            render: (_: unknown, row: any) => {
                 const score = row.metrics?.qualityScore ?? 0;
                 return (
                     <div style={{ fontWeight: 800, color: score >= 85 ? '#10B981' : '#F59E0B' }}>
@@ -92,8 +92,8 @@ export default function InstructorReportsPage() {
         { 
             key: 'startedAt', 
             label: 'Fecha',
-            render: (val: Date) => (
-                <div style={{ fontSize: 12, color: '#94A3B8' }}>{formatDate(val)}</div>
+            render: (_: unknown, row: any) => (
+                <div style={{ fontSize: 12, color: '#94A3B8' }}>{formatDate(row.startedAt)}</div>
             )
         },
     ];

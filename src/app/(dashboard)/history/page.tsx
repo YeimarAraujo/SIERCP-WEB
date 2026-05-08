@@ -22,7 +22,7 @@ export default function HistoryPage() {
 
     const approved = sessions.filter((s) => s.metrics?.approved).length;
     const avgScore = sessions.length
-        ? sessions.reduce((acc, s) => acc + (s.metrics?.score ?? 0), 0) / sessions.length
+        ? sessions.reduce((acc, s) => acc + (s.metrics?.qualityScore ?? 0), 0) / sessions.length
         : 0;
 
     return (

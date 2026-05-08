@@ -16,7 +16,7 @@ export default function EditGuidePage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     
-    const [formData, setFormData] = useState<GuideModel | null>(null);
+    const [formData, setFormData] = useState<any>(null);
 
     useEffect(() => {
         if (!guideId) return;
@@ -31,14 +31,14 @@ export default function EditGuidePage() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target as any;
-        setFormData(prev => prev ? ({
+        setFormData((prev: any) => prev ? ({
             ...prev,
             [name]: type === 'number' ? Number(value) : value
         }) : null);
     };
 
     const handleToggle = () => {
-        setFormData(prev => prev ? ({ ...prev, required: !prev.required }) : null);
+        setFormData((prev: any) => prev ? ({ ...prev, required: !prev.required }) : null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -115,8 +115,8 @@ export default function EditGuidePage() {
                                 <div style={{ position: 'relative' }}>
                                     <FileText size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
                                     <input
-                                        name="pdfUrl"
-                                        value={formData.pdfUrl}
+                                        name="contentUrl"
+                                        value={formData?.contentUrl}
                                         onChange={handleChange}
                                         required
                                         style={{ width: '100%', padding: '12px 16px 12px 40px', borderRadius: 10, border: '1px solid #E2E8F0', outline: 'none', fontSize: 14 }}

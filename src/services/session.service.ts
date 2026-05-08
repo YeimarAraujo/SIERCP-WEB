@@ -54,7 +54,7 @@ export const SessionManager = {
             rateScore: metrics.rateScore ?? 0,
             recoilScore: metrics.recoilScore ?? 0,
             interruptionScore: metrics.interruptionScore ?? 0,
-            score,
+            qualityScore: score,
             approved: isApproved(score),
             violations: metrics.violations ?? [],
         };

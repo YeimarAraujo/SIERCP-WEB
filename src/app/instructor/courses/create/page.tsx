@@ -17,7 +17,7 @@ export default function CreateCoursePage() {
     const [loading, setLoading] = useState(false);
     const [csvStudents, setCsvStudents] = useState<any[]>([]);
     
-    const [formData, setFormData] = useState<Omit<CourseModel, 'id'>>({
+    const [formData, setFormData] = useState<any>({
         title: '',
         description: '',
         instructorId: user?.uid || '',
@@ -28,12 +28,17 @@ export default function CreateCoursePage() {
         minScore: 85,
         moduleCount: 0,
         studentCount: 0,
-        requirements: [],
+        completedModules: 0,
+        guideIds: [],
+        requiredGuideCount: 0,
+        scenarioMode: 'completo' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target as any;
-        setFormData(prev => ({
+        setFormData((prev: any) => ({
             ...prev,
             [name]: type === 'number' ? Number(value) : value
         }));

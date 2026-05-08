@@ -34,28 +34,28 @@ export default function InstructorHistoryPage() {
         fetchData();
     }, [user]);
 
-    const columns = [
+    const columns: any[] = [
         {
             key: 'studentName',
             label: 'Estudiante',
-            render: (val: string) => (
+            render: (_: unknown, row: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700, fontSize: 11 }}>{val.charAt(0)}</div>
-                    <span style={{ fontWeight: 600 }}>{val}</span>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700, fontSize: 11 }}>{row.studentName?.charAt(0)}</div>
+                    <span style={{ fontWeight: 600 }}>{row.studentName}</span>
                 </div>
             )
         },
-        { key: 'courseName', label: 'Curso', render: (val: string) => <div style={{ fontSize: 13, color: '#64748B' }}><BookOpen size={12} style={{ marginRight: 4 }} />{val}</div> },
-        { key: 'scenarioTitle', label: 'Escenario', render: (val: string) => <div style={{ fontSize: 13, fontWeight: 500 }}>{val}</div> },
+        { key: 'courseName', label: 'Curso', render: (_: unknown, row: any) => <div style={{ fontSize: 13, color: '#64748B' }}><BookOpen size={12} style={{ marginRight: 4 }} />{row.courseName}</div> },
+        { key: 'scenarioTitle', label: 'Escenario', render: (_: unknown, row: any) => <div style={{ fontSize: 13, fontWeight: 500 }}>{row.scenarioTitle}</div> },
         {
             key: 'qualityScore',
             label: 'Calidad',
-            render: (_: any, row: any) => {
+            render: (_: unknown, row: any) => {
                 const score = row.metrics?.qualityScore ?? 0;
                 return <div style={{ fontWeight: 800, color: score >= 85 ? '#10B981' : '#F59E0B' }}>{score}%</div>;
             }
         },
-        { key: 'startedAt', label: 'Fecha', render: (val: Date) => <div style={{ fontSize: 12, color: '#94A3B8' }}>{formatDate(val)}</div> },
+        { key: 'startedAt', label: 'Fecha', render: (_: unknown, row: any) => <div style={{ fontSize: 12, color: '#94A3B8' }}>{formatDate(row.startedAt)}</div> },
     ];
 
     return (
