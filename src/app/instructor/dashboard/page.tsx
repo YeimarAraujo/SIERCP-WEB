@@ -142,7 +142,7 @@ export default function InstructorDashboardPage() {
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                                             <div style={{ textAlign: 'right' }}>
-                                                <div style={{ fontSize: 15, fontWeight: 800, color: getStatusColor(s.metrics.qualityScore, 85) }}>{s.metrics.qualityScore}%</div>
+                                                <div style={{ fontSize: 15, fontWeight: 800, color: getStatusColor(s.metrics?.qualityScore || 0, 85) }}>{s.metrics?.qualityScore || 0}%</div>
                                                 <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 700 }}>CALIDAD</div>
                                             </div>
                                             <ChevronRight size={18} style={{ color: '#CBD5E1' }} />

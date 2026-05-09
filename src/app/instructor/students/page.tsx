@@ -61,10 +61,10 @@ export default function InstructorStudentsPage() {
         {
             key: 'studentName',
             label: 'Nombre',
-            render: (val: string, row: any) => (
+            render: (val: any, row: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 32, height: 32, borderRadius: 10, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700, fontSize: 12 }}>
-                        {val.charAt(0)}
+                        {String(val || '').charAt(0)}
                     </div>
                     <div>
                         <div style={{ fontWeight: 700, color: '#0F172A' }}>{val}</div>
@@ -76,7 +76,7 @@ export default function InstructorStudentsPage() {
         {
             key: 'courseName',
             label: 'Curso',
-            render: (val: string) => (
+            render: (val: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#1800AD' }}>
                     <BookOpen size={14} /> {val}
                 </div>
@@ -85,7 +85,7 @@ export default function InstructorStudentsPage() {
         {
             key: 'avgScore',
             label: 'Calidad Avg',
-            render: (val: number) => (
+            render: (val: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div style={{ fontWeight: 800, color: (val || 0) >= 85 ? '#10B981' : '#F59E0B' }}>
                         {(val || 0).toFixed(1)}%
@@ -96,7 +96,7 @@ export default function InstructorStudentsPage() {
         {
             key: 'completedModules',
             label: 'Progreso',
-            render: (val: number) => (
+            render: (val: any) => (
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#64748B' }}>
                     {val} módulos
                 </div>
@@ -105,7 +105,7 @@ export default function InstructorStudentsPage() {
         {
             key: 'enrolledAt',
             label: 'Fecha Registro',
-            render: (val: Date) => (
+            render: (val: any) => (
                 <div style={{ fontSize: 12, color: '#94A3B8' }}>{formatDate(val)}</div>
             )
         },

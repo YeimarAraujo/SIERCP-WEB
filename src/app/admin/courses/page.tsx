@@ -5,7 +5,9 @@ import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
 import { CourseService } from '@/services/firestore.service';
 import type { CourseModel } from '@/models/course';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit2, Trash2, Plus, BookOpen, User, Users, ChevronRight, Search, FileText } from 'lucide-react';
+import { PageHero } from '@/components/ui/page-hero';
+import { DataTable } from '@/components/ui/data-table';
 
 export default function AdminCoursesPage() {
     const [courses, setCourses] = useState<CourseModel[]>([]);
@@ -17,112 +19,122 @@ export default function AdminCoursesPage() {
             .finally(() => setLoading(false));
     }, []);
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Header title="Gestión de cursos" />
-            <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                    <PageHeader
-                        title="Gestión de cursos"
-                        subtitle="Administra todos los cursos de la plataforma"
-                    />
-                    <button style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        background: '#1800AD',
-                        color: '#FFFFFF',
-                        border: 'none',
-                        borderRadius: 8,
-                        padding: '8px 16px',
-                        fontSize: 13,
-                        fontWeight: 500,
-                        cursor: 'pointer'
-                    }}>
-                        <Plus size={16} />
-                        Nuevo curso
-                    </button>
+    const columns = [
+        {
+            key: 'title',
+            label: 'Curso / Programa',
+            render: (_: any, row: CourseModel) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD' }}>
+                        <BookOpen size={22} />
+                    </div>
+                    <div>
+                        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 15 }}>{row.title}</div>
+                        <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{row.certification}</div>
+                    </div>
                 </div>
+            )
+        },
+        {
+            key: 'instructorName',
+            label: 'Instructor',
+            render: (val: any) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <User size={14} style={{ color: '#94A3B8' }} />
+                    <div style={{ color: '#475569', fontWeight: 600 }}>{val}</div>
+                </div>
+            )
+        },
+        {
+            key: 'studentCount',
+            label: 'Matrícula',
+            render: (val: any) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                    <Users size={14} style={{ color: '#94A3B8' }} />
+                    <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A' }}>{val}</div>
+                </div>
+            )
+        },
+        {
+            key: 'isActive',
+            label: 'Estado',
+            render: (val: any) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: val ? '#10B981' : '#CBD5E1' }} />
+                    <span style={{ 
+                        fontSize: 10, fontWeight: 900, padding: '4px 10px', borderRadius: 20,
+                        background: val ? '#DCFCE7' : '#F1F5F9',
+                        color: val ? '#166534' : '#64748B',
+                        letterSpacing: '0.05em'
+                    }}>
+                        {val ? 'ACTIVO' : 'INACTIVO'}
+                    </span>
+                </div>
+            )
+        },
+        {
+            key: 'actions',
+            label: '',
+            render: () => <ChevronRight size={18} style={{ color: '#CBD5E1' }} />
+        }
+    ];
 
-                <div style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #E2E4F0',
-                    borderRadius: 12,
-                    overflow: 'hidden',
-                }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                        <thead>
-                            <tr style={{
-                                background: '#F0F1FA',
-                                color: '#4A5568',
-                                fontSize: 11,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.05em'
-                            }}>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600 }}>Nombre del Curso</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600 }}>Instructor</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>Alumnos</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>Estado</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600 }}>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {loading ? (
-                                [1, 2, 3].map(i => (
-                                    <tr key={i}>
-                                        <td colSpan={5} style={{ padding: '16px', textAlign: 'center' }}>
-                                            <div style={{ height: 20, background: '#f1f5f9', borderRadius: 4, animation: 'pulse 2s infinite' }} />
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : courses.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} style={{ padding: 40, textAlign: 'center', color: '#8892A4' }}>
-                                        No hay cursos registrados o activos
-                                    </td>
-                                </tr>
-                            ) : (
-                                courses.map((course) => (
-                                    <tr key={course.id} style={{ borderTop: '1px solid #F1F5F9' }}>
-                                        <td style={{ padding: '12px 16px' }}>
-                                            <div style={{ fontWeight: 600, color: '#0F172A' }}>{course.title}</div>
-                                            <div style={{ fontSize: 11, color: '#64748B' }}>{course.certification}</div>
-                                        </td>
-                                        <td style={{ padding: '12px 16px', color: '#475569' }}>
-                                            {course.instructorName}
-                                        </td>
-                                        <td style={{ padding: '12px 16px', textAlign: 'center', color: '#475569' }}>
-                                            {course.studentCount}
-                                        </td>
-                                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                            <span style={{
-                                                fontSize: 10,
-                                                fontWeight: 600,
-                                                padding: '2px 8px',
-                                                borderRadius: 12,
-                                                background: course.isActive ? '#DCFCE7' : '#F1F5F9',
-                                                color: course.isActive ? '#166534' : '#64748B'
-                                            }}>
-                                                {course.isActive ? 'ACTIVO' : 'INACTIVO'}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                                                <button style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', padding: 4 }}>
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: 4 }}>
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+            <Header title="Gestión Académica" />
+            
+            <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+                <PageHero 
+                    title="Oferta Formativa" 
+                    subtitle={`Control centralizado de programas y cohortes (${courses.length} cursos activos)`} 
+                    parentTitle="Admin"
+                    parentHref="/admin/dashboard"
+                    actions={
+                        <button style={{
+                            padding: '10px 20px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
+                            border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+                            boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
+                        }}>
+                            <Plus size={16} /> Crear Curso
+                        </button>
+                    }
+                />
+
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 20 }}>
+                        <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <input
+                                type="text"
+                                placeholder="Buscar por título, instructor o certificación..."
+                                style={{
+                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
+                                    fontSize: 14, outline: 'none', transition: 'all 0.2s', background: '#F8FAFC'
+                                }}
+                            />
+                        </div>
+                        <button style={{
+                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF', 
+                            border: '1px solid #E2E8F0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#64748B', cursor: 'pointer'
+                        }}>
+                            <FileText size={16} /> Exportar Reporte
+                        </button>
+                    </div>
+
+                    <DataTable 
+                        columns={columns}
+                        data={courses}
+                        loading={loading}
+                        emptyMessage="No se han encontrado cursos que coincidan con los criterios de búsqueda."
+                    />
                 </div>
             </div>
+            <style jsx>{`
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                }
+            `}</style>
         </div>
     );
 }

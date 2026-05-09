@@ -42,7 +42,7 @@ export default function CourseDetailPage() {
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                         <span>Instructor: {course.instructorName}</span>
                         <span>Certificación: {course.certification}</span>
-                        <span>Puntaje requerido: {course.requiredScore}pts</span>
+                        <span>Puntaje requerido: {course.minScore}pts</span>
                         <span>Código: <span className="font-mono font-medium">{course.inviteCode}</span></span>
                     </div>
                 </div>
@@ -67,7 +67,7 @@ export default function CourseDetailPage() {
                             <div className="grid sm:grid-cols-2 gap-4">
                                 {[
                                     { label: 'Estudiantes', value: course.studentCount },
-                                    { label: 'Módulos totales', value: course.totalModules },
+                                    { label: 'Módulos totales', value: course.moduleCount },
                                     { label: 'Creado', value: formatDate(course.createdAt) },
                                     { label: 'Modo de escenario', value: course.scenarioMode },
                                 ].map(({ label, value }) => (

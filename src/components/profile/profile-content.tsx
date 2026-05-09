@@ -8,7 +8,7 @@ import {
     User, Mail, Shield, IdCard, CheckCircle, 
     Camera, Save, LogOut, Loader2, Edit3, 
     Zap, Target, Award, Clock, ShieldCheck, 
-    Bell, Lock, History, Settings
+    Bell, Lock, History, Settings, Monitor
 } from 'lucide-react';
 import { MetricBar } from '@/components/charts/metric-bar';
 
@@ -157,10 +157,10 @@ export function ProfileContent() {
 
                                 <form onSubmit={handleUpdate} style={{ display: 'grid', gap: 28 }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                                        <InputGroup label="Nombre" disabled={!editing} value={formData.firstName} onChange={v => setFormData(p => ({ ...p, firstName: v }))} icon={User} />
-                                        <InputGroup label="Apellido" disabled={!editing} value={formData.lastName} onChange={v => setFormData(p => ({ ...p, lastName: v }))} icon={User} />
+                                        <InputGroup label="Nombre" disabled={!editing} value={formData.firstName} onChange={(v: string) => setFormData(p => ({ ...p, firstName: v }))} icon={User} />
+                                        <InputGroup label="Apellido" disabled={!editing} value={formData.lastName} onChange={(v: string) => setFormData(p => ({ ...p, lastName: v }))} icon={User} />
                                     </div>
-                                    <InputGroup label="Documento de Identificación" disabled={!editing} value={formData.identificacion} onChange={v => setFormData(p => ({ ...p, identificacion: v }))} icon={IdCard} />
+                                    <InputGroup label="Documento de Identificación" disabled={!editing} value={formData.identificacion} onChange={(v: string) => setFormData(p => ({ ...p, identificacion: v }))} icon={IdCard} />
                                     <InputGroup label="Correo Institucional" disabled value={user.email} onChange={() => {}} icon={Mail} />
 
                                     {editing && (

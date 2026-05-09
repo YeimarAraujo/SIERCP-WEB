@@ -1,76 +1,157 @@
 'use client';
 
-import { PageHeader } from '@/components/ui/page-header';
+import { Header } from '@/components/layout/header';
+import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
-import { FileText } from 'lucide-react';
+import { FileText, Search, Download, Calendar } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { SessionService, CourseService } from '@/services/firestore.service';
+import { useAuth } from '@/hooks/use-auth';
+import type { SessionModel } from '@/models/session';
 
 export default function StudentReportsPage() {
+    const { user } = useAuth();
+    const [sessions, setSessions] = useState<SessionModel[]>([]);
+    const [totalSessionsCount, setTotalSessionsCount] = useState<number>(0);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!user) return;
+        
+        const fetchReports = async () => {
+            try {
+                setLoading(true);
+                // Usamos la misma lógica robusta que en el Home
+                const userSessions = await SessionService.getByStudent(user.uid, 500);
+
+                const uniqueSessions = Array.from(new Map(userSessions.map(s => [s.id, s])).values())
+                    .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime());
+
+                setSessions(uniqueSessions);
+                
+                const count = await SessionService.getCountByStudent(user.uid);
+                setTotalSessionsCount(count);
+            } catch (error) {
+                console.error('Error fetching reports:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReports();
+    }, [user]);
+
     const columns = [
-        { key: 'date', label: 'Fecha' },
-        { key: 'sessionName', label: 'Sesión' },
-        { key: 'courseName', label: 'Curso' },
-        { key: 'score', label: 'Score' },
-        {
-            key: 'aha', label: 'AHA',
-            render: (val: unknown) => (
-                <span style={{
-                    background: Number(val) >= 80 ? 'var(--aha-good-bg)' : Number(val) >= 60 ? 'var(--aha-warn-bg)' : 'var(--aha-danger-bg)',
-                    color: Number(val) >= 80 ? 'var(--aha-good)' : Number(val) >= 60 ? 'var(--aha-warn)' : 'var(--aha-danger)',
-                    padding: '3px 10px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: '600',
-                }}>
-                    {String(val)}%
-                </span>
-            ),
+        { 
+            key: 'startedAt', 
+            label: 'Fecha y Hora',
+            render: (val: any) => {
+                const date = val as Date;
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
+                            <Calendar size={18} />
+                        </div>
+                        <div>
+                            <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 14 }}>{date.toLocaleDateString()}</div>
+                            <div style={{ fontSize: 12, color: '#94A3B8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                    </div>
+                );
+            }
+        },
+        { 
+            key: 'scenarioTitle', 
+            label: 'Escenario',
+            render: (val: any) => (
+                <div style={{ fontWeight: 700, color: '#475569' }}>{val || 'Práctica Libre'}</div>
+            )
+        },
+        { 
+            key: 'metrics', 
+            label: 'Calidad AHA',
+            render: (metrics: any) => {
+                const score = metrics?.qualityScore || metrics?.score || 0;
+                const color = score >= 85 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ flex: 1, height: 6, background: '#F1F5F9', borderRadius: 3, minWidth: 60, overflow: 'hidden' }}>
+                            <div style={{ width: `${score}%`, height: '100%', background: color, borderRadius: 3 }} />
+                        </div>
+                        <span style={{ fontSize: 14, fontWeight: 900, color: color }}>{score}%</span>
+                    </div>
+                );
+            }
         },
         {
-            key: 'actions', label: 'Acciones',
+            key: 'metrics_detail',
+            label: 'Prof. / Frec.',
+            render: (_: any, row: any) => (
+                <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
+                    {(row.metrics as any)?.averageDepthMm?.toFixed(1) || 0}mm / {(row.metrics as any)?.averageRatePerMin?.toFixed(0) || 0}cpm
+                </div>
+            )
+        },
+        {
+            key: 'actions',
+            label: '',
             render: () => (
-                <button style={{
-                    background: 'var(--brand-light)', color: 'var(--brand)',
-                    border: 'none', borderRadius: 'var(--radius-md)',
-                    padding: '6px 12px', fontSize: '13px', fontWeight: '600',
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                <button style={{ 
+                    padding: '8px 16px', borderRadius: 10, background: '#F1F5F9', border: 'none', 
+                    color: '#1800AD', fontSize: 12, fontWeight: 800, cursor: 'pointer', 
+                    display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s' 
                 }}>
-                    <FileText size={14} />
-                    Descargar PDF
+                    <FileText size={14} /> PDF
                 </button>
             ),
         },
     ];
 
     return (
-        <div>
-            <PageHeader
-                title="Mis reportes"
-                subtitle="Tus reportes de sesiones de entrenamiento"
-            />
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+            <Header title="Reportes Clínicos" />
+            
+            <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+                <PageHero 
+                    title="Historial de Rendimiento" 
+                    subtitle={`Has completado ${totalSessionsCount > 0 ? totalSessionsCount : sessions.length} sesiones de entrenamiento oficial.`} 
+                    parentTitle="Estudiante"
+                    parentHref="/student/home"
+                    actions={
+                        <button style={{ 
+                            padding: '10px 18px', borderRadius: 12, background: '#FFFFFF', color: '#1800AD', 
+                            border: '1px solid #1800AD', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
+                            display: 'flex', alignItems: 'center', gap: 8 
+                        }}>
+                            <Download size={16} /> Exportar Todo (.csv)
+                        </button>
+                    }
+                />
 
-            <div className="card-padded" style={{ marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                <div style={{ flex: '1', minWidth: '180px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                        Curso
-                    </label>
-                    <select className="input-field">
-                        <option value="">Todos los cursos</option>
-                    </select>
-                </div>
-                <div style={{ flex: '1', minWidth: '180px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                        Período
-                    </label>
-                    <select className="input-field">
-                        <option>Última semana</option>
-                        <option>Último mes</option>
-                        <option>Último año</option>
-                    </select>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 20 }}>
+                        <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <input
+                                type="text"
+                                placeholder="Filtrar por escenario o fecha..."
+                                style={{
+                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
+                                    fontSize: 14, outline: 'none', background: '#F8FAFC'
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    <DataTable 
+                        columns={columns}
+                        data={sessions}
+                        loading={loading}
+                        emptyMessage="No se han encontrado registros de sesiones. ¡Comienza a practicar para generar tu primer reporte!"
+                        enablePagination={true}
+                    />
                 </div>
             </div>
-
-            <DataTable
-                columns={columns}
-                data={[]}
-                emptyMessage="No tienes reportes aún. Completa sesiones de entrenamiento para generar reportes."
-            />
         </div>
     );
 }
