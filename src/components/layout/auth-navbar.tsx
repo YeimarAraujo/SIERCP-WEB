@@ -26,22 +26,24 @@ export default function AuthNavbar() {
 
     // Styles
     const headerStyles = {
-        background: 'rgba(10, 8, 40, 0.85)',
+        background: theme === 'dark' ? 'rgba(10, 8, 40, 0.85)' : 'rgba(255, 255, 255, 0.85)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        borderBottom: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(24, 0, 173, 0.1)',
+        transition: 'all 0.3s ease',
     };
 
     const themeBtnStyle = {
-        borderColor: 'rgba(255, 255, 255, 0.3)',
-        background: 'rgba(255, 255, 255, 0.08)',
+        borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(24, 0, 173, 0.3)',
+        background: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(24, 0, 173, 0.05)',
         cursor: 'pointer' as const,
+        color: theme === 'dark' ? '#FFFFFF' : '#1800AD',
     };
 
     const secondaryBtnStyle = {
-        color: '#FFFFFF' as string,
+        color: theme === 'dark' ? '#FFFFFF' : '#3D4270',
         background: 'transparent',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
+        border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(24, 0, 173, 0.3)',
         borderRadius: '8px',
         padding: '8px 18px',
         fontSize: '14px',
@@ -77,10 +79,10 @@ export default function AuthNavbar() {
                         />
                     </div>
                     <nav className="hidden md:flex gap-8">
-                        <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Documentación</a>
-                        <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Planes</a>
-                        <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Contacto</a>
-                        <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Sobre nosotros</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
                     </nav>
                     <div className="flex items-center gap-4">
                         <button
@@ -121,10 +123,10 @@ export default function AuthNavbar() {
                     />
                 </div>
                 <nav className="hidden md:flex gap-8">
-                    <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Documentación</a>
-                    <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Planes</a>
-                    <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Contacto</a>
-                    <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Sobre nosotros</a>
+                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
+                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
+                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
+                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
                 </nav>
                 <div className="flex items-center gap-4">
                     {/* Theme Toggle */}
@@ -132,13 +134,13 @@ export default function AuthNavbar() {
                         className="w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300"
                         style={themeBtnStyle}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.18)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)';
+                            e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.18)' : 'rgba(24, 0, 173, 0.12)';
+                            e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(24, 0, 173, 0.6)';
                             e.currentTarget.style.transform = 'rotate(20deg)';
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                            e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(24, 0, 173, 0.05)';
+                            e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(24, 0, 173, 0.3)';
                             e.currentTarget.style.transform = 'rotate(0deg)';
                         }}
                         onClick={toggleTheme}
@@ -146,7 +148,7 @@ export default function AuthNavbar() {
                         title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
                     >
                         <div style={{ transition: 'transform 0.4s ease', transform: theme === 'dark' ? 'rotate(0deg)' : 'rotate(180deg)' }}>
-                            {theme === 'dark' ? <Moon size={20} color="white" /> : <Sun size={20} color="white" />}
+                            {theme === 'dark' ? <Moon size={20} color="white" /> : <Sun size={20} color="#1800AD" />}
                         </div>
                     </button>
 
@@ -156,12 +158,12 @@ export default function AuthNavbar() {
                             className="text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1"
                             style={secondaryBtnStyle}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)';
+                                e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(24, 0, 173, 0.05)';
+                                e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(24, 0, 173, 0.6)';
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(24, 0, 173, 0.3)';
                             }}
                             onClick={() => router.push('/')}
                         >

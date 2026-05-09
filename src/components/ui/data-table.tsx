@@ -2,28 +2,39 @@
 
 import { useState } from 'react';
 
-interface Column<T> {
-    key: keyof T | string;
+interface Column<T = any> {
+    key: string;
     label: string;
     width?: string;
-    render?: (value: unknown, row: T) => React.ReactNode;
+    render?: (value: any, row: T) => React.ReactNode;
 }
 
-interface DataTableProps<T> {
+interface DataTableProps<T = any> {
     columns: Column<T>[];
     data: T[];
     loading?: boolean;
     emptyMessage?: string;
     onRowClick?: (row: T) => void;
+    enablePagination?: boolean;
+    defaultPageSize?: number;
 }
 
-export function DataTable<T extends { id?: string }>({
+export function DataTable<T = any>({
     columns,
     data,
     loading = false,
     emptyMessage = 'No hay datos disponibles',
     onRowClick,
+    enablePagination = false,
+    defaultPageSize = 20,
 }: DataTableProps<T>) {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(defaultPageSize);
+
+    const totalPages = Math.ceil(data.length / pageSize);
+    const paginatedData = enablePagination 
+        ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+        : data;
 
     if (loading) {
         return (
@@ -93,9 +104,9 @@ export function DataTable<T extends { id?: string }>({
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((row, i) => (
+                    {paginatedData.map((row, i) => (
                         <tr
-                            key={row.id ?? i}
+                            key={(row as any).id ?? i}
                             onClick={() => onRowClick?.(row)}
                             style={{
                                 borderBottom: '1px solid var(--border)',
@@ -130,6 +141,70 @@ export function DataTable<T extends { id?: string }>({
                     ))}
                 </tbody>
             </table>
+
+            {enablePagination && data.length > 0 && (
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 24px',
+                    borderTop: '1px solid var(--border)',
+                    background: 'var(--bg-surface)',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                        <span>Filas por página:</span>
+                        <select 
+                            value={pageSize}
+                            onChange={(e) => {
+                                setPageSize(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            style={{
+                                padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border)',
+                                background: 'var(--bg-surface)', fontSize: '13px', outline: 'none', cursor: 'pointer'
+                            }}
+                        >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                        </select>
+                        <span>
+                            Mostrando {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, data.length)} de {data.length}
+                        </span>
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            style={{
+                                padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border)',
+                                background: currentPage === 1 ? 'var(--bg-surface-2)' : 'var(--bg-surface)',
+                                color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-primary)',
+                                cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600'
+                            }}
+                        >
+                            Anterior
+                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: '13px', fontWeight: '600' }}>
+                            Página {currentPage} de {totalPages}
+                        </div>
+                        <button 
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            style={{
+                                padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border)',
+                                background: currentPage === totalPages ? 'var(--bg-surface-2)' : 'var(--bg-surface)',
+                                color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-primary)',
+                                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600'
+                            }}
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

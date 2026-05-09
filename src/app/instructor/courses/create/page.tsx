@@ -29,6 +29,12 @@ export default function CreateCoursePage() {
         moduleCount: 0,
         studentCount: 0,
         requirements: [],
+        completedModules: 0,
+        guideIds: [],
+        requiredGuideCount: 0,
+        scenarioMode: 'completo',
+        createdAt: new Date(),
+        updatedAt: new Date(),
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
