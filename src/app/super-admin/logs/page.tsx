@@ -1,9 +1,28 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { DataTable } from '@/components/ui/data-table';
+import { SessionService } from '@/services/firestore.service';
+import { formatDate } from '@/lib/utils';
 
 export default function SuperAdminLogsPage() {
+    const [logs, setLogs] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        SessionService.getAllRecent(100)
+            .then(sessions => sessions.map(s => ({
+                date: formatDate(s.startedAt),
+                user: s.studentName || '—',
+                institution: s.courseTitle || '—',
+                action: (s.metrics?.qualityScore || 0) >= 85 ? 'Certificación' : 'Práctica',
+                detail: `${s.scenarioTitle || 'Escenario'} — ${s.metrics?.qualityScore || 0}% calidad`,
+            })))
+            .then(setLogs)
+            .finally(() => setLoading(false));
+    }, []);
+
     const columns = [
         { key: 'date', label: 'Fecha' },
         { key: 'user', label: 'Usuario' },
@@ -16,7 +35,7 @@ export default function SuperAdminLogsPage() {
         <div>
             <PageHeader
                 title="Logs de actividad"
-                subtitle="Registro de todas las acciones del sistema"
+                subtitle={`Registro de las últimas actividades del sistema (${logs.length} eventos)`}
             />
 
             <div className="card-padded" style={{ marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
@@ -54,7 +73,8 @@ export default function SuperAdminLogsPage() {
 
             <DataTable
                 columns={columns}
-                data={[]}
+                data={logs}
+                loading={loading}
                 emptyMessage="No hay actividad registrada"
             />
         </div>

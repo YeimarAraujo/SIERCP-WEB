@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
 import { 
     Settings, Building2, ShieldCheck, Bell, 
     Save, Globe, Lock, Palette, Database,
@@ -10,20 +13,54 @@ import {
 } from 'lucide-react';
 
 export default function AdminSettingsPage() {
+    const { user } = useAuth();
     const [institution, setInstitution] = useState({
-        name: 'Instituto de Simulación SIERCP',
-        nit: '900.123.456-7',
-        city: 'Bogotá, D.C.',
-        phone: '+57 300 123 4567',
-        email: 'contacto@siercp.edu.co',
-        address: 'Av. Siempre Viva 123'
+        name: '',
+        nit: '',
+        city: '',
+        phone: '',
+        email: '',
+        address: ''
     });
     const [aha, setAha] = useState({ minScore: '75', certScore: '85' });
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
 
-    const handleSave = () => {
-        setLoading(true);
-        setTimeout(() => setLoading(false), 1500);
+    useEffect(() => {
+        if (!user?.institutionId) return;
+        const ref = doc(db!, 'institutions', user.institutionId);
+        getDoc(ref).then(snap => {
+            if (snap.exists()) {
+                const d = snap.data();
+                setInstitution({
+                    name: d.name || '',
+                    nit: d.nit || '',
+                    city: d.city || '',
+                    phone: d.phone || '',
+                    email: d.email || '',
+                    address: d.address || ''
+                });
+                if (d.minScore) setAha({ minScore: String(d.minScore), certScore: String(d.certScore || '85') });
+            }
+        }).catch(console.error);
+    }, [user]);
+
+    const handleSave = async () => {
+        if (!user?.institutionId || !db) return;
+        setSaving(true);
+        try {
+            const ref = doc(db, 'institutions', user.institutionId);
+            await updateDoc(ref, {
+                name: institution.name, nit: institution.nit, city: institution.city,
+                phone: institution.phone, email: institution.email, address: institution.address,
+                minScore: Number(aha.minScore), certScore: Number(aha.certScore),
+                updatedAt: serverTimestamp(),
+            });
+        } catch (e) {
+            console.error('Error saving settings:', e);
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -44,10 +81,10 @@ export default function AdminSettingsPage() {
                                 padding: '12px 24px', borderRadius: 14, background: '#1800AD', color: '#FFFFFF', 
                                 border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
                                 display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)',
-                                opacity: loading ? 0.7 : 1
+                                    opacity: saving ? 0.7 : 1
                             }}
                         >
-                            <Save size={18} /> {loading ? 'Guardando...' : 'Guardar Cambios Globales'}
+                            <Save size={18} /> {saving ? 'Guardando...' : 'Guardar Cambios Globales'}
                         </button>
                     }
                 />
@@ -73,15 +110,15 @@ export default function AdminSettingsPage() {
                             </h3>
                             
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-                                <FormGroup label="Nombre Legal" icon={Building2} value={institution.name} />
-                                <FormGroup label="NIT / RUT" icon={FileTextIcon} value={institution.nit} />
-                                <FormGroup label="Correo Institucional" icon={Mail} value={institution.email} />
-                                <FormGroup label="Teléfono de Contacto" icon={Phone} value={institution.phone} />
+                                <FormGroup label="Nombre Legal" icon={Building2} value={institution.name} onChange={(v: string) => setInstitution({...institution, name: v})} />
+                                <FormGroup label="NIT / RUT" icon={FileTextIcon} value={institution.nit} onChange={(v: string) => setInstitution({...institution, nit: v})} />
+                                <FormGroup label="Correo Institucional" icon={Mail} value={institution.email} onChange={(v: string) => setInstitution({...institution, email: v})} />
+                                <FormGroup label="Teléfono de Contacto" icon={Phone} value={institution.phone} onChange={(v: string) => setInstitution({...institution, phone: v})} />
                             </div>
                             
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                                <FormGroup label="Ciudad" icon={Globe} value={institution.city} />
-                                <FormGroup label="Dirección Física" icon={MapPin} value={institution.address} />
+                                <FormGroup label="Ciudad" icon={Globe} value={institution.city} onChange={(v: string) => setInstitution({...institution, city: v})} />
+                                <FormGroup label="Dirección Física" icon={MapPin} value={institution.address} onChange={(v: string) => setInstitution({...institution, address: v})} />
                             </div>
                         </div>
 
@@ -135,7 +172,7 @@ function NavButton({ icon: Icon, label, active = false }: any) {
     );
 }
 
-function FormGroup({ label, icon: Icon, value }: any) {
+function FormGroup({ label, icon: Icon, value, onChange }: any) {
     return (
         <div>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{label}</label>
@@ -144,7 +181,8 @@ function FormGroup({ label, icon: Icon, value }: any) {
                     <Icon size={18} />
                 </div>
                 <input 
-                    defaultValue={value}
+                    value={value}
+                    onChange={(e) => onChange?.(e.target.value)}
                     style={{ 
                         width: '100%', height: 48, padding: '0 16px 0 44px', borderRadius: 12, 
                         border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 14, 

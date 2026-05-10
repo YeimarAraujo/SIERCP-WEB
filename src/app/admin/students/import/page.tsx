@@ -4,6 +4,9 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@/shared/lib/firebase';
 import {
     Upload, FileText, Download, AlertTriangle,
     CheckCircle, X, ArrowLeft, Loader2
@@ -31,12 +34,60 @@ export default function ImportStudentsPage() {
         if (f) setFile(f);
     };
 
+    const parseCSV = (text: string): string[][] => {
+        const lines = text.split('\n').filter(l => l.trim());
+        if (lines.length < 2) return [];
+        return lines.slice(1).map(line => {
+            const row: string[] = [];
+            let current = '';
+            let inQuotes = false;
+            for (const ch of line) {
+                if (ch === '"') { inQuotes = !inQuotes; continue; }
+                if (ch === ',' && !inQuotes) { row.push(current.trim()); current = ''; continue; }
+                current += ch;
+            }
+            row.push(current.trim());
+            return row;
+        });
+    };
+
     const handleSubmit = async () => {
         if (!file) return;
         setLoading(true);
-        // Simulación de importación
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setResult({ success: 15, errors: [] });
+        const errors: string[] = [];
+        let success = 0;
+
+        try {
+            const text = await file.text();
+            const rows = parseCSV(text);
+
+            for (let i = 0; i < rows.length; i++) {
+                const cols = rows[i];
+                try {
+                    const [nombres, apellidos, email, identificacion] = cols;
+                    if (!email) { errors.push(`Fila ${i + 2}: email requerido`); continue; }
+
+                    const password = Math.random().toString(36).slice(2, 10) + 'A1!';
+                    const cred = await createUserWithEmailAndPassword(auth!, email, password);
+                    await setDoc(doc(db!, 'users', cred.user.uid), {
+                        uid: cred.user.uid, email,
+                        firstName: nombres || '', lastName: apellidos || '',
+                        role: 'ESTUDIANTE', identificacion: identificacion || '',
+                        isActive: true, institutionId: 'SIERCP-GENERAL',
+                        status: 'ACTIVE',
+                        stats: { totalSessions: 0, sessionsToday: 0, averageScore: 0, bestScore: 0, streakDays: 0, totalHours: 0, averageDepthMm: 0, averageRatePerMin: 0 },
+                        createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+                    });
+                    success++;
+                } catch (e: any) {
+                    errors.push(`Fila ${i + 2}: ${e.message}`);
+                }
+            }
+        } catch (e: any) {
+            errors.push(`Error de archivo: ${e.message}`);
+        }
+
+        setResult({ success, errors });
         setLoading(false);
     };
 

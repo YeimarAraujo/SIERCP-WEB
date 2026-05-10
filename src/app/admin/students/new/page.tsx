@@ -4,37 +4,60 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@/shared/lib/firebase';
 import { 
     UserPlus, Mail, Shield, Save, X, 
-    User, Fingerprint, MapPin, Phone, 
+    User, Fingerprint, MapPin, Phone, Key,
     BookOpen, ShieldCheck, GraduationCap
 } from 'lucide-react';
-import { UserService } from '@/services/firestore.service';
 
 export default function NewStudentPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
+        password: '',
         identificacion: '',
         phone: '',
         institutionId: 'SIERCP-GENERAL',
         role: 'ESTUDIANTE' as const,
         isActive: true,
-        status: 'ACTIVE' as const,
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
         try {
             setLoading(true);
-            // Simulación de creación (en un entorno real usaríamos auth + firestore)
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            if (!auth || !db) throw new Error('Firebase not configured');
+
+            const cred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            await setDoc(doc(db, 'users', cred.user.uid), {
+                uid: cred.user.uid,
+                email: formData.email,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                role: 'ESTUDIANTE',
+                identificacion: formData.identificacion,
+                isActive: formData.isActive,
+                institutionId: formData.institutionId,
+                status: 'ACTIVE',
+                stats: {
+                    totalSessions: 0, sessionsToday: 0, averageScore: 0, bestScore: 0,
+                    streakDays: 0, totalHours: 0, averageDepthMm: 0, averageRatePerMin: 0,
+                },
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+            });
+
             router.push('/admin/students');
-        } catch (error) {
-            console.error('Error:', error);
+        } catch (error: any) {
+            setError(error.message || 'Error al crear estudiante');
         } finally {
             setLoading(false);
         }
@@ -78,13 +101,19 @@ export default function NewStudentPage() {
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20 }}>
                                     <FormInput label="Correo Electrónico Institucional" icon={Mail} placeholder="estudiante@siercp.edu.co" required type="email" value={formData.email} onChange={(v: any) => setFormData({...formData, email: v})} />
+                                    <FormInput label="Contraseña Temporal" icon={Key} placeholder="••••••••" required type="password" value={formData.password} onChange={(v: any) => setFormData({...formData, password: v})} />
                                 </div>
                                 <div style={{ marginTop: 16, padding: '12px 16px', background: '#F0F9FF', borderRadius: 12, border: '1px solid #B9E6FE', color: '#0369A1', fontSize: 12, fontWeight: 600 }}>
                                     Se enviará un correo de bienvenida con las instrucciones de activación de cuenta.
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
+                            {error && (
+                                <div style={{ padding: '12px 16px', background: '#FEF2F2', borderRadius: 12, border: '1px solid #FECACA', color: '#DC2626', fontSize: 13, fontWeight: 600 }}>
+                                    {error}
+                                </div>
+                            )}
+                                    <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
                                 <button 
                                     type="button" 
                                     onClick={() => router.back()}

@@ -1,43 +1,64 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
-import { Upload, UserPlus, Search, FileText, ChevronRight, GraduationCap } from 'lucide-react';
+import { Upload, UserPlus, Search, FileText, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { UserService } from '@/services/firestore.service';
+import { getFullName } from '@/models/user';
+import { ROLE_STUDENT } from '@/shared/lib/constants';
+import type { UserModel } from '@/models/user';
+
 export default function AdminStudentsPage() {
     const router = useRouter();
+    const [students, setStudents] = useState<UserModel[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        UserService.getAll()
+            .then(users => users.filter(u => u.role === ROLE_STUDENT))
+            .then(setStudents)
+            .finally(() => setLoading(false));
+    }, []);
+
+    const filtered = students.filter(u =>
+        getFullName(u).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const columns = [
-        { 
-            key: 'displayName', 
+        {
+            key: 'displayName',
             label: 'Estudiante',
-            render: (_: any, row: any) => (
+            render: (_: any, row: UserModel) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 40, height: 40, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD', fontWeight: 700 }}>
-                        {row.displayName?.charAt(0) || 'E'}
+                        {getFullName(row).charAt(0) || 'E'}
                     </div>
                     <div>
-                        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 14 }}>{row.displayName}</div>
-                        <div style={{ fontSize: 12, color: '#64748B' }}>ID: {row.idNumber || '—'}</div>
+                        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 14 }}>{getFullName(row)}</div>
+                        <div style={{ fontSize: 12, color: '#64748B' }}>ID: {row.identificacion || '—'}</div>
                     </div>
                 </div>
             )
         },
         { key: 'email', label: 'Correo Electrónico' },
-        { 
-            key: 'coursesCount', 
+        {
+            key: 'coursesCount',
             label: 'Matrículas',
-            render: (val: any) => (
+            render: (_: any, row: UserModel) => (
                 <div style={{ textAlign: 'center', fontWeight: 700, color: '#475569' }}>
-                    {val || 0} cursos
+                    {row.stats?.totalSessions || 0} cursos
                 </div>
             )
         },
         {
-            key: 'status', 
+            key: 'status',
             label: 'Estado',
-            render: (val: unknown) => (
+            render: (val: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: val === 'ACTIVE' ? '#10B981' : '#F59E0B' }} />
                     <span style={{
@@ -61,31 +82,31 @@ export default function AdminStudentsPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
             <Header title="Gestión Estudiantil" />
-            
+
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-                <PageHero 
-                    title="Directorio de Alumnos" 
-                    subtitle="Administración integral de expedientes académicos y certificados" 
+                <PageHero
+                    title="Directorio de Alumnos"
+                    subtitle={`Administración integral de expedientes académicos (${students.length} estudiantes registrados)`}
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <button
                                 onClick={() => router.push('/admin/students/import')}
-                                style={{ 
-                                    padding: '10px 18px', borderRadius: 12, background: '#FFFFFF', color: '#64748B', 
-                                    border: '1px solid #E2E8F0', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
-                                    display: 'flex', alignItems: 'center', gap: 8 
+                                style={{
+                                    padding: '10px 18px', borderRadius: 12, background: '#FFFFFF', color: '#64748B',
+                                    border: '1px solid #E2E8F0', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: 8
                                 }}
                             >
                                 <Upload size={16} /> Importar CSV
                             </button>
                             <button
                                 onClick={() => router.push('/admin/students/new')}
-                                style={{ 
-                                    padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF', 
-                                    border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
-                                    display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)' 
+                                style={{
+                                    padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
+                                    border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
                                 }}
                             >
                                 <UserPlus size={16} /> Nuevo Alumno
@@ -100,6 +121,8 @@ export default function AdminStudentsPage() {
                             <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
                             <input
                                 type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Buscar por nombre, ID o correo..."
                                 style={{
                                     width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
@@ -108,16 +131,17 @@ export default function AdminStudentsPage() {
                             />
                         </div>
                         <button style={{
-                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF', 
+                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF',
                             border: '1px solid #E2E8F0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#64748B', cursor: 'pointer'
                         }}>
                             <FileText size={16} /> Reporte de Matrícula
                         </button>
                     </div>
 
-                    <DataTable 
+                    <DataTable
                         columns={columns}
-                        data={[]}
+                        data={filtered}
+                        loading={loading}
                         emptyMessage="No se han encontrado estudiantes registrados en la base de datos institucional."
                     />
                 </div>

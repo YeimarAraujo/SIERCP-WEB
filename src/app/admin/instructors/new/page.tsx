@@ -4,19 +4,24 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@/shared/lib/firebase';
 import { 
     UserPlus, Mail, Shield, Save, X, 
     User, Fingerprint, Award, Phone, 
-    Briefcase, GraduationCap, Star
+    Briefcase, GraduationCap, Star, Key
 } from 'lucide-react';
 
 export default function NewInstructorPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
+        password: '',
         identificacion: '',
         phone: '',
         specialty: 'Instructor de Soporte Vital',
@@ -27,12 +32,33 @@ export default function NewInstructorPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
         try {
             setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            if (!auth || !db) throw new Error('Firebase not configured');
+
+            const cred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            await setDoc(doc(db, 'users', cred.user.uid), {
+                uid: cred.user.uid,
+                email: formData.email,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                role: 'INSTRUCTOR',
+                identificacion: formData.identificacion,
+                isActive: formData.isActive,
+                institutionId: formData.institutionId,
+                status: 'PENDING',
+                stats: {
+                    totalSessions: 0, sessionsToday: 0, averageScore: 0, bestScore: 0,
+                    streakDays: 0, totalHours: 0, averageDepthMm: 0, averageRatePerMin: 0,
+                },
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+            });
+
             router.push('/admin/instructors');
-        } catch (error) {
-            console.error('Error:', error);
+        } catch (error: any) {
+            setError(error.message || 'Error al crear instructor');
         } finally {
             setLoading(false);
         }
@@ -72,14 +98,20 @@ export default function NewInstructorPage() {
                             {/* Sección: Identidad y Acceso */}
                             <div>
                                 <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <Mail size={20} style={{ color: '#1800AD' }} /> Identidad Institucional
+                                    <Key size={20} style={{ color: '#1800AD' }} /> Identidad Institucional
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Correo Corporativo" icon={Mail} placeholder="instructor@siercp.edu.co" required type="email" value={formData.email} onChange={(v: string) => setFormData({...formData, email: v})} />
                                     <FormInput label="Documento Identidad" icon={Fingerprint} placeholder="C.C. 000.000.000" required value={formData.identificacion} onChange={(v: string) => setFormData({...formData, identificacion: v})} />
+                                    <FormInput label="Contraseña Temporal" icon={Key} placeholder="••••••••" required type="password" value={formData.password} onChange={(v: string) => setFormData({...formData, password: v})} />
                                 </div>
                             </div>
 
+                            {error && (
+                                <div style={{ padding: '12px 16px', background: '#FEF2F2', borderRadius: 12, border: '1px solid #FECACA', color: '#DC2626', fontSize: 13, fontWeight: 600 }}>
+                                    {error}
+                                </div>
+                            )}
                             <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
                                 <button 
                                     type="button" 

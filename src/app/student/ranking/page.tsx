@@ -1,11 +1,58 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Trophy, TrendingUp, TrendingDown, Minus, Search, Target, Award, Star } from 'lucide-react';
 import { PageHero } from '@/components/ui/page-hero';
 import { Header } from '@/components/layout/header';
 import { DataTable } from '@/components/ui/data-table';
+import { useAuth } from '@/hooks/use-auth';
+import { UserService } from '@/services/firestore.service';
+import { getFullName } from '@/models/user';
+import { ROLE_STUDENT } from '@/shared/lib/constants';
+import type { UserModel } from '@/models/user';
+
+interface RankingEntry {
+    rank: number;
+    student: string;
+    averageScore: number;
+    sessions: number;
+    trend: string;
+    uid: string;
+}
 
 export default function StudentRankingPage() {
+    const { user } = useAuth();
+    const [ranking, setRanking] = useState<RankingEntry[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        if (!user) return;
+        UserService.getAll()
+            .then(users => {
+                const sameInstitution = users.filter(
+                    u => u.role === ROLE_STUDENT && u.institutionId === user.institutionId
+                );
+                const ranked = sameInstitution
+                    .sort((a, b) => (b.stats?.averageScore ?? 0) - (a.stats?.averageScore ?? 0))
+                    .map((u, i) => ({
+                        rank: i + 1,
+                        student: getFullName(u),
+                        averageScore: Math.round(u.stats?.averageScore ?? 0),
+                        sessions: u.stats?.totalSessions ?? 0,
+                        uid: u.uid,
+                        trend: (u.stats?.averageScore ?? 0) >= 85 ? 'up' : (u.stats?.averageScore ?? 0) >= 70 ? 'minus' : 'down',
+                    }));
+                setRanking(ranked);
+            })
+            .finally(() => setLoading(false));
+    }, [user]);
+
+    const userRank = ranking.find(e => e.uid === user?.uid);
+    const filtered = ranking.filter(e =>
+        e.student.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     const podiumStyles = [
         { bg: '#FFD700', color: '#5C4300', icon: Star },
         { bg: '#C0C0C0', color: '#3D3D3D', icon: Trophy },
@@ -15,10 +62,11 @@ export default function StudentRankingPage() {
     const columns = [
         {
             key: 'rank', label: 'Posición',
-            render: (_: unknown, row: any) => {
+            render: (_: unknown, row: RankingEntry) => {
                 const rank = Number(row.rank);
                 const style = podiumStyles[rank - 1];
                 if (rank <= 3 && style) {
+                    const Icon = style.icon;
                     return (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <span style={{
@@ -30,7 +78,7 @@ export default function StudentRankingPage() {
                             }}>
                                 {rank}
                             </span>
-                            <style.icon size={16} style={{ color: style.bg }} />
+                            <Icon size={16} style={{ color: style.bg }} />
                         </div>
                     );
                 }
@@ -41,22 +89,27 @@ export default function StudentRankingPage() {
                 );
             },
         },
-        { 
-            key: 'student', 
+        {
+            key: 'student',
             label: 'Estudiante',
-            render: (val: any) => (
-                <div style={{ fontWeight: 800, color: '#0F172A' }}>{val}</div>
+            render: (val: any, row: RankingEntry) => (
+                <div style={{
+                    fontWeight: 800, color: '#0F172A',
+                    ...(row.uid === user?.uid ? { color: '#1800AD' } : {}),
+                }}>
+                    {val} {row.uid === user?.uid ? '(Tú)' : ''}
+                </div>
             )
         },
-        { 
-            key: 'averageScore', 
+        {
+            key: 'averageScore',
             label: 'Puntaje AHA',
             render: (val: any) => (
                 <div style={{ fontWeight: 900, color: '#1800AD', fontSize: 16 }}>{val}%</div>
             )
         },
-        { 
-            key: 'sessions', 
+        {
+            key: 'sessions',
             label: 'Sesiones',
             render: (val: any) => (
                 <div style={{ color: '#64748B', fontWeight: 600 }}>{val} prácticas</div>
@@ -75,11 +128,11 @@ export default function StudentRankingPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
             <Header title="Ranking Institucional" />
-            
+
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-                <PageHero 
-                    title="Cuadro de Honor" 
-                    subtitle="Liderazgo académico basado en desempeño clínico real" 
+                <PageHero
+                    title="Cuadro de Honor"
+                    subtitle="Liderazgo académico basado en desempeño clínico real"
                     parentTitle="Estudiante"
                     parentHref="/student/home"
                 />
@@ -94,8 +147,12 @@ export default function StudentRankingPage() {
                         </div>
                         <div>
                             <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 4 }}>Tu Posición Actual</div>
-                            <div style={{ fontSize: 32, fontWeight: 900 }}>No Clasificado</div>
-                            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Completa sesiones para entrar al top</div>
+                            <div style={{ fontSize: 32, fontWeight: 900 }}>
+                                {userRank ? `#${userRank.rank} — ${userRank.averageScore}%` : 'No Clasificado'}
+                            </div>
+                            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>
+                                {userRank ? `${ranking.length} estudiantes en tu institución` : 'Completa sesiones para entrar al top'}
+                            </div>
                         </div>
                     </div>
 
@@ -120,18 +177,18 @@ export default function StudentRankingPage() {
                             <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
                             <input
                                 type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Filtrar por estudiante..."
                                 style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none', background: '#F8FAFC' }}
                             />
                         </div>
-                        <select style={{ padding: '12px 16px', borderRadius: 12, border: '1px solid #E2E8F0', background: '#FFFFFF', fontSize: 13, fontWeight: 700, color: '#475569', outline: 'none' }}>
-                            <option value="">Todos los cursos</option>
-                        </select>
                     </div>
 
                     <DataTable
                         columns={columns}
-                        data={[]}
+                        data={filtered}
+                        loading={loading}
                         emptyMessage="Completa al menos una sesión para ver el ranking global de tu institución."
                     />
                 </div>
