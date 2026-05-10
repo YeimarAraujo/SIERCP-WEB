@@ -8,12 +8,15 @@ import { useEffect, useState } from 'react';
 import { SessionService, CourseService } from '@/services/firestore.service';
 import { useAuth } from '@/hooks/use-auth';
 import type { SessionModel } from '@/models/session';
+import { downloadCsv } from '@/shared/lib/export-utils';
+import toast from 'react-hot-toast';
 
 export default function StudentReportsPage() {
     const { user } = useAuth();
     const [sessions, setSessions] = useState<SessionModel[]>([]);
     const [totalSessionsCount, setTotalSessionsCount] = useState<number>(0);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         if (!user) return;
@@ -40,6 +43,12 @@ export default function StudentReportsPage() {
 
         fetchReports();
     }, [user]);
+
+    const filteredSessions = sessions.filter(s =>
+        searchTerm === '' ||
+        s.scenarioTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.startedAt.toLocaleDateString().includes(searchTerm)
+    );
 
     const columns = [
         { 
@@ -95,8 +104,8 @@ export default function StudentReportsPage() {
         {
             key: 'actions',
             label: '',
-            render: () => (
-                <button style={{ 
+            render: (_: any, row: SessionModel) => (
+                <button onClick={() => toast.error('La generación de PDF estará disponible próximamente')} style={{ 
                     padding: '8px 16px', borderRadius: 10, background: '#F1F5F9', border: 'none', 
                     color: '#1800AD', fontSize: 12, fontWeight: 800, cursor: 'pointer', 
                     display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s' 
@@ -118,13 +127,24 @@ export default function StudentReportsPage() {
                     parentTitle="Estudiante"
                     parentHref="/student/home"
                     actions={
-                        <button style={{ 
-                            padding: '10px 18px', borderRadius: 12, background: '#FFFFFF', color: '#1800AD', 
-                            border: '1px solid #1800AD', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
-                            display: 'flex', alignItems: 'center', gap: 8 
-                        }}>
-                            <Download size={16} /> Exportar Todo (.csv)
-                        </button>
+                <button onClick={() => {
+                    if (sessions.length === 0) return toast.error('No hay datos para exportar');
+                    downloadCsv(sessions.map(s => ({
+                        Fecha: s.startedAt.toLocaleDateString(),
+                        Hora: s.startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        Escenario: s.scenarioTitle || 'Práctica Libre',
+                        Calidad: `${s.metrics?.qualityScore || s.metrics?.score || 0}%`,
+                        Profundidad: `${(s.metrics as any)?.averageDepthMm?.toFixed(1) || 0}mm`,
+                        Frecuencia: `${(s.metrics as any)?.averageRatePerMin?.toFixed(0) || 0}cpm`
+                    })), 'historial-rendimiento');
+                    toast.success('CSV exportado');
+                }} style={{ 
+                    padding: '10px 18px', borderRadius: 12, background: '#FFFFFF', color: '#1800AD', 
+                    border: '1px solid #1800AD', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
+                    display: 'flex', alignItems: 'center', gap: 8 
+                }}>
+                    <Download size={16} /> Exportar Todo (.csv)
+                </button>
                     }
                 />
 
@@ -135,6 +155,8 @@ export default function StudentReportsPage() {
                             <input
                                 type="text"
                                 placeholder="Filtrar por escenario o fecha..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{
                                     width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
                                     fontSize: 14, outline: 'none', background: '#F8FAFC'
@@ -145,7 +167,7 @@ export default function StudentReportsPage() {
 
                     <DataTable 
                         columns={columns}
-                        data={sessions}
+                        data={filteredSessions}
                         loading={loading}
                         emptyMessage="No se han encontrado registros de sesiones. ¡Comienza a practicar para generar tu primer reporte!"
                         enablePagination={true}

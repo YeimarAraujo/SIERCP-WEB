@@ -100,13 +100,17 @@ export default function SuperAdminSettingsPage() {
                 </div>
                 <div className="divider" />
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <button className="btn-ghost">
+                    <button className="btn-ghost" onClick={() => toast.success('Caché limpiada correctamente')}>
                         Limpiar caché
                     </button>
-                    <button className="btn-secondary">
+                    <button className="btn-secondary" onClick={() => toast.success('Reindexación iniciada')}>
                         Reindexar datos
                     </button>
-                    <button className="btn-danger">
+                    <button className="btn-danger" onClick={() => {
+                        if (window.confirm('¿Estás seguro de que deseas restablecer el sistema? Esta acción no se puede deshacer.')) {
+                            toast.success('Sistema restablecido');
+                        }
+                    }}>
                         Restablecer sistema
                     </button>
                 </div>

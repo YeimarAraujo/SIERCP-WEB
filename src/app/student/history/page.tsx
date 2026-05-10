@@ -10,11 +10,14 @@ import { Clock, Activity, BarChart, ChevronRight, History, Search } from 'lucide
 import { formatDate } from '@/lib/utils';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
+import { useRouter } from 'next/navigation';
 
 export default function StudentHistoryPage() {
     const { user } = useAuth();
+    const router = useRouter();
     const [sessions, setSessions] = useState<SessionModel[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         if (!user) return;
@@ -22,6 +25,11 @@ export default function StudentHistoryPage() {
             .then(setSessions)
             .finally(() => setLoading(false));
     }, [user]);
+
+    const filtered = sessions.filter(s =>
+        searchTerm === '' ||
+        s.scenarioTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const columns = [
         { 
@@ -103,6 +111,8 @@ export default function StudentHistoryPage() {
                             <input
                                 type="text"
                                 placeholder="Buscar por escenario..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none' }}
                             />
                         </div>
@@ -110,8 +120,9 @@ export default function StudentHistoryPage() {
 
                     <DataTable 
                         columns={columns}
-                        data={sessions}
+                        data={filtered}
                         loading={loading}
+                        onRowClick={(row) => router.push(`/student/sessions/${row.id}`)}
                         emptyMessage="Aún no tienes sesiones registradas en tu historial."
                         enablePagination={true}
                     />

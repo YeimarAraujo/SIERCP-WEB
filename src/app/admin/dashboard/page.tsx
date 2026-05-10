@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { DashboardHero } from '@/components/ui/dashboard-hero';
+import { downloadCsv } from '@/shared/lib/export-utils';
+import toast from 'react-hot-toast';
 
 export default function AdminDashboardPage() {
     const [stats, setStats] = useState({
@@ -121,7 +123,16 @@ export default function AdminDashboardPage() {
                             <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#1E293B', display: 'flex', alignItems: 'center', gap: 10 }}>
                                 <Database size={20} style={{ color: '#1800AD' }} /> Log de Actividad Global
                             </h3>
-                            <button style={{ background: 'none', border: 'none', color: '#1800AD', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Exportar CSV</button>
+                            <button onClick={() => {
+                                if (stats.recentLogs.length === 0) return toast.error('No hay datos para exportar');
+                                downloadCsv(stats.recentLogs.map(l => ({
+                                    Evento: l.event,
+                                    Usuario: l.user,
+                                    Estado: l.status === 'success' ? 'Éxito' : 'Advertencia',
+                                    Hora: new Date(l.time).toLocaleString()
+                                })), 'log-actividad-global');
+                                toast.success('CSV exportado');
+                            }} style={{ background: 'none', border: 'none', color: '#1800AD', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Exportar CSV</button>
                         </div>
                         
                         <div style={{ display: 'grid', gap: 0 }}>

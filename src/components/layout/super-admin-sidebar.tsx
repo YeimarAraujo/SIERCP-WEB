@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
+import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Building2, UserCheck, CreditCard,
-    ScrollText, Settings, User, LogOut
+    ScrollText, Settings, User, LogOut,
+    Sun, Moon
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -29,6 +32,10 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
     const router = useRouter();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
+    const [hovered, setHovered] = useState(false);
+    const { theme, toggleTheme } = useThemeStore();
+
+    const isCollapsed = collapsed && !hovered;
 
     const isActive = (href: string) => {
         if (href === '/super-admin/dashboard' && pathname === '/super-admin/dashboard') return true;
@@ -41,7 +48,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
         router.replace('/');
     };
 
-    const sidebarWidth = collapsed ? '68px' : '240px';
+    const sidebarWidth = isCollapsed ? '68px' : '240px';
 
     return (
         <aside style={{
@@ -57,14 +64,18 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
             padding: '0',
             overflowY: 'auto',
             transition: 'width 0.25s ease, min-width 0.25s ease',
-        }}>
+            zIndex: 50,
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        >
             <div style={{
-                padding: collapsed ? '16px 12px' : '20px 20px 16px',
+                padding: isCollapsed ? '16px 12px' : '20px 20px 16px',
                 borderBottom: '1px solid var(--sidebar-border)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                gap: collapsed ? 0 : '10px',
+                justifyContent: isCollapsed ? 'center' : 'flex-start',
+                gap: isCollapsed ? 0 : '10px',
                 position: 'relative',
             }}>
                 <div style={{
@@ -79,14 +90,14 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                     cursor: 'pointer',
                 }}
                 onClick={onToggle}
-                title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+                title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
                 >S</div>
                 <span style={{
                     fontSize: '16px',
                     fontWeight: '700',
                     color: 'var(--text-primary)',
                     letterSpacing: '-0.3px',
-                    opacity: collapsed ? 0 : 1,
+                    opacity: isCollapsed ? 0 : 1,
                     overflow: 'hidden',
                     whiteSpace: 'nowrap',
                     transition: 'opacity 0.2s ease',
@@ -104,7 +115,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                 )}
             </div>
 
-            <nav style={{ flex: 1, padding: collapsed ? '8px 6px' : '12px 12px' }}>
+            <nav style={{ flex: 1, padding: isCollapsed ? '8px 6px' : '12px 12px' }}>
                 {navItems.map((item) => {
                     const active = isActive(item.href);
                     const Icon = item.icon;
@@ -114,9 +125,9 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: collapsed ? 'center' : 'flex-start',
-                                gap: collapsed ? 0 : '10px',
-                                padding: collapsed ? '10px' : '10px 12px',
+                                justifyContent: isCollapsed ? 'center' : 'flex-start',
+                                gap: isCollapsed ? 0 : '10px',
+                                padding: isCollapsed ? '10px' : '10px 12px',
                                 borderRadius: 'var(--radius-md)',
                                 marginBottom: '2px',
                                 background: active
@@ -132,9 +143,9 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                                     : '3px solid transparent',
                                 transition: 'all 0.15s ease',
                                 cursor: 'pointer',
-                                width: collapsed ? 44 : 'auto',
-                                marginLeft: collapsed ? 'auto' : 0,
-                                marginRight: collapsed ? 'auto' : 0,
+                                width: isCollapsed ? 44 : 'auto',
+                                marginLeft: isCollapsed ? 'auto' : 0,
+                                marginRight: isCollapsed ? 'auto' : 0,
                             }}
                             onMouseEnter={(e) => {
                                 if (!active) {
@@ -154,10 +165,10 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                                     strokeWidth={active ? 2.5 : 2}
                                 />
                                 <span style={{
-                                    opacity: collapsed ? 0 : 1,
+                                    opacity: isCollapsed ? 0 : 1,
                                     overflow: 'hidden',
                                     whiteSpace: 'nowrap',
-                                    maxWidth: collapsed ? 0 : '200px',
+                                    maxWidth: isCollapsed ? 0 : '200px',
                                     transition: 'opacity 0.2s ease, max-width 0.2s ease',
                                 }}>{item.label}</span>
                             </div>
@@ -167,12 +178,12 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
             </nav>
 
             <div style={{
-                padding: collapsed ? '8px' : '12px',
+                padding: isCollapsed ? '8px' : '12px',
                 borderTop: '1px solid var(--sidebar-border)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 4,
-                alignItems: collapsed ? 'center' : 'stretch',
+                alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
                 {user && !collapsed && (
                     <div style={{ padding: '8px 12px' }}>
@@ -202,17 +213,17 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: collapsed ? 'center' : 'flex-start',
-                        gap: collapsed ? 0 : '10px',
-                        padding: collapsed ? '10px' : '10px 12px',
+                        justifyContent: isCollapsed ? 'center' : 'flex-start',
+                        gap: isCollapsed ? 0 : '10px',
+                        padding: isCollapsed ? '10px' : '10px 12px',
                         borderRadius: 'var(--radius-md)',
                         cursor: 'pointer',
                         color: 'var(--sidebar-text)',
                         fontSize: '14px',
                         fontWeight: 500,
-                        width: collapsed ? 44 : 'auto',
-                        marginLeft: collapsed ? 'auto' : 0,
-                        marginRight: collapsed ? 'auto' : 0,
+                        width: isCollapsed ? 44 : 'auto',
+                        marginLeft: isCollapsed ? 'auto' : 0,
+                        marginRight: isCollapsed ? 'auto' : 0,
                     }}
                     onMouseEnter={(e) => {
                         e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
@@ -222,28 +233,67 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                         e.currentTarget.style.background = 'transparent';
                         e.currentTarget.style.color = 'var(--sidebar-text)';
                     }}
-                    title={collapsed ? 'Mi perfil' : undefined}
+                    title={isCollapsed ? 'Mi perfil' : undefined}
                     >
                         <User size={20} />
                         <span style={{
-                            opacity: collapsed ? 0 : 1,
+                            opacity: isCollapsed ? 0 : 1,
                             overflow: 'hidden',
                             whiteSpace: 'nowrap',
-                            maxWidth: collapsed ? 0 : '200px',
+                            maxWidth: isCollapsed ? 0 : '200px',
                             transition: 'opacity 0.2s ease, max-width 0.2s ease',
                         }}>Mi perfil</span>
                     </div>
                 </Link>
 
                 <button
-                    onClick={handleLogout}
+                    onClick={toggleTheme}
                     style={{
-                        width: collapsed ? 44 : '100%',
+                        width: isCollapsed ? 44 : '100%',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: collapsed ? 'center' : 'flex-start',
-                        gap: collapsed ? 0 : '10px',
-                        padding: collapsed ? '10px' : '10px 12px',
+                        justifyContent: isCollapsed ? 'center' : 'flex-start',
+                        gap: isCollapsed ? 0 : '10px',
+                        padding: isCollapsed ? '10px' : '10px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--sidebar-text)',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        marginLeft: isCollapsed ? 'auto' : 0,
+                        marginRight: isCollapsed ? 'auto' : 0,
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'var(--sidebar-text)';
+                    }}
+                    title={isCollapsed ? (theme === 'dark' ? 'Modo claro' : 'Modo oscuro') : undefined}
+                >
+                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    <span style={{
+                        opacity: isCollapsed ? 0 : 1,
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        maxWidth: isCollapsed ? 0 : '200px',
+                        transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                    }}>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
+                </button>
+
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        width: isCollapsed ? 44 : '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isCollapsed ? 'center' : 'flex-start',
+                        gap: isCollapsed ? 0 : '10px',
+                        padding: isCollapsed ? '10px' : '10px 12px',
                         borderRadius: 'var(--radius-md)',
                         background: 'transparent',
                         border: 'none',
@@ -251,8 +301,8 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                         color: 'var(--danger-text)',
                         fontSize: '14px',
                         fontWeight: '500',
-                        marginLeft: collapsed ? 'auto' : 0,
-                        marginRight: collapsed ? 'auto' : 0,
+                        marginLeft: isCollapsed ? 'auto' : 0,
+                        marginRight: isCollapsed ? 'auto' : 0,
                     }}
                     onMouseEnter={(e) => {
                         e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
@@ -260,14 +310,14 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                     onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'transparent';
                     }}
-                    title={collapsed ? 'Cerrar sesión' : undefined}
+                    title={isCollapsed ? 'Cerrar sesión' : undefined}
                 >
                     <LogOut size={20} />
                     <span style={{
-                        opacity: collapsed ? 0 : 1,
+                        opacity: isCollapsed ? 0 : 1,
                         overflow: 'hidden',
                         whiteSpace: 'nowrap',
-                        maxWidth: collapsed ? 0 : '200px',
+                        maxWidth: isCollapsed ? 0 : '200px',
                         transition: 'opacity 0.2s ease, max-width 0.2s ease',
                     }}>Cerrar sesión</span>
                 </button>

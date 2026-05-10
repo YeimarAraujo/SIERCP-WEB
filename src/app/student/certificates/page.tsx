@@ -5,6 +5,7 @@ import { PageHero } from '@/components/ui/page-hero';
 import { Award, Download, ShieldCheck, Calendar, ExternalLink } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SessionService, CourseService } from '@/services/firestore.service';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/hooks/use-auth';
 import type { SessionModel } from '@/models/session';
 
@@ -110,14 +111,14 @@ function CertificateCard({ session }: { session: SessionModel }) {
             <div style={{ height: 1, background: '#F1F5F9', marginBottom: 20 }} />
 
             <div style={{ display: 'flex', gap: 12 }}>
-                <button style={{ 
+                <button onClick={() => toast.error('La generación de PDF estará disponible próximamente')} style={{ 
                     flex: 2, padding: '12px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF', 
                     fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', 
                     alignItems: 'center', justifyContent: 'center', gap: 8 
                 }}>
                     <Download size={16} /> Descargar PDF
                 </button>
-                <button style={{ 
+                <button onClick={() => toast.error('La vista pública del certificado estará disponible próximamente')} style={{ 
                     flex: 1, padding: '12px', borderRadius: 12, background: '#F8FAFC', color: '#64748B', 
                     fontSize: 13, fontWeight: 700, border: '1px solid #E2E8F0', cursor: 'pointer', 
                     display: 'flex', alignItems: 'center', justifyContent: 'center' 

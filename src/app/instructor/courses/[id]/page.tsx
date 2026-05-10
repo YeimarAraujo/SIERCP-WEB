@@ -16,6 +16,7 @@ import {
     ChevronRight, User, Mail, Settings, Save, AlertCircle, BarChart, 
     GraduationCap, TrendingUp, Target, Award, Download, Filter
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 type TabType = 'alumnos' | 'contenido' | 'sesiones' | 'config';
 
@@ -104,7 +105,7 @@ export default function InstructorCoursePage() {
                         <p style={{ color: '#64748B', fontSize: 14, margin: '4px 0 0 0' }}>Instructor: <span style={{ fontWeight: 600, color: '#1800AD' }}>{course.instructorName}</span></p>
                     </div>
                     <div style={{ display: 'flex', gap: 12 }}>
-                        <button style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <button onClick={() => toast.error('La generación de PDF estará disponible próximamente')} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Download size={16} /> Reporte PDF
                         </button>
                         <Link href={`/instructor/monitor`} style={{ textDecoration: 'none' }}>

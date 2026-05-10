@@ -11,6 +11,7 @@ export default function InstructorEvaluationsPage() {
     const { user } = useAuth();
     const [rubrics, setRubrics] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         if (!user) return;
@@ -25,6 +26,12 @@ export default function InstructorEvaluationsPage() {
         };
         fetchRubrics();
     }, [user]);
+
+    const filteredRubrics = rubrics.filter(r =>
+        searchTerm === '' ||
+        r.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.type?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
@@ -49,7 +56,7 @@ export default function InstructorEvaluationsPage() {
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
-                        {rubrics.map((r) => (
+                        {filteredRubrics.map((r) => (
                             <EvalCard key={r.id} title={r.title} type={r.type} items={r.items} color={r.color || '#1800AD'} />
                         ))}
                     </div>
@@ -60,7 +67,7 @@ export default function InstructorEvaluationsPage() {
                         <h3 style={{ fontSize: 18, fontWeight: 900, color: '#0F172A', margin: 0 }}>Evaluaciones Pendientes por Calificar</h3>
                         <div style={{ position: 'relative', width: 250 }}>
                             <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                            <input type="text" placeholder="Buscar alumno..." style={{ width: '100%', padding: '8px 12px 8px 36px', borderRadius: 10, border: '1px solid #E2E8F0', fontSize: 13, outline: 'none' }} />
+                            <input type="text" placeholder="Buscar alumno..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '8px 12px 8px 36px', borderRadius: 10, border: '1px solid #E2E8F0', fontSize: 13, outline: 'none' }} />
                         </div>
                     </div>
 

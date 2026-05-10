@@ -6,6 +6,8 @@ import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import { Award, Download, Search, ShieldCheck, User, Calendar, ExternalLink } from 'lucide-react';
 import { SessionService } from '@/services/firestore.service';
+import { downloadCsv } from '@/shared/lib/export-utils';
+import toast from 'react-hot-toast';
 import type { SessionModel } from '@/models/session';
 
 export default function AdminCertificatesPage() {
@@ -104,7 +106,16 @@ export default function AdminCertificatesPage() {
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
-                        <button style={{ 
+                        <button onClick={() => {
+                            if (filteredCerts.length === 0) return toast.error('No hay certificados para exportar');
+                            downloadCsv(filteredCerts.map(c => ({
+                                Estudiante: c.studentName,
+                                Certificación: c.scenarioTitle || 'RCP Avanzado',
+                                Calidad: `${c.metrics?.qualityScore || c.metrics?.score || 0}%`,
+                                'Fecha Emisión': c.startedAt.toLocaleDateString()
+                            })), 'auditoria-certificados');
+                            toast.success('Auditoría exportada');
+                        }} style={{ 
                             padding: '12px 20px', borderRadius: 12, background: '#FFFFFF', color: '#1800AD', 
                             border: '1px solid #1800AD', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
                             display: 'flex', alignItems: 'center', gap: 8 

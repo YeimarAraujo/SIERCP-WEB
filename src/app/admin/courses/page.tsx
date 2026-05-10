@@ -9,17 +9,27 @@ import type { CourseModel } from '@/models/course';
 import { Edit2, Trash2, Plus, BookOpen, User, Users, ChevronRight, Search, FileText } from 'lucide-react';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
+import { downloadCsv } from '@/shared/lib/export-utils';
+import toast from 'react-hot-toast';
 
 export default function AdminCoursesPage() {
     const router = useRouter();
     const [courses, setCourses] = useState<CourseModel[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         CourseService.getAll()
             .then(setCourses)
             .finally(() => setLoading(false));
     }, []);
+
+    const filtered = courses.filter(c =>
+        searchTerm === '' ||
+        c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.instructorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.certification?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const columns = [
         {
@@ -109,13 +119,25 @@ export default function AdminCoursesPage() {
                             <input
                                 type="text"
                                 placeholder="Buscar por título, instructor o certificación..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{
                                     width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
                                     fontSize: 14, outline: 'none', transition: 'all 0.2s', background: '#F8FAFC'
                                 }}
                             />
                         </div>
-                        <button style={{
+                        <button onClick={() => {
+                            if (courses.length === 0) return toast.error('No hay cursos para exportar');
+                            downloadCsv(courses.map(c => ({
+                                Curso: c.title,
+                                Instructor: c.instructorName,
+                                Certificación: c.certification,
+                                Matrícula: c.studentCount ?? 0,
+                                Estado: c.isActive ? 'Activo' : 'Inactivo'
+                            })), 'oferta-formativa');
+                            toast.success('Reporte exportado');
+                        }} style={{
                             display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF', 
                             border: '1px solid #E2E8F0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#64748B', cursor: 'pointer'
                         }}>
@@ -125,8 +147,9 @@ export default function AdminCoursesPage() {
 
                     <DataTable 
                         columns={columns}
-                        data={courses}
+                        data={filtered}
                         loading={loading}
+                        onRowClick={(row) => router.push(`/admin/courses/${row.id}`)}
                         emptyMessage="No se han encontrado cursos que coincidan con los criterios de búsqueda."
                     />
                 </div>

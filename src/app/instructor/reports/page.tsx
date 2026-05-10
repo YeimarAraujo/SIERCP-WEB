@@ -6,6 +6,8 @@ import { DataTable } from '@/components/ui/data-table';
 import { FileText, Download, Filter, Search, TrendingUp, Calendar, User, BookOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { CourseService, SessionService } from '@/services/firestore.service';
+import { downloadCsv } from '@/shared/lib/export-utils';
+import toast from 'react-hot-toast';
 import { formatDate } from '@/lib/utils';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
@@ -114,13 +116,23 @@ export default function InstructorReportsPage() {
                     parentHref="/instructor/dashboard"
                     actions={
                         <>
-                            <button style={{ 
+                            <button onClick={() => toast.error('La generación de PDF estará disponible próximamente')} style={{ 
                                 padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF', 
                                 border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 
                             }}>
                                 <Download size={16} /> Exportar PDF
                             </button>
-                            <button style={{ 
+                            <button onClick={() => {
+                                if (filteredSessions.length === 0) return toast.error('No hay datos para exportar');
+                                downloadCsv(filteredSessions.map(s => ({
+                                    Alumno: s.studentName,
+                                    Curso: s.courseName,
+                                    Escenario: s.scenarioTitle,
+                                    Score: `${s.metrics?.qualityScore ?? 0}%`,
+                                    Fecha: s.startedAt ? new Date(s.startedAt).toLocaleDateString() : '—'
+                                })), 'analisis-rendimiento');
+                                toast.success('CSV descargado');
+                            }} style={{ 
                                 padding: '10px 18px', borderRadius: 12, background: '#F1F5F9', color: '#475569', 
                                 border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' 
                             }}>

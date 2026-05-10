@@ -2,6 +2,7 @@
 
 import { PageHeader } from '@/components/ui/page-header';
 import { CreditCard, Users, Radio } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const plans = [
     {
@@ -105,7 +106,7 @@ export default function SuperAdminPlansPage() {
                                 </div>
                             </div>
 
-                            <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                            <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => toast.error('Gestión de planes disponible próximamente')}>
                                 Gestionar
                             </button>
                         </div>

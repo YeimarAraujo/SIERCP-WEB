@@ -6,10 +6,13 @@ import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import { FileText, Download, TrendingUp, Users, BookOpen, Search, Filter } from 'lucide-react';
 import { SessionService, CourseService, UserService } from '@/services/firestore.service';
+import { downloadCsv } from '@/shared/lib/export-utils';
+import toast from 'react-hot-toast';
 
 export default function AdminReportsPage() {
     const [sessions, setSessions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
     const [stats, setStats] = useState({
         avgScore: 0,
         totalStudents: 0,
@@ -45,6 +48,12 @@ export default function AdminReportsPage() {
 
         fetchReportData();
     }, []);
+
+    const filteredSessions = sessions.filter(s =>
+        searchTerm === '' ||
+        s.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.scenarioTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const columns = [
         { 
@@ -101,10 +110,20 @@ export default function AdminReportsPage() {
                     parentHref="/admin/dashboard"
                     actions={
                         <div style={{ display: 'flex', gap: 12 }}>
-                            <button style={{ padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <button onClick={() => toast.error('La generación de PDF estará disponible próximamente')} style={{ padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <FileText size={16} /> Exportar PDF
                             </button>
-                            <button style={{ padding: '10px 18px', borderRadius: 12, background: '#F1F5F9', color: '#475569', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <button onClick={() => {
+                                if (sessions.length === 0) return toast.error('No hay datos para exportar');
+                                downloadCsv(sessions.map(s => ({
+                                    Fecha: s.startedAt.toLocaleDateString(),
+                                    Estudiante: s.studentName,
+                                    Actividad: s.scenarioTitle || 'Práctica Libre',
+                                    Calidad: `${s.metrics?.qualityScore || s.metrics?.score || 0}%`,
+                                    Duración: s.duration ? `${Math.floor(s.duration / 60)}m ${s.duration % 60}s` : '—'
+                                })), 'reportes-operacion');
+                                toast.success('CSV exportado');
+                            }} style={{ padding: '10px 18px', borderRadius: 12, background: '#F1F5F9', color: '#475569', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Download size={16} /> CSV
                             </button>
                         </div>
@@ -135,7 +154,7 @@ export default function AdminReportsPage() {
                         <div style={{ display: 'flex', gap: 12 }}>
                             <div style={{ position: 'relative' }}>
                                 <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                                <input type="text" placeholder="Filtrar reporte..." style={{ padding: '8px 12px 8px 36px', borderRadius: 10, border: '1px solid #E2E8F0', fontSize: 13, outline: 'none' }} />
+                                <input type="text" placeholder="Filtrar reporte..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ padding: '8px 12px 8px 36px', borderRadius: 10, border: '1px solid #E2E8F0', fontSize: 13, outline: 'none' }} />
                             </div>
                             <button style={{ padding: '8px 12px', borderRadius: 10, border: '1px solid #E2E8F0', background: '#FFFFFF', fontSize: 13, fontWeight: 600, color: '#64748B', display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Filter size={16} /> Filtros
@@ -145,7 +164,7 @@ export default function AdminReportsPage() {
 
                     <DataTable 
                         columns={columns}
-                        data={sessions}
+                        data={filteredSessions}
                         loading={loading}
                         emptyMessage="No hay datos suficientes para generar el reporte de operaciones."
                     />

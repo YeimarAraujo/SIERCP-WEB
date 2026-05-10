@@ -10,6 +10,8 @@ import type { UserModel } from '@/models/user';
 import { Search, User, Mail, Shield, UserCircle, ChevronRight, UserPlus, FileText } from 'lucide-react';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
+import { downloadCsv } from '@/shared/lib/export-utils';
+import toast from 'react-hot-toast';
 
 const ROLE_STYLES: Record<string, { bg: string, color: string }> = {
     ADMIN: { bg: '#F3E8FF', color: '#7E22CE' },
@@ -128,7 +130,17 @@ export default function AdminUsersPage() {
                                 }}
                             />
                         </div>
-                        <button style={{
+                        <button onClick={() => {
+                            if (users.length === 0) return toast.error('No hay usuarios para exportar');
+                            downloadCsv(users.map(u => ({
+                                Usuario: getFullName(u),
+                                Email: u.email,
+                                Rol: u.role,
+                                Estado: u.isActive ? 'Activo' : 'Inactivo',
+                                Sesiones: u.stats?.totalSessions ?? 0
+                            })), 'reporte-global-usuarios');
+                            toast.success('Reporte exportado');
+                        }} style={{
                             display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF', 
                             border: '1px solid #E2E8F0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#64748B', cursor: 'pointer'
                         }}>
@@ -139,6 +151,7 @@ export default function AdminUsersPage() {
                         columns={columns}
                         data={filtered}
                         loading={loading}
+                        onRowClick={(row) => router.push(`/admin/users/${row.uid}`)}
                         emptyMessage="No se encontraron usuarios registrados con esos criterios."
                     />
                 </div>

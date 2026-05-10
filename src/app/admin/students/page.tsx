@@ -7,6 +7,8 @@ import { DataTable } from '@/components/ui/data-table';
 import { Upload, UserPlus, Search, FileText, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { UserService } from '@/services/firestore.service';
+import { downloadCsv } from '@/shared/lib/export-utils';
+import toast from 'react-hot-toast';
 import { getFullName } from '@/models/user';
 import { ROLE_STUDENT } from '@/shared/lib/constants';
 import type { UserModel } from '@/models/user';
@@ -130,7 +132,16 @@ export default function AdminStudentsPage() {
                                 }}
                             />
                         </div>
-                        <button style={{
+                        <button onClick={() => {
+                            if (students.length === 0) return toast.error('No hay estudiantes para exportar');
+                            downloadCsv(students.map(s => ({
+                                Estudiante: getFullName(s),
+                                Email: s.email,
+                                ID: s.identificacion || '—',
+                                Estado: s.status === 'ACTIVE' ? 'Activo' : 'Pendiente'
+                            })), 'reporte-matricula');
+                            toast.success('Reporte exportado');
+                        }} style={{
                             display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF',
                             border: '1px solid #E2E8F0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#64748B', cursor: 'pointer'
                         }}>
@@ -142,6 +153,7 @@ export default function AdminStudentsPage() {
                         columns={columns}
                         data={filtered}
                         loading={loading}
+                        onRowClick={(row) => router.push(`/admin/students/${row.uid}`)}
                         emptyMessage="No se han encontrado estudiantes registrados en la base de datos institucional."
                     />
                 </div>
