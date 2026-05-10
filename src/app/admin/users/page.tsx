@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
 import { UserService } from '@/services/firestore.service';
@@ -17,6 +18,7 @@ const ROLE_STYLES: Record<string, { bg: string, color: string }> = {
 };
 
 export default function AdminUsersPage() {
+    const router = useRouter();
     const [users, setUsers] = useState<UserModel[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -102,7 +104,7 @@ export default function AdminUsersPage() {
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
-                        <button style={{
+                        <button onClick={() => router.push('/admin/users/new')} style={{
                             padding: '10px 20px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
                             border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
                             boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'

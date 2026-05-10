@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
 import { ManiquiService } from '@/services/firestore.service';
@@ -18,6 +19,7 @@ const STATUS_STYLES: Record<string, { bg: string, color: string }> = {
 };
 
 export default function AdminDevicesPage() {
+    const router = useRouter();
     const [manikins, setManikins] = useState<ManiquiModel[]>([]);
     const [loading, setLoading] = useState(true);
     const rtdbDevices = useAllDevices();
@@ -39,7 +41,7 @@ export default function AdminDevicesPage() {
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
-                        <button style={{
+                        <button onClick={() => router.push('/admin/devices/new')} style={{
                             padding: '10px 20px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
                             border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
                             boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
@@ -95,7 +97,7 @@ export default function AdminDevicesPage() {
                         <p style={{ color: '#64748B', fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
                             No hay maniquíes vinculados a la organización. Comienza integrando tu primer nodo SIERCP-PRO para iniciar el monitoreo.
                         </p>
-                        <button style={{ 
+                        <button onClick={() => router.push('/admin/devices/new')} style={{ 
                             display: 'inline-flex', alignItems: 'center', gap: 10, padding: '12px 24px', 
                             background: '#1800AD', color: '#FFFFFF', borderRadius: 12, fontWeight: 700, 
                             border: 'none', cursor: 'pointer'

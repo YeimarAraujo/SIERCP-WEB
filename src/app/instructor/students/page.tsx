@@ -120,7 +120,7 @@ export default function InstructorStudentsPage() {
                 parentHref="/instructor/dashboard"
                 actions={
                     <>
-                        <button style={{
+                        <button onClick={() => router.push('/admin/students/import')} style={{
                             padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
                             border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8
                         }}>
@@ -132,7 +132,7 @@ export default function InstructorStudentsPage() {
 
             <div style={{ display: 'flex', gap: 12, marginBottom: 24, justifyContent: 'flex-end' }}>
                 <button
-                    onClick={() => router.push('/instructor/courses/create')}
+                    onClick={() => router.push('/admin/students/import')}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, fontSize: 13, fontWeight: 700, color: '#475569', cursor: 'pointer' }}
                 >
                     <Upload size={16} /> Importar CSV

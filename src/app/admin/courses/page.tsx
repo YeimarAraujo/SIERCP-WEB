@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
 import { CourseService } from '@/services/firestore.service';
@@ -10,6 +11,7 @@ import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 
 export default function AdminCoursesPage() {
+    const router = useRouter();
     const [courses, setCourses] = useState<CourseModel[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -90,7 +92,7 @@ export default function AdminCoursesPage() {
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
-                        <button style={{
+                        <button onClick={() => router.push('/admin/courses/new')} style={{
                             padding: '10px 20px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
                             border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
                             boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
