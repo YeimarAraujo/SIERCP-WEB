@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { AdminSidebar } from '@/components/layout/admin-sidebar';
+import { ToastProvider } from '@/components/layout/toast-provider';
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [ready, setReady] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     useEffect(() => {
         const checkAuth = () => {
@@ -74,7 +76,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             background: 'var(--bg-page)',
             color: 'var(--text-primary)',
         }}>
-            <AdminSidebar />
+            <AdminSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
             <main style={{
                 flex: 1,
                 overflowY: 'auto',
@@ -83,6 +85,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             }}>
                 {children}
             </main>
+            <ToastProvider />
         </div>
     );
 }

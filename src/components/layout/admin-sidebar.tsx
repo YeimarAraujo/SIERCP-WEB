@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
     { label: 'Configuración',     href: '/admin/settings',     icon: Settings },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
     const pathname = usePathname();
     const router = useRouter();
     const user = useAuthStore((s) => s.user);
@@ -44,10 +44,12 @@ export function AdminSidebar() {
         router.replace('/');
     };
 
+    const sidebarWidth = collapsed ? '68px' : '240px';
+
     return (
         <aside style={{
-            width: '240px',
-            minWidth: '240px',
+            width: sidebarWidth,
+            minWidth: sidebarWidth,
             height: '100vh',
             position: 'sticky',
             top: 0,
@@ -57,13 +59,16 @@ export function AdminSidebar() {
             flexDirection: 'column',
             padding: '0',
             overflowY: 'auto',
+            transition: 'width 0.25s ease, min-width 0.25s ease',
         }}>
             <div style={{
-                padding: '20px 20px 16px',
+                padding: collapsed ? '16px 12px' : '20px 20px 16px',
                 borderBottom: '1px solid var(--sidebar-border)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                gap: collapsed ? 0 : '10px',
+                position: 'relative',
             }}>
                 <div style={{
                     display: 'flex',
@@ -74,18 +79,35 @@ export function AdminSidebar() {
                     background: 'var(--brand)',
                     color: 'var(--text-on-brand)',
                     fontSize: 14, fontWeight: 700,
-                }}>S</div>
+                    cursor: 'pointer',
+                }}
+                onClick={onToggle}
+                title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+                >S</div>
                 <span style={{
                     fontSize: '16px',
                     fontWeight: '700',
                     color: 'var(--text-primary)',
                     letterSpacing: '-0.3px',
+                    opacity: collapsed ? 0 : 1,
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    transition: 'opacity 0.2s ease',
                 }}>
                     SIERCP
                 </span>
+                {collapsed && (
+                    <div style={{
+                        position: 'absolute', bottom: -8, left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 24, height: 2, borderRadius: 1,
+                        background: 'var(--brand)',
+                        opacity: 0.3,
+                    }} />
+                )}
             </div>
 
-            <nav style={{ flex: 1, padding: '12px 12px' }}>
+            <nav style={{ flex: 1, padding: collapsed ? '8px 6px' : '12px 12px' }}>
                 {navItems.map((item) => {
                     const active = isActive(item.href);
                     const Icon = item.icon;
@@ -95,8 +117,9 @@ export function AdminSidebar() {
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px',
-                                padding: '10px 12px',
+                                justifyContent: collapsed ? 'center' : 'flex-start',
+                                gap: collapsed ? 0 : '10px',
+                                padding: collapsed ? '10px' : '10px 12px',
                                 borderRadius: 'var(--radius-md)',
                                 marginBottom: '2px',
                                 background: active
@@ -112,6 +135,9 @@ export function AdminSidebar() {
                                     : '3px solid transparent',
                                 transition: 'all 0.15s ease',
                                 cursor: 'pointer',
+                                width: collapsed ? 44 : 'auto',
+                                marginLeft: collapsed ? 'auto' : 0,
+                                marginRight: collapsed ? 'auto' : 0,
                             }}
                             onMouseEnter={(e) => {
                                 if (!active) {
@@ -127,10 +153,16 @@ export function AdminSidebar() {
                             }}
                             >
                                 <Icon
-                                    size={18}
+                                    size={20}
                                     strokeWidth={active ? 2.5 : 2}
                                 />
-                                <span>{item.label}</span>
+                                <span style={{
+                                    opacity: collapsed ? 0 : 1,
+                                    overflow: 'hidden',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: collapsed ? 0 : '200px',
+                                    transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                                }}>{item.label}</span>
                             </div>
                         </Link>
                     );
@@ -138,13 +170,14 @@ export function AdminSidebar() {
             </nav>
 
             <div style={{
-                padding: '12px',
+                padding: collapsed ? '8px' : '12px',
                 borderTop: '1px solid var(--sidebar-border)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 4,
+                alignItems: collapsed ? 'center' : 'stretch',
             }}>
-                {user && (
+                {user && !collapsed && (
                     <div style={{ padding: '8px 12px' }}>
                         <p style={{
                             fontSize: 12,
@@ -172,13 +205,17 @@ export function AdminSidebar() {
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '10px',
-                        padding: '10px 12px',
+                        justifyContent: collapsed ? 'center' : 'flex-start',
+                        gap: collapsed ? 0 : '10px',
+                        padding: collapsed ? '10px' : '10px 12px',
                         borderRadius: 'var(--radius-md)',
                         cursor: 'pointer',
                         color: 'var(--sidebar-text)',
                         fontSize: '14px',
                         fontWeight: 500,
+                        width: collapsed ? 44 : 'auto',
+                        marginLeft: collapsed ? 'auto' : 0,
+                        marginRight: collapsed ? 'auto' : 0,
                     }}
                     onMouseEnter={(e) => {
                         e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
@@ -188,20 +225,28 @@ export function AdminSidebar() {
                         e.currentTarget.style.background = 'transparent';
                         e.currentTarget.style.color = 'var(--sidebar-text)';
                     }}
+                    title={collapsed ? 'Mi perfil' : undefined}
                     >
-                        <User size={18} />
-                        <span>Mi perfil</span>
+                        <User size={20} />
+                        <span style={{
+                            opacity: collapsed ? 0 : 1,
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            maxWidth: collapsed ? 0 : '200px',
+                            transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                        }}>Mi perfil</span>
                     </div>
                 </Link>
 
                 <button
                     onClick={handleLogout}
                     style={{
-                        width: '100%',
+                        width: collapsed ? 44 : '100%',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '10px',
-                        padding: '10px 12px',
+                        justifyContent: collapsed ? 'center' : 'flex-start',
+                        gap: collapsed ? 0 : '10px',
+                        padding: collapsed ? '10px' : '10px 12px',
                         borderRadius: 'var(--radius-md)',
                         background: 'transparent',
                         border: 'none',
@@ -209,6 +254,8 @@ export function AdminSidebar() {
                         color: 'var(--danger-text)',
                         fontSize: '14px',
                         fontWeight: '500',
+                        marginLeft: collapsed ? 'auto' : 0,
+                        marginRight: collapsed ? 'auto' : 0,
                     }}
                     onMouseEnter={(e) => {
                         e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
@@ -216,9 +263,16 @@ export function AdminSidebar() {
                     onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'transparent';
                     }}
+                    title={collapsed ? 'Cerrar sesión' : undefined}
                 >
-                    <LogOut size={18} />
-                    <span>Cerrar sesión</span>
+                    <LogOut size={20} />
+                    <span style={{
+                        opacity: collapsed ? 0 : 1,
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        maxWidth: collapsed ? 0 : '200px',
+                        transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                    }}>Cerrar sesión</span>
                 </button>
             </div>
         </aside>
