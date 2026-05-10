@@ -6,8 +6,10 @@ import { PageHeader } from '@/components/ui/page-header';
 import { useAuth } from '@/hooks/use-auth';
 import { SessionService } from '@/services/firestore.service';
 import type { SessionModel } from '@/models/session';
-import { Clock, Activity, BarChart, ChevronRight, History } from 'lucide-react';
+import { Clock, Activity, BarChart, ChevronRight, History, Search } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { PageHero } from '@/components/ui/page-hero';
+import { DataTable } from '@/components/ui/data-table';
 
 export default function StudentHistoryPage() {
     const { user } = useAuth();
@@ -16,83 +18,111 @@ export default function StudentHistoryPage() {
 
     useEffect(() => {
         if (!user) return;
-        SessionService.getByStudent(user.uid, 50)
+        SessionService.getByStudent(user.uid, 500)
             .then(setSessions)
             .finally(() => setLoading(false));
     }, [user]);
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Header title="Mi Historial" />
-            <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
-                <PageHeader title="Mi Historial" subtitle="Revisa tu rendimiento en sesiones pasadas" />
+    const columns = [
+        { 
+            key: 'startedAt', 
+            label: 'Fecha y Hora', 
+            render: (val: any) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Clock size={14} style={{ color: '#94A3B8' }} />
+                    <div style={{ fontWeight: 600, color: '#475569' }}>{formatDate(val)}</div>
+                </div>
+            )
+        },
+        { 
+            key: 'scenarioTitle', 
+            label: 'Escenario', 
+            render: (val: any) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Activity size={14} style={{ color: '#94A3B8' }} />
+                    <div style={{ color: '#0F172A', fontWeight: 800 }}>{val || 'Sesión RCP'}</div>
+                </div>
+            )
+        },
+        { 
+            key: 'qualityScore', 
+            label: 'Calidad', 
+            render: (_: any, row: any) => {
+                const score = row.metrics?.qualityScore || 0;
+                return (
+                    <div style={{ 
+                        fontSize: 16, fontWeight: 900, 
+                        color: score >= 85 ? '#10B981' : '#EF4444'
+                    }}>
+                        {Math.round(score)}%
+                    </div>
+                );
+            }
+        },
+        { 
+            key: 'status', 
+            label: 'Resultado', 
+            render: (_: any, row: any) => {
+                const score = row.metrics?.qualityScore || 0;
+                const approved = score >= 85;
+                return (
+                    <span style={{ 
+                        fontSize: 10, fontWeight: 900, padding: '6px 12px', borderRadius: 20,
+                        background: approved ? '#DCFCE7' : '#FEE2E2',
+                        color: approved ? '#166534' : '#991B1B',
+                        letterSpacing: '0.05em'
+                    }}>
+                        {approved ? 'CERTIFICABLE' : 'PRÁCTICA'}
+                    </span>
+                );
+            }
+        },
+        {
+            key: 'actions',
+            label: '',
+            render: () => <ChevronRight size={18} style={{ color: '#CBD5E1' }} />
+        }
+    ];
 
-                {loading ? (
-                    <div style={{ display: 'grid', gap: 12 }}>
-                        {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} style={{ height: 60, background: '#F8FAFC', borderRadius: 12, border: '1px solid #E2E4F0', animation: 'pulse 2s infinite' }} />
-                        ))}
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+            <Header title="Mi Historial" />
+            
+            <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+                <PageHero 
+                    title="Bitácora de Sesiones" 
+                    subtitle="Registro detallado de tu evolución en maniobras RCP" 
+                    parentTitle="Estudiante"
+                    parentHref="/student/home"
+                />
+
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                        <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <input
+                                type="text"
+                                placeholder="Buscar por escenario..."
+                                style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none' }}
+                            />
+                        </div>
                     </div>
-                ) : sessions.length === 0 ? (
-                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 16, padding: 64, textAlign: 'center' }}>
-                        <History size={48} style={{ color: '#E2E4F0', marginBottom: 16 }} />
-                        <h3 style={{ fontSize: 16, fontWeight: 600, color: '#0F172A', marginBottom: 4 }}>Aún no tienes sesiones</h3>
-                        <p style={{ color: '#64748B', fontSize: 14 }}>Tus prácticas aparecerán aquí una vez que completes tu primera sesión.</p>
-                    </div>
-                ) : (
-                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                            <thead>
-                                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E4F0', color: '#64748B', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                    <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 600 }}>Fecha y Hora</th>
-                                    <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 600 }}>Escenario</th>
-                                    <th style={{ padding: '16px 20px', textAlign: 'center', fontWeight: 600 }}>Calidad</th>
-                                    <th style={{ padding: '16px 20px', textAlign: 'center', fontWeight: 600 }}>Estado</th>
-                                    <th style={{ padding: '16px 20px', textAlign: 'right', fontWeight: 600 }}>Detalles</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {sessions.map((s) => (
-                                    <tr key={s.id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s' }}>
-                                        <td style={{ padding: '16px 20px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <Clock size={14} style={{ color: '#94A3B8' }} />
-                                                <div style={{ fontWeight: 500, color: '#475569' }}>{formatDate(s.startedAt)}</div>
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '16px 20px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <Activity size={14} style={{ color: '#94A3B8' }} />
-                                                <div style={{ color: '#0F172A', fontWeight: 600 }}>{s.scenarioTitle || 'Sesión RCP'}</div>
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '16px 20px', textAlign: 'center' }}>
-                                            <div style={{ 
-                                                fontSize: 15, fontWeight: 700, 
-                                                color: (s.metrics?.qualityScore || 0) >= 85 ? '#059669' : '#DC2626'
-                                            }}>
-                                                {s.metrics?.qualityScore || 0}%
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '16px 20px', textAlign: 'center' }}>
-                                            <span style={{ 
-                                                fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 20,
-                                                background: (s.metrics?.qualityScore || 0) >= 85 ? '#DCFCE7' : '#FEE2E2',
-                                                color: (s.metrics?.qualityScore || 0) >= 85 ? '#166534' : '#991B1B'
-                                            }}>
-                                                {(s.metrics?.qualityScore || 0) >= 85 ? 'APROBADO' : 'FALLIDO'}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                                            <ChevronRight size={18} style={{ color: '#E2E4F0', cursor: 'pointer' }} />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+
+                    <DataTable 
+                        columns={columns}
+                        data={sessions}
+                        loading={loading}
+                        emptyMessage="Aún no tienes sesiones registradas en tu historial."
+                        enablePagination={true}
+                    />
+                </div>
             </div>
+            <style jsx>{`
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                }
+            `}</style>
         </div>
     );
 }

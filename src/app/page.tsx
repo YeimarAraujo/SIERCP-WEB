@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Moon, Sun } from 'lucide-react';
 import { useThemeStore } from '@/stores/theme-store';
 
-const overlayBg = 'rgba(10,8,40,0.65)';
-const badgeBg = 'rgba(255,255,255,0.08)';
-const badgeBorder = 'rgba(199,210,254,0.25)';
-const regBorder = 'rgba(255,255,255,0.6)';
+// Responsive design tokens
+const getOverlayBg = (theme: string) => theme === 'dark' ? 'rgba(6, 11, 46, 0.75)' : 'rgba(240, 241, 255, 0.6)';
+const getBadgeBg = (theme: string) => theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(24, 0, 173, 0.05)';
+const getBadgeBorder = (theme: string) => theme === 'dark' ? 'rgba(199,210,254,0.25)' : 'rgba(24, 0, 173, 0.1)';
+const getTextColor = (theme: string) => theme === 'dark' ? '#FFFFFF' : '#060B2E';
+const getSubTextColor = (theme: string) => theme === 'dark' ? '#A5B4FC' : '#3D4270';
 
 export default function LandingPage() {
     const [scrolled, setScrolled] = useState(false);
@@ -45,11 +47,15 @@ export default function LandingPage() {
             <header
                 className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-4 md:px-8 transition-all duration-300"
                 style={{
-                    background: scrolled ? 'rgba(10,8,40,0.85)' : 'transparent',
+                    background: scrolled 
+                        ? (theme === 'dark' ? 'rgba(10,8,40,0.85)' : 'rgba(255,255,255,0.85)') 
+                        : 'transparent',
                     backdropFilter: scrolled ? 'blur(12px)' : 'none',
                     WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
-                    borderBottom: scrolled ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
-                    transition: 'background 0.3s ease, backdrop-filter 0.3s ease',
+                    borderBottom: scrolled 
+                        ? (theme === 'dark' ? 'rgba(255,255,255,0.08)' : '1px solid rgba(24, 0, 173, 0.1)') 
+                        : '1px solid transparent',
+                    transition: 'all 0.3s ease',
                 }}
             >
                 <div className="flex justify-between items-center w-full">
@@ -62,28 +68,29 @@ export default function LandingPage() {
                         />
                     </div>
                     <nav className="hidden md:flex gap-8">
-                        <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Documentación</a>
-                        <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Planes</a>
-                        <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Contacto</a>
-                        <a className="text-sm font-medium transition-colors hover:text-white cursor-pointer" style={{ color: '#C7D2FE' }}>Sobre nosotros</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
                     </nav>
                     <div className="flex items-center gap-4">
                         {/* Theme Toggle */}
                         <button
                             className="w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300"
                             style={{
-                                borderColor: 'rgba(255,255,255,0.3)',
-                                background: 'rgba(255,255,255,0.08)',
+                                borderColor: theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(24, 0, 173, 0.3)',
+                                background: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(24, 0, 173, 0.05)',
+                                color: theme === 'dark' ? '#FFFFFF' : '#1800AD',
                                 cursor: 'pointer',
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255,255,255,0.18)';
-                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)';
+                                e.currentTarget.style.background = theme === 'dark' ? 'rgba(255,255,255,0.18)' : 'rgba(24, 0, 173, 0.12)';
+                                e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(24, 0, 173, 0.6)';
                                 e.currentTarget.style.transform = 'rotate(20deg)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                                e.currentTarget.style.background = theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(24, 0, 173, 0.05)';
+                                e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(24, 0, 173, 0.3)';
                                 e.currentTarget.style.transform = 'rotate(0deg)';
                             }}
                             onClick={toggleTheme}
@@ -93,7 +100,7 @@ export default function LandingPage() {
                             <div style={{ transition: 'transform 0.4s ease, opacity 0.3s ease', transform: theme === 'dark' ? 'rotate(0deg)' : 'rotate(180deg)' }}>
                                 {theme === 'dark'
                                     ? <Moon size={20} color="white" />
-                                    : <Sun size={20} color="white" />
+                                    : <Sun size={20} color="#1800AD" />
                                 }
                             </div>
                         </button>
@@ -102,9 +109,9 @@ export default function LandingPage() {
                         <button
                             className="text-sm font-medium transition-all duration-200 cursor-pointer"
                             style={{
-                                color: '#FFFFFF',
+                                color: theme === 'dark' ? '#FFFFFF' : '#3D4270',
                                 background: 'transparent',
-                                border: '1px solid rgba(255,255,255,0.3)',
+                                border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(24, 0, 173, 0.3)'}`,
                                 borderRadius: '8px',
                                 padding: '8px 18px',
                                 fontSize: '14px',
@@ -169,8 +176,8 @@ export default function LandingPage() {
                 />
                 {/* Overlay */}
                 <div
-                    className="absolute inset-0 z-0"
-                    style={{ background: overlayBg }}
+                    className="absolute inset-0 z-0 transition-colors duration-700"
+                    style={{ background: getOverlayBg(theme) }}
                 />
                 {/* Content */}
                 <div
@@ -178,10 +185,10 @@ export default function LandingPage() {
                     style={{ height: '100%' }}
                 >
                     <div className="space-y-6 md:space-y-8" style={{ maxWidth: '640px' }}>
-                        <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
+                        <h1 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: getTextColor(theme) }}>
                             Entrena mejor, salva más vidas.
                         </h1>
-                        <p className="text-base md:text-lg leading-relaxed mx-auto" style={{ color: '#A5B4FC', maxWidth: '520px' }}>
+                        <p className="text-base md:text-lg leading-relaxed mx-auto" style={{ color: getSubTextColor(theme), maxWidth: '520px' }}>
                             Accede a tu plataforma de entrenamiento RCP con métricas clínicas en tiempo real.
                         </p>
 
@@ -217,8 +224,8 @@ export default function LandingPage() {
                                 className="cursor-pointer select-none font-semibold text-base transition-all duration-200"
                                 style={{
                                     background: 'transparent',
-                                    color: '#FFFFFF',
-                                    border: '2px solid rgba(255,255,255,0.6)',
+                                    color: getTextColor(theme),
+                                    border: `2px solid ${theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(24, 0, 173, 0.4)'}`,
                                     borderRadius: '10px',
                                     padding: '14px 32px',
                                     fontSize: '16px',
@@ -251,11 +258,11 @@ export default function LandingPage() {
                             ].map((text) => (
                                 <div
                                     key={text}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-full"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-500"
                                     style={{
-                                        background: badgeBg,
-                                        border: '1px solid ' + badgeBorder,
-                                        color: '#C7D2FE',
+                                        background: getBadgeBg(theme),
+                                        border: '1px solid ' + getBadgeBorder(theme),
+                                        color: theme === 'dark' ? '#C7D2FE' : '#1800AD',
                                     }}
                                 >
                                     <svg className="w-4 h-4" style={{ color: '#38BDF8' }} fill="currentColor" viewBox="0 0 20 20">
@@ -270,16 +277,16 @@ export default function LandingPage() {
             </main>
 
             {/* Footer */}
-            <footer className="py-6 text-xs" style={{ background: '#0A005C', color: '#6B7FCC' }}>
+            <footer className="py-6 text-xs transition-colors duration-500" style={{ background: theme === 'dark' ? '#0A005C' : '#FFFFFF', color: theme === 'dark' ? '#6B7FCC' : '#64748B', borderTop: theme === 'dark' ? 'none' : '1px solid #E2E8F0' }}>
                 <div className="flex flex-col md:flex-row justify-between items-center px-4 md:px-8 gap-4">
                     <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
-                        <span className="font-bold text-white">SIERCP</span>
+                        <span className="font-bold" style={{ color: theme === 'dark' ? 'white' : '#1800AD' }}>SIERCP</span>
                         <span>© 2026 SIERCP Medical Training. Profesionales de la salud.</span>
                     </div>
                     <nav className="flex flex-wrap justify-center gap-4 md:gap-6">
-                        <a className="hover:underline cursor-pointer" style={{ color: '#C7D2FE' }}>¿Quieres implementar SIERCP?</a>
-                        <a className="hover:underline cursor-pointer" style={{ color: '#C7D2FE' }}>Solicitar demo</a>
-                        <a className="hover:underline cursor-pointer" style={{ color: '#C7D2FE' }}>Contacto</a>
+                        <a className="hover:underline cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#1800AD' }}>¿Quieres implementar SIERCP?</a>
+                        <a className="hover:underline cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#1800AD' }}>Solicitar demo</a>
+                        <a className="hover:underline cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#1800AD' }}>Contacto</a>
                     </nav>
                 </div>
             </footer>

@@ -1,9 +1,12 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import AuthNavbar from '@/components/layout/auth-navbar';
+import { useThemeStore } from '@/stores/theme-store';
 
 export default function AuthFormLayout({ children }: { children: ReactNode }) {
-    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-    const isLogin = pathname === '/login';
+    const { theme } = useThemeStore();
+    const isLogin = typeof window !== 'undefined' ? window.location.pathname === '/login' : true;
 
     return (
         <div style={{
@@ -11,6 +14,8 @@ export default function AuthFormLayout({ children }: { children: ReactNode }) {
             flexDirection: 'column',
             height: '100vh',
             overflow: 'hidden',
+            background: theme === 'dark' ? '#060B2E' : '#F0F1FF',
+            transition: 'background 0.5s ease',
         }}>
             <AuthNavbar />
             <div style={{
@@ -39,8 +44,11 @@ export default function AuthFormLayout({ children }: { children: ReactNode }) {
                         style={{
                             position: 'absolute',
                             inset: '0',
-                            background: 'linear-gradient(135deg, rgba(14,0,128,0.80) 0%, rgba(10,8,40,0.90) 100%)',
+                            background: theme === 'dark' 
+                                ? 'linear-gradient(135deg, rgba(14,0,128,0.85) 0%, rgba(10,8,40,0.95) 100%)'
+                                : 'linear-gradient(135deg, rgba(24,0,173,0.7) 0%, rgba(240,241,255,0.8) 100%)',
                             zIndex: 0,
+                            transition: 'background 0.5s ease',
                         }}
                     />
                     {/* Content over overlay */}
@@ -60,14 +68,14 @@ export default function AuthFormLayout({ children }: { children: ReactNode }) {
                         <img
                             src="/images/logov3.png"
                             alt="SIERCP"
-                            style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '16px' }}
+                            style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '16px', filter: theme === 'dark' ? 'none' : 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}
                         />
-                        <h2 className="text-2xl font-bold text-white">SIERCP</h2>
-                        <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                        <h2 className="text-2xl font-bold" style={{ color: theme === 'dark' ? '#FFFFFF' : '#1800AD' }}>SIERCP</h2>
+                        <p className="text-sm mt-2" style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : '#3D4270' }}>
                             Entrena mejor, salva más vidas
                         </p>
                         {!isLogin && (
-                            <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.6)', maxWidth: '220px', textAlign: 'center' }}>
+                            <p className="text-xs mt-2" style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : '#6B7099', maxWidth: '220px', textAlign: 'center' }}>
                                 Únete a la plataforma de entrenamiento RCP más avanzada
                             </p>
                         )}
@@ -80,11 +88,12 @@ export default function AuthFormLayout({ children }: { children: ReactNode }) {
                         flex: 1,
                         height: '100%',
                         overflowY: 'auto',
-                        background: '#12142a',
+                        background: theme === 'dark' ? '#0A0E2A' : '#FFFFFF',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: '48px 64px',
+                        transition: 'background 0.5s ease',
                     }}
                 >
                     {/* Mobile logo */}

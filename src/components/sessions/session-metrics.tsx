@@ -23,7 +23,7 @@ export function SessionMetricsPanel({ metrics, duration }: SessionMetricsProps) 
         <div className="space-y-6">
             {/* Score + summary row */}
             <div className="flex flex-col sm:flex-row items-center gap-6">
-                <ScoreGauge score={metrics.score} />
+                <ScoreGauge score={metrics.score ?? 0} />
                 <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm flex-1">
                     {[
                         { label: 'Comprensiones totales', value: metrics.totalCompressions, unit: '' },

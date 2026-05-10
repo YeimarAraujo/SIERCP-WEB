@@ -22,8 +22,6 @@ const navItems: NavItem[] = [
     { label: 'Mis reportes',   href: '/student/reports',      icon: BarChart2 },
     { label: 'Certificados',   href: '/student/certificates', icon: Award },
     { label: 'Ranking',        href: '/student/ranking',      icon: Trophy },
-    { label: 'Mi dispositivo', href: '/student/device',       icon: Cpu },
-    { label: 'Descargar app',  href: '/student/download',     icon: Smartphone },
 ];
 
 export function StudentSidebar() {

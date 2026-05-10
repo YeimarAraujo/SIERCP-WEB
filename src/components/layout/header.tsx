@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { getUserInitials, getFullName } from '@/models/user';
-import { ChevronDown, Bell, Search, Settings, LogOut, User as UserIcon } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Bell, Search, Settings, LogOut, User as UserIcon } from 'lucide-react';
 import { GlobalSearch } from '@/components/ui/global-search';
 import { NotificationsDrawer } from '@/components/ui/notifications-drawer';
 import Link from 'next/link';
@@ -12,9 +12,11 @@ import { useRouter } from 'next/navigation';
 interface HeaderProps {
     title?: string;
     dark?: boolean;
+    showBack?: boolean;
+    onBack?: () => void;
 }
 
-export function Header({ title, dark = false }: HeaderProps) {
+export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
     const { user, logout } = useAuth();
     const router = useRouter();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -40,6 +42,19 @@ export function Header({ title, dark = false }: HeaderProps) {
                 position: 'sticky', top: 0, zIndex: 50, transition: 'all 0.3s ease'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    {showBack && onBack && (
+                        <button 
+                            onClick={onBack}
+                            style={{ 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                width: 32, height: 32, borderRadius: 8, border: 'none',
+                                background: dark ? 'rgba(255,255,255,0.1)' : '#F1F5F9',
+                                color: textColor, cursor: 'pointer', padding: 0
+                            }}
+                        >
+                            <ChevronLeft size={18} />
+                        </button>
+                    )}
                     <h1 style={{ fontSize: 14, fontWeight: 700, color: textColor, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
                         {title ?? 'Dashboard'}
                     </h1>

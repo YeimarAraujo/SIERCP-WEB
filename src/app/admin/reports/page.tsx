@@ -1,67 +1,156 @@
 'use client';
 
-import { PageHeader } from '@/components/ui/page-header';
+import { useEffect, useState } from 'react';
+import { Header } from '@/components/layout/header';
+import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, TrendingUp, Users, BookOpen, Search, Filter } from 'lucide-react';
+import { SessionService, CourseService, UserService } from '@/services/firestore.service';
 
 export default function AdminReportsPage() {
+    const [sessions, setSessions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        avgScore: 0,
+        totalStudents: 0,
+        totalCourses: 0
+    });
+
+    useEffect(() => {
+        const fetchReportData = async () => {
+            try {
+                setLoading(true);
+                const [allSessions, allCourses, allUsers] = await Promise.all([
+                    SessionService.getAllRecent(200),
+                    CourseService.getAll(),
+                    UserService.getAll()
+                ]);
+
+                const scores = allSessions.map(s => (s.metrics as any)?.qualityScore || (s.metrics as any)?.score || 0);
+                const avg = scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : 0;
+
+                setStats({
+                    avgScore: avg,
+                    totalStudents: allUsers.filter(u => u.role === 'ESTUDIANTE').length,
+                    totalCourses: allCourses.length
+                });
+
+                setSessions(allSessions);
+            } catch (error) {
+                console.error('Error fetching report data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReportData();
+    }, []);
+
     const columns = [
-        { key: 'instructor', label: 'Instructor' },
-        { key: 'course', label: 'Curso' },
-        { key: 'sessions', label: 'Sesiones' },
-        { key: 'score', label: 'Score promedio' },
-        { key: 'aha', label: 'Cumplimiento AHA' },
-        { key: 'date', label: 'Fecha' },
+        { 
+            key: 'startedAt', 
+            label: 'Fecha',
+            render: (val: any) => (
+                <div style={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>{(val as Date).toLocaleDateString()}</div>
+            )
+        },
+        { 
+            key: 'studentName', 
+            label: 'Estudiante',
+            render: (val: any) => (
+                <div style={{ fontWeight: 700, color: '#0F172A', fontSize: 14 }}>{val}</div>
+            )
+        },
+        { 
+            key: 'scenarioTitle', 
+            label: 'Actividad',
+            render: (val: any) => (
+                <span style={{ fontSize: 13, color: '#475569' }}>{val || 'Práctica Libre'}</span>
+            )
+        },
+        { 
+            key: 'metrics', 
+            label: 'Calidad',
+            render: (metrics: any) => {
+                const score = metrics?.qualityScore || metrics?.score || 0;
+                return (
+                    <div style={{ fontWeight: 800, color: score >= 85 ? '#10B981' : '#F59E0B' }}>
+                        {score}%
+                    </div>
+                );
+            }
+        },
+        {
+            key: 'duration',
+            label: 'Duración',
+            render: (val: any) => (
+                <div style={{ fontSize: 12, color: '#94A3B8' }}>{Math.floor((val as number) / 60)}m {(val as number) % 60}s</div>
+            )
+        }
     ];
 
     return (
-        <div>
-            <PageHeader
-                title="Reportes"
-                subtitle="Genera y exporta reportes de tu institución"
-            />
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+            <Header title="Inteligencia Institucional" />
+            
+            <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+                <PageHero 
+                    title="Reportes de Operación" 
+                    subtitle="Consolidado global de rendimiento académico y métricas de simulación clínica"
+                    parentTitle="Admin"
+                    parentHref="/admin/dashboard"
+                    actions={
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <button style={{ padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <FileText size={16} /> Exportar PDF
+                            </button>
+                            <button style={{ padding: '10px 18px', borderRadius: 12, background: '#F1F5F9', color: '#475569', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Download size={16} /> CSV
+                            </button>
+                        </div>
+                    }
+                />
 
-            <div className="card-padded" style={{ marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                <div style={{ flex: '1', minWidth: '180px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                        Período
-                    </label>
-                    <select className="input-field">
-                        <option>Esta semana</option>
-                        <option>Este mes</option>
-                        <option>Este año</option>
-                    </select>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 32 }}>
+                    {[
+                        { label: 'Calidad Promedio', value: `${stats.avgScore}%`, icon: TrendingUp, color: '#10B981' },
+                        { label: 'Alumnos Evaluados', value: stats.totalStudents, icon: Users, color: '#1800AD' },
+                        { label: 'Cursos Vigentes', value: stats.totalCourses, icon: BookOpen, color: '#6366F1' },
+                    ].map((s, i) => (
+                        <div key={i} style={{ background: '#FFFFFF', padding: 24, borderRadius: 20, border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: 20 }}>
+                            <div style={{ width: 52, height: 52, borderRadius: 14, background: `${s.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color }}>
+                                <s.icon size={26} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: 12, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.02em', marginBottom: 4 }}>{s.label}</div>
+                                <div style={{ fontSize: 26, fontWeight: 900, color: '#0F172A' }}>{loading ? '...' : s.value}</div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-                <div style={{ flex: '1', minWidth: '180px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                        Instructor
-                    </label>
-                    <select className="input-field">
-                        <option value="">Todos los instructores</option>
-                    </select>
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                        Exportar
-                    </label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <FileText size={16} />
-                            PDF
-                        </button>
-                        <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Download size={16} />
-                            CSV
-                        </button>
+
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                        <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F172A' }}>Log de Sesiones Globales</h4>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <div style={{ position: 'relative' }}>
+                                <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                                <input type="text" placeholder="Filtrar reporte..." style={{ padding: '8px 12px 8px 36px', borderRadius: 10, border: '1px solid #E2E8F0', fontSize: 13, outline: 'none' }} />
+                            </div>
+                            <button style={{ padding: '8px 12px', borderRadius: 10, border: '1px solid #E2E8F0', background: '#FFFFFF', fontSize: 13, fontWeight: 600, color: '#64748B', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Filter size={16} /> Filtros
+                            </button>
+                        </div>
                     </div>
+
+                    <DataTable 
+                        columns={columns}
+                        data={sessions}
+                        loading={loading}
+                        emptyMessage="No hay datos suficientes para generar el reporte de operaciones."
+                    />
                 </div>
             </div>
-
-            <DataTable
-                columns={columns}
-                data={[]}
-                emptyMessage="No hay reportes disponibles para el período seleccionado"
-            />
         </div>
     );
 }

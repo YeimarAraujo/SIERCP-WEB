@@ -38,9 +38,9 @@ export default function EditCoursePage() {
                     title: data.title,
                     description: data.description || '',
                     certification: data.certification,
-                    requiredScore: data.requiredScore,
+                    requiredScore: data.minScore || data.requiredScore || 85,
                     isActive: data.isActive,
-                    totalModules: data.totalModules,
+                    totalModules: data.moduleCount || data.totalModules || 1,
                     inviteCode: data.inviteCode,
                 });
             }
