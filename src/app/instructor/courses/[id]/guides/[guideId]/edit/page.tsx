@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { GuideService } from '@/services/firestore.service';
 import { CATEGORY_LABELS, type GuideModel } from '@/models/guide';
 import { Save, X, FileText, ShieldCheck, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function EditGuidePage() {
     const { user } = useAuth();
@@ -48,10 +49,11 @@ export default function EditGuidePage() {
         try {
             setSaving(true);
             await GuideService.update(formData.id, formData);
+            toast.success('Módulo actualizado exitosamente');
             router.push(`/instructor/courses/${courseId}`);
         } catch (error) {
             console.error('Error updating guide:', error);
-            alert('Error al actualizar el módulo');
+            toast.error('Error al actualizar el módulo');
         } finally {
             setSaving(false);
         }

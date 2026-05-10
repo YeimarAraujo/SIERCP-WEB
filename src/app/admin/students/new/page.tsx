@@ -12,6 +12,7 @@ import {
     User, Fingerprint, MapPin, Phone, Key,
     BookOpen, ShieldCheck, GraduationCap
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function NewStudentPage() {
     const router = useRouter();
@@ -55,9 +56,11 @@ export default function NewStudentPage() {
                 updatedAt: serverTimestamp(),
             });
 
+            toast.success('Estudiante creado exitosamente');
             router.push('/admin/students');
         } catch (error: any) {
             setError(error.message || 'Error al crear estudiante');
+            toast.error(error.message || 'Error al crear estudiante');
         } finally {
             setLoading(false);
         }

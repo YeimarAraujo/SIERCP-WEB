@@ -11,6 +11,7 @@ import {
     Save, Globe, Lock, Palette, Database,
     Smartphone, Mail, Phone, MapPin
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function AdminSettingsPage() {
     const { user } = useAuth();
@@ -56,8 +57,10 @@ export default function AdminSettingsPage() {
                 minScore: Number(aha.minScore), certScore: Number(aha.certScore),
                 updatedAt: serverTimestamp(),
             });
+            toast.success('Configuración guardada exitosamente');
         } catch (e) {
             console.error('Error saving settings:', e);
+            toast.error('Error al guardar la configuración');
         } finally {
             setSaving(false);
         }

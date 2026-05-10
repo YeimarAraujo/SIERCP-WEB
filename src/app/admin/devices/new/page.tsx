@@ -10,6 +10,7 @@ import {
     Plus, Save, Cpu, Wifi, MapPin, Tag,
     Hash, Package, Monitor, AlertTriangle
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function NewDevicePage() {
     const router = useRouter();
@@ -39,10 +40,12 @@ export default function NewDevicePage() {
                 updatedAt: serverTimestamp(),
             });
 
+            toast.success('Nodo registrado exitosamente');
             router.push('/admin/devices');
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Error al registrar nodo';
             setError(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }

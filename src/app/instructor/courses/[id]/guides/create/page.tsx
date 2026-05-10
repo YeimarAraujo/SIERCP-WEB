@@ -12,6 +12,7 @@ import {
     Video, HelpCircle, Link as LinkIcon, ChevronRight,
     Type, Layout, Send
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function CreateGuidePage() {
     const { user } = useAuth();
@@ -56,10 +57,11 @@ export default function CreateGuidePage() {
                 uploadedBy: user.uid,
                 uploaderName: `${user.firstName} ${user.lastName}`
             } as any);
+            toast.success('Módulo creado exitosamente');
             router.push(`/instructor/courses/${courseId}`);
         } catch (error) {
             console.error('Error creating guide:', error);
-            alert('Error al crear el módulo');
+            toast.error('Error al crear el módulo');
         } finally {
             setLoading(false);
         }

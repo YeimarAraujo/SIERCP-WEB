@@ -10,6 +10,7 @@ import type { CourseModel } from '@/models/course';
 import { Save, X, BookOpen, Key, Award, Info, Upload, Users, CheckCircle2, QrCode } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import Papa from 'papaparse';
+import toast from 'react-hot-toast';
 
 export default function CreateCoursePage() {
     const { user } = useAuth();
@@ -89,10 +90,11 @@ export default function CreateCoursePage() {
                 ));
             }
 
+            toast.success('Curso creado exitosamente');
             router.push(`/instructor/courses/${courseId}`);
         } catch (error) {
             console.error('Error creating course:', error);
-            alert('Error al crear el curso');
+            toast.error('Error al crear el curso');
         } finally {
             setLoading(false);
         }

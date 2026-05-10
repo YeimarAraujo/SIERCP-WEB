@@ -12,6 +12,7 @@ import {
     User, Fingerprint, Award, Phone, 
     Briefcase, GraduationCap, Star, Key
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function NewInstructorPage() {
     const router = useRouter();
@@ -56,9 +57,11 @@ export default function NewInstructorPage() {
                 updatedAt: serverTimestamp(),
             });
 
+            toast.success('Instructor creado exitosamente');
             router.push('/admin/instructors');
         } catch (error: any) {
             setError(error.message || 'Error al crear instructor');
+            toast.error(error.message || 'Error al crear instructor');
         } finally {
             setLoading(false);
         }

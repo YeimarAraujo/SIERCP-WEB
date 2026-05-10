@@ -11,6 +11,7 @@ import {
     Upload, FileText, Download, AlertTriangle,
     CheckCircle, X, ArrowLeft, Loader2
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ImportStudentsPage() {
     const router = useRouter();
@@ -85,10 +86,12 @@ export default function ImportStudentsPage() {
             }
         } catch (e: any) {
             errors.push(`Error de archivo: ${e.message}`);
+            toast.error('Error al procesar el archivo');
         }
 
         setResult({ success, errors });
         setLoading(false);
+        toast.success(`Importación completada: ${success} estudiantes registrados`);
     };
 
     return (

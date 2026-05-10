@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { useThemeStore } from '@/stores/theme-store';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -41,6 +42,7 @@ export default function LoginPage() {
         try {
             const { useAuthStore } = await import('@/stores/auth-store');
             await useAuthStore.getState().login(email, password);
+            toast.success('Inicio de sesión exitoso');
             const currentUser = useAuthStore.getState().user;
             const role = currentUser?.role ?? 'ESTUDIANTE';
             switch (role) {
@@ -57,6 +59,7 @@ export default function LoginPage() {
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Error al iniciar sesión';
             setError(msg);
+            toast.error(msg);
             setLoading(false);
         }
     }

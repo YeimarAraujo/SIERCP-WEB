@@ -2,6 +2,7 @@
 
 import { PageHeader } from '@/components/ui/page-header';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function SuperAdminSettingsPage() {
     const [aha, setAha] = useState({ minScore: '80', certScore: '85' });
@@ -41,7 +42,7 @@ export default function SuperAdminSettingsPage() {
                     </div>
                 </div>
                 <div className="divider" />
-                <button className="btn-primary" style={{ alignSelf: 'flex-end' }}>
+                <button className="btn-primary" style={{ alignSelf: 'flex-end' }} onClick={() => toast.success('Parámetros AHA guardados')}>
                     Guardar
                 </button>
             </div>
@@ -73,7 +74,7 @@ export default function SuperAdminSettingsPage() {
                     </label>
                 </div>
                 <div className="divider" />
-                <button className="btn-primary" style={{ alignSelf: 'flex-end' }}>
+                <button className="btn-primary" style={{ alignSelf: 'flex-end' }} onClick={() => toast.success('Notificaciones guardadas')}>
                     Guardar
                 </button>
             </div>

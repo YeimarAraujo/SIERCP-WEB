@@ -4,6 +4,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useThemeStore } from '@/stores/theme-store';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
     const [form, setForm] = useState({
@@ -63,9 +64,12 @@ export default function RegisterPage() {
                 role: form.role,
                 institutionCode: form.institutionCode || undefined,
             });
+            toast.success('Registro exitoso');
             router.replace(form.role === 'INSTRUCTOR' ? '/pending-approval' : '/home');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al registrar');
+            const msg = err instanceof Error ? err.message : 'Error al registrar';
+            setError(msg);
+            toast.error(msg);
             setLoading(false);
         }
     }

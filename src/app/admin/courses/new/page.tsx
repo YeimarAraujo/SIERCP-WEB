@@ -10,6 +10,7 @@ import {
     Plus, Save, BookOpen, Type, FileText,
     Hash, Users, Award, AlignLeft
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function NewCoursePage() {
     const router = useRouter();
@@ -45,10 +46,12 @@ export default function NewCoursePage() {
                 updatedAt: serverTimestamp(),
             });
 
+            toast.success('Curso creado exitosamente');
             router.push('/admin/courses');
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Error al crear curso';
             setError(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }

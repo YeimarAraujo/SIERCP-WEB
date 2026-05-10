@@ -12,6 +12,7 @@ import {
     UserPlus, Mail, Shield, Save,
     User, Fingerprint, Phone, Key,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function NewUserPage() {
     const router = useRouter();
@@ -63,10 +64,12 @@ export default function NewUserPage() {
                 updatedAt: serverTimestamp(),
             });
 
+            toast.success('Usuario creado exitosamente');
             router.push('/admin/users');
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Error al crear usuario';
             setError(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
