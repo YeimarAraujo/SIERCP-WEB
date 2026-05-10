@@ -25,6 +25,7 @@ export function useAuth() {
         logout: store.logout,
         initialize: store.initialize,
         clearError: store.clearError,
+        updateLocalUser: store.updateLocalUser,
         isAdmin: store.user?.role === 'ADMIN',
         isInstructor: store.user?.role === 'INSTRUCTOR' || store.user?.role === 'ADMIN',
         isStudent: store.user?.role === 'ESTUDIANTE',

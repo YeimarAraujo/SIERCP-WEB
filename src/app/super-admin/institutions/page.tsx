@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { InstitutionService } from '@/services/institution.service';
-import type { Institution } from '@/services/institution.service';
+import type { Institution } from '@/shared/types/institution';
 
 export default function InstitutionsPage() {
     const [institutions, setInstitutions] = useState<Institution[]>([]);
@@ -24,7 +24,17 @@ export default function InstitutionsPage() {
         e.preventDefault();
         if (!newCode || !newName) return;
         try {
-            await InstitutionService.create(newCode, { name: newName });
+            await InstitutionService.create(newCode, {
+                name: newName,
+                code: newCode,
+                adminIds: [],
+                plan: 'basic',
+                status: 'pending',
+                maxDevices: 10,
+                maxInstructors: 5,
+                maxStudents: 100,
+                createdBy: '',
+            });
             setNewCode('');
             setNewName('');
             loadInstitutions();
