@@ -6,7 +6,9 @@ import { PageHeader } from '@/components/ui/page-header';
 import { UserService } from '@/services/firestore.service';
 import { getFullName } from '@/models/user';
 import type { UserModel } from '@/models/user';
-import { Search, User, Mail, Shield, UserCircle } from 'lucide-react';
+import { Search, User, Mail, Shield, UserCircle, ChevronRight, UserPlus, FileText } from 'lucide-react';
+import { PageHero } from '@/components/ui/page-hero';
+import { DataTable } from '@/components/ui/data-table';
 
 const ROLE_STYLES: Record<string, { bg: string, color: string }> = {
     ADMIN: { bg: '#F3E8FF', color: '#7E22CE' },
@@ -28,103 +30,123 @@ export default function AdminUsersPage() {
         u.email.toLowerCase().includes(search.toLowerCase()),
     );
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Header title="Gestión de usuarios" />
-            <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
-                    <PageHeader
-                        title="Gestión de usuarios"
-                        subtitle={`Administra las cuentas y roles del sistema (${users.length} usuarios)`}
-                    />
-                    <div style={{ position: 'relative', width: 320 }}>
-                        <Search size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                        <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Buscar por nombre o correo..."
-                            style={{
-                                width: '100%', height: 44, padding: '0 12px 0 40px', borderRadius: 12, border: '1px solid #E2E8F0',
-                                fontSize: 14, outline: 'none', transition: 'border-color 0.2s', background: '#FFFFFF'
-                            }}
-                            onFocus={(e) => e.currentTarget.style.borderColor = '#1800AD'}
-                            onBlur={(e) => e.currentTarget.style.borderColor = '#E2E8F0'}
-                        />
+    const columns = [
+        {
+            key: 'name',
+            label: 'Usuario',
+            render: (_: any, u: UserModel) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700 }}>
+                        {u.firstName?.charAt(0) || u.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 14 }}>{getFullName(u)}</div>
+                        <div style={{ fontSize: 12, color: '#64748B' }}>{u.email}</div>
                     </div>
                 </div>
+            )
+        },
+        {
+            key: 'role',
+            label: 'Rol',
+            render: (val: any) => {
+                const style = ROLE_STYLES[val] || ROLE_STYLES.ESTUDIANTE;
+                return (
+                    <span style={{ 
+                        display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 20,
+                        background: style.bg, color: style.color, fontSize: 11, fontWeight: 800, letterSpacing: '0.02em'
+                    }}>
+                        {val === 'ADMIN' ? <Shield size={12} /> : val === 'INSTRUCTOR' ? <UserCircle size={12} /> : null}
+                        {val}
+                    </span>
+                );
+            }
+        },
+        {
+            key: 'isActive',
+            label: 'Estado',
+            render: (val: any) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: val ? '#10B981' : '#EF4444', boxShadow: `0 0 0 4px ${val ? '#10B98120' : '#EF444420'}` }} />
+                    <span style={{ color: val ? '#059669' : '#DC2626', fontWeight: 700, fontSize: 13 }}>
+                        {val ? 'ACTIVO' : 'INACTIVO'}
+                    </span>
+                </div>
+            )
+        },
+        {
+            key: 'sessions',
+            label: 'Actividad',
+            render: (_: any, u: UserModel) => (
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: '#0F172A' }}>{u.stats?.totalSessions ?? 0}</div>
+                    <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 700 }}>SESIONES</div>
+                </div>
+            )
+        },
+        {
+            key: 'actions',
+            label: '',
+            render: () => <ChevronRight size={18} style={{ color: '#CBD5E1' }} />
+        }
+    ];
 
-                {loading ? (
-                    <div style={{ display: 'grid', gap: 12 }}>
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} style={{ height: 64, background: '#F8FAFC', border: '1px solid #F1F5F9', borderRadius: 12, animation: 'pulse 2s infinite' }} />
-                        ))}
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+            <Header title="Gestión de Usuarios" />
+            
+            <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+                <PageHero 
+                    title="Control de Accesos" 
+                    subtitle={`Administración centralizada de identidades (${users.length} perfiles activos)`} 
+                    parentTitle="Admin"
+                    parentHref="/admin/dashboard"
+                    actions={
+                        <button style={{
+                            padding: '10px 20px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
+                            border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+                            boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
+                        }}>
+                            <UserPlus size={16} /> Crear Usuario
+                        </button>
+                    }
+                />
+
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 20 }}>
+                        <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Buscar por nombre, correo o rol..."
+                                style={{
+                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
+                                    fontSize: 14, outline: 'none', transition: 'all 0.2s', background: '#F8FAFC'
+                                }}
+                            />
+                        </div>
+                        <button style={{
+                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF', 
+                            border: '1px solid #E2E8F0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#64748B', cursor: 'pointer'
+                        }}>
+                            <FileText size={16} /> Reporte Global
+                        </button>
                     </div>
-                ) : (
-                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                            <thead style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E4F0' }}>
-                                <tr>
-                                    <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.05em' }}>Usuario</th>
-                                    <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.05em' }}>Rol</th>
-                                    <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.05em' }}>Estado</th>
-                                    <th style={{ padding: '16px 20px', textAlign: 'center', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.05em' }}>Sesiones</th>
-                                    <th style={{ padding: '16px 20px', textAlign: 'right', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.05em' }}>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filtered.map((u) => {
-                                    const style = ROLE_STYLES[u.role] || ROLE_STYLES.ESTUDIANTE;
-                                    return (
-                                        <tr key={u.uid} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s' }}>
-                                            <td style={{ padding: '16px 20px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
-                                                        <User size={18} />
-                                                    </div>
-                                                    <div>
-                                                        <div style={{ fontWeight: 600, color: '#0F172A' }}>{getFullName(u)}</div>
-                                                        <div style={{ fontSize: 12, color: '#64748B' }}>{u.email}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '16px 20px' }}>
-                                                <span style={{ 
-                                                    display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20,
-                                                    background: style.bg, color: style.color, fontSize: 11, fontWeight: 700
-                                                }}>
-                                                    {u.role === 'ADMIN' ? <Shield size={12} /> : u.role === 'INSTRUCTOR' ? <UserCircle size={12} /> : null}
-                                                    {u.role}
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '16px 20px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: u.isActive ? '#10B981' : '#EF4444' }} />
-                                                    <span style={{ color: u.isActive ? '#059669' : '#DC2626', fontWeight: 500 }}>
-                                                        {u.isActive ? 'Activo' : 'Inactivo'}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '16px 20px', textAlign: 'center', color: '#0F172A', fontWeight: 600 }}>
-                                                {u.stats?.totalSessions ?? 0}
-                                            </td>
-                                            <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                                                <button style={{ background: 'none', border: 'none', color: '#1800AD', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>
-                                                    Editar
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        {filtered.length === 0 && (
-                            <div style={{ padding: 48, textAlign: 'center', color: '#64748B', fontSize: 14 }}>
-                                No se encontraron usuarios que coincidan con la búsqueda.
-                            </div>
-                        )}
-                    </div>
-                )}
+                    <DataTable 
+                        columns={columns}
+                        data={filtered}
+                        loading={loading}
+                        emptyMessage="No se encontraron usuarios registrados con esos criterios."
+                    />
+                </div>
             </div>
+            <style jsx>{`
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                }
+            `}</style>
         </div>
     );
 }

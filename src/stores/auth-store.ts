@@ -10,10 +10,10 @@ import {
     type User,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
-import type { UserModel } from '@/models/user';
-import { ROLE_STUDENT, ROLE_INSTRUCTOR, ROLE_SUPER_ADMIN } from '@/lib/constants';
-import { InstitutionService } from '@/services/institution.service';
+import { auth, db } from '@/shared/lib/firebase';
+import type { UserModel } from '@/shared/types/user';
+import { ROLE_STUDENT, ROLE_INSTRUCTOR, ROLE_SUPER_ADMIN } from '@/shared/lib/constants';
+import { InstitutionService } from '@/features/institutions/services/institution.service';
 
 interface AuthStore {
     user: UserModel | null;
@@ -35,7 +35,7 @@ interface AuthStore {
     }) => Promise<void>;
     logout: () => Promise<void>;
     clearError: () => void;
-    updateLocalUser: (data: Partial<UserModel>) => void;
+    updateLocalUser: (userData: Partial<UserModel>) => void;
 }
 
 async function fetchUserModel(uid: string): Promise<UserModel | null> {
@@ -215,12 +215,9 @@ export const useAuthStore = create<AuthStore>()(
 
             clearError: () => set({ error: null }),
 
-            updateLocalUser: (data: Partial<UserModel>) => {
-                const current = get().user;
-                if (current) {
-                    set({ user: { ...current, ...data } });
-                }
-            },
+            updateLocalUser: (userData) => set((state) => ({
+                user: state.user ? { ...state.user, ...userData } : null
+            })),
         }),
         {
             name: 'siercp-auth',

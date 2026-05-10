@@ -1,8 +1,8 @@
 import { serverTimestamp, updateDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { SessionService as FS } from './firestore.service';
-import { calculateSessionScore, isApproved, calculateCCF } from '@/lib/scoring';
-import type { SessionModel, SessionMetrics, PatientType } from '@/models/session';
+import { db } from '@/shared/lib/firebase';
+import { SessionService } from '@/shared/lib/firestore.service';
+import { calculateSessionScore, isApproved, calculateCCF } from '@/shared/lib/scoring';
+import type { SessionModel, SessionMetrics, PatientType } from '@/shared/types/session';
 
 export const SessionManager = {
     async start(params: {
@@ -20,12 +20,12 @@ export const SessionManager = {
             startedAt: new Date(),
             duration: 0,
         };
-        return FS.create(session);
+        return SessionService.create(session);
     },
 
     async end(sessionId: string, metrics: Partial<SessionMetrics>): Promise<void> {
         const endedAt = new Date();
-        const session = await FS.get(sessionId);
+        const session = await SessionService.get(sessionId);
         if (!session) throw new Error(`Session ${sessionId} not found`);
 
         const durationSeconds = Math.round(
@@ -55,6 +55,7 @@ export const SessionManager = {
             recoilScore: metrics.recoilScore ?? 0,
             interruptionScore: metrics.interruptionScore ?? 0,
             qualityScore: score,
+            score,
             approved: isApproved(score),
             violations: metrics.violations ?? [],
         };
@@ -69,6 +70,6 @@ export const SessionManager = {
     },
 
     async abort(sessionId: string): Promise<void> {
-        await FS.update(sessionId, { status: 'aborted', endedAt: new Date() });
+        await SessionService.update(sessionId, { status: 'aborted', endedAt: new Date() });
     },
 };

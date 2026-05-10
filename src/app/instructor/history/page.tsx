@@ -40,7 +40,7 @@ export default function InstructorHistoryPage() {
             label: 'Estudiante',
             render: (_: unknown, row: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700, fontSize: 11 }}>{row.studentName?.charAt(0)}</div>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700, fontSize: 11 }}>{row.studentName?.charAt(0) ?? ''}</div>
                     <span style={{ fontWeight: 600 }}>{row.studentName}</span>
                 </div>
             )

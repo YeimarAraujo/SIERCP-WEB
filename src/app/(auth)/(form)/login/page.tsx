@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import { useThemeStore } from '@/stores/theme-store';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const { theme } = useThemeStore();
 
     useEffect(() => {
         let unsubscribe: (() => void) | undefined;
@@ -62,19 +64,23 @@ export default function LoginPage() {
     return (
         <div className="w-full space-y-6">
             <div className="space-y-2">
-                <h1 className="text-2xl font-bold text-white">Iniciar sesión</h1>
-                <p className="text-sm" style={{ color: '#A5B4FC' }}>Bienvenido de nuevo a SIERCP</p>
+                <h1 className="text-2xl font-bold" style={{ color: theme === 'dark' ? '#FFFFFF' : '#0F172A' }}>Iniciar sesión</h1>
+                <p className="text-sm" style={{ color: theme === 'dark' ? '#A5B4FC' : '#475569' }}>Bienvenido de nuevo a SIERCP</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                    <div className="px-4 py-3 rounded-lg text-sm" style={{ background: 'rgba(252, 165, 165, 0.1)', color: '#FCA5A5', border: '1px solid rgba(252, 165, 165, 0.3)' }}>
+                    <div className="px-4 py-3 rounded-lg text-sm" style={{ 
+                        background: theme === 'dark' ? 'rgba(252, 165, 165, 0.1)' : '#FEF2F2', 
+                        color: theme === 'dark' ? '#FCA5A5' : '#DC2626', 
+                        border: `1px solid ${theme === 'dark' ? 'rgba(252, 165, 165, 0.3)' : '#FCA5A5'}` 
+                    }}>
                         {error}
                     </div>
                 )}
 
                 <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: '#A5B4FC' }} htmlFor="email">
+                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: theme === 'dark' ? '#A5B4FC' : '#64748B' }} htmlFor="email">
                         Correo electrónico
                     </label>
                     <input
@@ -83,16 +89,21 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="dr.ejemplo@hospital.com"
-                        className="w-full text-white px-4 py-3 outline-none text-base placeholder:text-[#6B7FCC] transition-all"
-                        style={{ background: '#1e2040', border: '1px solid #2a2e55', borderRadius: '8px' }}
-                        onFocus={(e) => { e.currentTarget.style.borderColor = '#4a6cf7'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(74, 108, 247, 0.15)'; }}
-                        onBlur={(e) => { e.currentTarget.style.borderColor = '#2a2e55'; e.currentTarget.style.boxShadow = 'none'; }}
+                        className="w-full px-4 py-3 outline-none text-base transition-all"
+                        style={{ 
+                            background: theme === 'dark' ? '#1e2040' : '#F8FAFC', 
+                            border: `1px solid ${theme === 'dark' ? '#2a2e55' : '#E2E8F0'}`, 
+                            borderRadius: '8px',
+                            color: theme === 'dark' ? '#FFFFFF' : '#0F172A'
+                        }}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#1800AD'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24, 0, 173, 0.1)'; }}
+                        onBlur={(e) => { e.currentTarget.style.borderColor = theme === 'dark' ? '#2a2e55' : '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                         required
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: '#A5B4FC' }} htmlFor="password">
+                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: theme === 'dark' ? '#A5B4FC' : '#64748B' }} htmlFor="password">
                         Contraseña
                     </label>
                     <div className="relative">
@@ -102,10 +113,15 @@ export default function LoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full text-white px-4 py-3 outline-none text-base placeholder:text-[#6B7FCC] pr-12 transition-all"
-                            style={{ background: '#1e2040', border: '1px solid #2a2e55', borderRadius: '8px' }}
-                            onFocus={(e) => { e.currentTarget.style.borderColor = '#4a6cf7'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(74, 108, 247, 0.15)'; }}
-                            onBlur={(e) => { e.currentTarget.style.borderColor = '#2a2e55'; e.currentTarget.style.boxShadow = 'none'; }}
+                            className="w-full px-4 py-3 outline-none text-base pr-12 transition-all"
+                            style={{ 
+                                background: theme === 'dark' ? '#1e2040' : '#F8FAFC', 
+                                border: `1px solid ${theme === 'dark' ? '#2a2e55' : '#E2E8F0'}`, 
+                                borderRadius: '8px',
+                                color: theme === 'dark' ? '#FFFFFF' : '#0F172A'
+                            }}
+                            onFocus={(e) => { e.currentTarget.style.borderColor = '#1800AD'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24, 0, 173, 0.1)'; }}
+                            onBlur={(e) => { e.currentTarget.style.borderColor = theme === 'dark' ? '#2a2e55' : '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                             required
                         />
                         <button
@@ -135,8 +151,8 @@ export default function LoginPage() {
                     <div className="text-center">
                         <button
                             type="button"
-                            className="transition-colors underline-offset-4 hover:underline text-sm"
-                            style={{ color: '#38BDF8' }}
+                            className="transition-colors underline-offset-4 hover:underline text-sm font-semibold"
+                            style={{ color: '#1800AD' }}
                             onClick={() => router.push('/register')}
                         >
                             ¿No tienes cuenta? Regístrate aquí

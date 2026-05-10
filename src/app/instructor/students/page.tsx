@@ -64,7 +64,7 @@ export default function InstructorStudentsPage() {
             render: (_: unknown, row: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 32, height: 32, borderRadius: 10, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700, fontSize: 12 }}>
-                        {row.studentName?.charAt(0)}
+                        {row.studentName?.charAt(0) ?? ''}
                     </div>
                     <div>
                         <div style={{ fontWeight: 700, color: '#0F172A' }}>{row.studentName}</div>

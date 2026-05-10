@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
-import { SessionService, ManiquiService } from '@/services/firestore.service';
+import { SessionService, ManiquiService, CourseService, UserService } from '@/services/firestore.service';
+import type { SessionModel } from '@/models/session';
+import type { ManiquiModel } from '@/models/device';
 import { 
     Cpu, Globe, Shield, Users, Server, 
     Signal, AlertTriangle, TrendingUp,
     Settings, Search, Bell, Monitor,
-    HardDrive, Database, RefreshCw
+    HardDrive, Database, RefreshCw, Activity, GraduationCap
 } from 'lucide-react';
 import Link from 'next/link';
 import { DashboardHero } from '@/components/ui/dashboard-hero';
@@ -20,6 +22,8 @@ export default function AdminDashboardPage() {
         totalDevices: 0,
         averageScore: 0,
         totalUsers: 0,
+        instructorsCount: 0,
+        studentsCount: 0,
         recentLogs: [] as any[]
     });
     const [loading, setLoading] = useState(true);
@@ -28,31 +32,37 @@ export default function AdminDashboardPage() {
         const fetchGlobalStats = async () => {
             try {
                 setLoading(true);
-                const [devices, allRecent] = await Promise.all([
+                const [devices, allRecent, users] = await Promise.all([
                     ManiquiService.getAll(),
-                    SessionService.getAllRecent(10)
+                    SessionService.getAllRecent(10),
+                    UserService.getAll()
                 ]);
 
                 const now = new Date();
-                const online = devices.filter(d => {
+                const online = devices.filter((d: ManiquiModel) => {
                     if (!d.lastConnection) return false;
                     const diff = now.getTime() - d.lastConnection.getTime();
                     return diff < 1000 * 60 * 5;
                 });
 
                 const thirtyMinsAgo = new Date(now.getTime() - 1000 * 60 * 30);
-                const active = allRecent.filter(s => s.startedAt > thirtyMinsAgo).length;
+                const active = allRecent.filter((s: SessionModel) => s.startedAt > thirtyMinsAgo).length;
 
-                const scores = allRecent.map(s => s.metrics?.qualityScore || 0);
-                const avg = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+                const scores = allRecent.map((s: SessionModel) => s.metrics?.qualityScore || 0);
+                const avg = scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : 0;
+
+                const instructors = users.filter(u => u.role === 'INSTRUCTOR');
+                const students = users.filter(u => u.role === 'ESTUDIANTE');
 
                 setStats({
                     activeSessions: active,
                     onlineDevices: online.length,
                     totalDevices: devices.length,
                     averageScore: avg,
-                    totalUsers: 142, // Mock for now
-                    recentLogs: allRecent.map(s => ({
+                    totalUsers: users.length,
+                    instructorsCount: instructors.length,
+                    studentsCount: students.length,
+                    recentLogs: allRecent.map((s: SessionModel) => ({
                         id: s.id,
                         event: 'Nueva Sesión RCP',
                         user: s.studentName,
@@ -77,28 +87,28 @@ export default function AdminDashboardPage() {
                 
                 <DashboardHero subtitle="INFRAESTRUCTURA GLOBAL / NOC" />
 
-                {/* Infrastructure Grid */}
+                {/* Performance & Capacity Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 32 }}>
                     {[
-                        { label: 'Heartbeat Sistema', value: 'Operativo', sub: 'Latencia 24ms', icon: Signal, color: '#10B981' },
-                        { label: 'Dispositivos IoT', value: `${stats.onlineDevices}/${stats.totalDevices}`, sub: 'Online / Total', icon: Monitor, color: '#1800AD' },
-                        { label: 'Carga de Servidor', value: '12%', sub: 'Instancia AWS-E1', icon: Cpu, color: '#6366F1' },
-                        { label: 'Alertas Críticas', value: '0', sub: 'Sin incidentes', icon: Shield, color: '#10B981' },
+                        { label: 'Dispositivos Online', value: `${stats.onlineDevices}`, sub: `${stats.totalDevices} vinculados`, icon: Monitor, color: '#1800AD' },
+                        { label: 'Sesiones Activas', value: stats.activeSessions, sub: 'En los últimos 30 min', icon: Activity, color: '#10B981' },
+                        { label: 'Instructores', value: (stats as any).instructorsCount || 0, sub: 'Plantilla docente', icon: GraduationCap, color: '#6366F1' },
+                        { label: 'Estudiantes', value: (stats as any).studentsCount || 0, sub: 'Alumnos matriculados', icon: Users, color: '#F59E0B' },
                     ].map((item, i) => (
                         <div key={i} style={{ 
                             background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 20, padding: 24,
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden'
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                                <div style={{ width: 40, height: 40, borderRadius: 12, background: `${item.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color }}>
-                                    <item.icon size={20} />
+                                <div style={{ width: 44, height: 44, borderRadius: 12, background: `${item.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color }}>
+                                    <item.icon size={22} />
                                 </div>
-                                {item.label === 'Heartbeat Sistema' && (
+                                {item.label === 'Sesiones Activas' && stats.activeSessions > 0 && (
                                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10B981', animation: 'ping 1.5s infinite' }} />
                                 )}
                             </div>
                             <div style={{ fontSize: 13, fontWeight: 600, color: '#64748B', marginBottom: 4 }}>{item.label}</div>
-                            <div style={{ fontSize: 24, fontWeight: 800, color: '#1E293B' }}>{loading ? '...' : item.value}</div>
+                            <div style={{ fontSize: 28, fontWeight: 800, color: '#1E293B' }}>{loading ? '...' : item.value}</div>
                             <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, marginTop: 4 }}>{item.sub}</div>
                         </div>
                     ))}
@@ -174,7 +184,7 @@ export default function AdminDashboardPage() {
     );
 }
 
-function ResourceItem({ label, progress, icon: Icon }: any) {
+function ResourceItem({ label, progress, icon: Icon }: { label: string, progress: number, icon: any }) {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -191,7 +201,7 @@ function ResourceItem({ label, progress, icon: Icon }: any) {
     );
 }
 
-function QuickLink({ label, icon: Icon, href }: any) {
+function QuickLink({ label, icon: Icon, href }: { label: string, icon: any, href: string }) {
     return (
         <Link href={href} style={{ 
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '16px 8px',

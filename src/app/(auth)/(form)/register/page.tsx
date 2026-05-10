@@ -3,6 +3,7 @@
 import type { ChangeEvent, FormEvent } from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useThemeStore } from '@/stores/theme-store';
 
 export default function RegisterPage() {
     const [form, setForm] = useState({
@@ -13,6 +14,7 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const { theme } = useThemeStore();
 
     useEffect(() => {
         let unsubscribe: (() => void) | undefined;
@@ -69,34 +71,39 @@ export default function RegisterPage() {
     }
 
     const inputStyle = {
-        background: '#1e2040',
-        border: '1px solid #2a2e55',
+        background: theme === 'dark' ? '#1e2040' : '#F8FAFC',
+        border: `1px solid ${theme === 'dark' ? '#2a2e55' : '#E2E8F0'}`,
         borderRadius: '8px',
+        color: theme === 'dark' ? '#FFFFFF' : '#0F172A',
     };
 
     return (
         <div className="w-full space-y-6">
             <div className="space-y-2">
-                <h1 className="text-2xl font-bold text-white">Crear cuenta</h1>
-                <p className="text-sm" style={{ color: '#A5B4FC' }}>Registro de usuario</p>
+                <h1 className="text-2xl font-bold" style={{ color: theme === 'dark' ? '#FFFFFF' : '#0F172A' }}>Crear cuenta</h1>
+                <p className="text-sm" style={{ color: theme === 'dark' ? '#A5B4FC' : '#475569' }}>Registro de usuario</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                    <div className="px-4 py-3 rounded-lg text-sm" style={{ background: 'rgba(252, 165, 165, 0.1)', color: '#FCA5A5', border: '1px solid rgba(252, 165, 165, 0.3)' }}>
+                    <div className="px-4 py-3 rounded-lg text-sm" style={{ 
+                        background: theme === 'dark' ? 'rgba(252, 165, 165, 0.1)' : '#FEF2F2', 
+                        color: theme === 'dark' ? '#FCA5A5' : '#DC2626', 
+                        border: `1px solid ${theme === 'dark' ? 'rgba(252, 165, 165, 0.3)' : '#FCA5A5'}` 
+                    }}>
                         {error}
                     </div>
                 )}
 
                 <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: '#A5B4FC' }}>Tipo de usuario</label>
+                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: theme === 'dark' ? '#A5B4FC' : '#64748B' }}>Tipo de usuario</label>
                     <select
                         name="role" value={form.role}
                         onChange={handleChange}
-                        className="w-full h-11 text-white px-4 text-sm outline-none transition-all"
+                        className="w-full h-11 px-4 text-sm outline-none transition-all"
                         style={inputStyle}
-                        onFocus={(e) => { e.currentTarget.style.borderColor = '#4a6cf7'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(74, 108, 247, 0.15)'; }}
-                        onBlur={(e) => { e.currentTarget.style.borderColor = '#2a2e55'; e.currentTarget.style.boxShadow = 'none'; }}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#1800AD'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24, 0, 173, 0.1)'; }}
+                        onBlur={(e) => { e.currentTarget.style.borderColor = theme === 'dark' ? '#2a2e55' : '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                     >
                         <option value="ESTUDIANTE" style={{ background: '#1e2040' }}>Estudiante</option>
                         <option value="INSTRUCTOR" style={{ background: '#1e2040' }}>Instructor</option>
@@ -109,31 +116,31 @@ export default function RegisterPage() {
                         { name: 'lastName', label: 'Apellido', placeholder: 'Acosta' },
                     ].map(({ name, label, placeholder }) => (
                         <div key={name} className="space-y-2">
-                            <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: '#A5B4FC' }}>{label}</label>
+                            <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: theme === 'dark' ? '#A5B4FC' : '#64748B' }}>{label}</label>
                             <input
                                 name={name} required value={form[name as keyof typeof form]}
                                 onChange={handleChange} placeholder={placeholder}
-                                className="w-full text-white px-4 py-3 text-sm outline-none transition-all placeholder:text-[#6B7FCC]"
+                                className="w-full px-4 py-3 text-sm outline-none transition-all"
                                 style={inputStyle}
-                                onFocus={(e) => { e.currentTarget.style.borderColor = '#4a6cf7'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(74, 108, 247, 0.15)'; }}
-                                onBlur={(e) => { e.currentTarget.style.borderColor = '#2a2e55'; e.currentTarget.style.boxShadow = 'none'; }}
+                                onFocus={(e) => { e.currentTarget.style.borderColor = '#1800AD'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24, 0, 173, 0.1)'; }}
+                                onBlur={(e) => { e.currentTarget.style.borderColor = theme === 'dark' ? '#2a2e55' : '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                             />
                         </div>
                     ))}
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: '#A5B4FC' }}>Código de institución (opcional)</label>
+                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: theme === 'dark' ? '#A5B4FC' : '#64748B' }}>Código de institución (opcional)</label>
                     <input
                         name="institutionCode" type="text"
                         value={form.institutionCode}
                         onChange={handleChange} placeholder="Ej: UPC-VALLEDUPAR"
-                        className="w-full text-white px-4 py-3 text-sm outline-none transition-all placeholder:text-[#6B7FCC]"
+                        className="w-full px-4 py-3 text-sm outline-none transition-all"
                         style={inputStyle}
-                        onFocus={(e) => { e.currentTarget.style.borderColor = '#4a6cf7'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(74, 108, 247, 0.15)'; }}
-                        onBlur={(e) => { e.currentTarget.style.borderColor = '#2a2e55'; e.currentTarget.style.boxShadow = 'none'; }}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#1800AD'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24, 0, 173, 0.1)'; }}
+                        onBlur={(e) => { e.currentTarget.style.borderColor = theme === 'dark' ? '#2a2e55' : '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                     />
-                    <p className="text-xs" style={{ color: '#6B7FCC' }}>
+                    <p className="text-xs" style={{ color: theme === 'dark' ? '#6B7FCC' : '#64748B' }}>
                         {form.role === 'INSTRUCTOR'
                             ? 'Instructores independientes pueden dejar este campo vacío'
                             : 'Déjalo vacío si eres estudiante independiente'}
@@ -147,15 +154,15 @@ export default function RegisterPage() {
                     { name: 'confirm', type: 'password', label: 'Confirmar contraseña', placeholder: '••••••••' },
                 ].map(({ name, type, label, placeholder }) => (
                     <div key={name} className="space-y-2">
-                        <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: '#A5B4FC' }}>{label}</label>
+                        <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: theme === 'dark' ? '#A5B4FC' : '#64748B' }}>{label}</label>
                         <input
                             name={name} type={type} required={name !== 'identificacion'}
                             value={form[name as keyof typeof form]}
                             onChange={handleChange} placeholder={placeholder}
-                            className="w-full text-white px-4 py-3 text-sm outline-none transition-all placeholder:text-[#6B7FCC]"
+                            className="w-full px-4 py-3 text-sm outline-none transition-all"
                             style={inputStyle}
-                            onFocus={(e) => { e.currentTarget.style.borderColor = '#4a6cf7'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(74, 108, 247, 0.15)'; }}
-                            onBlur={(e) => { e.currentTarget.style.borderColor = '#2a2e55'; e.currentTarget.style.boxShadow = 'none'; }}
+                            onFocus={(e) => { e.currentTarget.style.borderColor = '#1800AD'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24, 0, 173, 0.1)'; }}
+                            onBlur={(e) => { e.currentTarget.style.borderColor = theme === 'dark' ? '#2a2e55' : '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                         />
                     </div>
                 ))}
@@ -174,8 +181,8 @@ export default function RegisterPage() {
                     <div className="text-center">
                         <button
                             type="button"
-                            className="transition-colors underline-offset-4 hover:underline text-sm"
-                            style={{ color: '#38BDF8' }}
+                            className="transition-colors underline-offset-4 hover:underline text-sm font-semibold"
+                            style={{ color: '#1800AD' }}
                             onClick={() => router.push('/login')}
                         >
                             ¿Ya tienes cuenta? Inicia sesión
