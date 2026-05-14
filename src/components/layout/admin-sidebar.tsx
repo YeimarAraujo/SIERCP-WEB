@@ -7,8 +7,8 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Monitor, GraduationCap, Users, Cpu,
-    BookOpen, BarChart2, Award, Settings, User, LogOut,
-    Sun, Moon
+    BookOpen, BarChart2, FileText, Settings, Shield, User, LogOut,
+    Sun, Moon, Globe, Award
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -211,6 +211,44 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                         </p>
                     </div>
                 )}
+
+                <Link href="/" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isCollapsed ? 'center' : 'flex-start',
+                        gap: isCollapsed ? 0 : '10px',
+                        padding: isCollapsed ? '10px' : '10px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        color: 'var(--sidebar-text)',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        width: isCollapsed ? 44 : 'auto',
+                        marginLeft: isCollapsed ? 'auto' : 0,
+                        marginRight: isCollapsed ? 'auto' : 0,
+                        marginBottom: '4px',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'var(--sidebar-text)';
+                    }}
+                    title={isCollapsed ? 'Volver al sitio' : undefined}
+                    >
+                        <Globe size={20} />
+                        <span style={{
+                            opacity: isCollapsed ? 0 : 1,
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            maxWidth: isCollapsed ? 0 : '200px',
+                            transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                        }}>Volver al sitio</span>
+                    </div>
+                </Link>
 
                 <Link href="/admin/profile" style={{ textDecoration: 'none' }}>
                     <div style={{

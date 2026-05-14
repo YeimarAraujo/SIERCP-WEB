@@ -1,5 +1,17 @@
 # SIERCP-WEB — Sistema de Entrenamiento RCP
  
 Plataforma tecnológica de grado clínico y educativo desarrollada para modernizar, estandarizar y monitorear el entrenamiento en Reanimación Cardiopulmonar (RCP).
- 
-Conecta simuladores físicos (maniquíes con sensores ESP32) con una plataforma web que mide en tiempo real la calidad de las compresiones torácicas — profundidad, frecuencia y recoil — bajo los estándares AHA 2024. Permite llevar historial de sesiones, gestionar cursos y estudiantes, y generar métricas clínicas para instituciones educativas y de salud.
+
+
+## Tecnologías Principales
+- **Framework**: Next.js 16+ (App Router)
+- **Lenguaje**: TypeScript
+- **Estilos**: Tailwind CSS
+- **Estado**: Zustand
+- **Backend**: Firebase SDK & Admin SDK
+
+## Seguridad Implementada
+- **Rate Limiting**: Protección contra abuso de APIs.
+- **CORS**: Restricción de orígenes para mayor seguridad.
+- **Sanitización**: Validación de inputs en todas las rutas críticas.
+- **RLS**: Row Level Security vía Firestore Rules.

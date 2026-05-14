@@ -1,233 +1,160 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Moon, Sun } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useThemeStore } from '@/stores/theme-store';
 
 export default function AuthNavbar() {
     const [scrolled, setScrolled] = useState(false);
     const [mounted, setMounted] = useState(false);
     const router = useRouter();
+    const pathname = usePathname();
     const { theme, toggleTheme } = useThemeStore();
+    const isDark = theme === 'dark';
 
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 10);
+        setMounted(true);
+        const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    const pathname = mounted ? (typeof window !== 'undefined' ? window.location.pathname : '') : '';
     const isLogin = pathname === '/login';
 
-    // Styles
-    const headerStyles = {
-        background: theme === 'dark' ? 'rgba(10, 8, 40, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(24, 0, 173, 0.1)',
-        transition: 'all 0.3s ease',
+    if (!mounted) return null;
+
+    const navStyle: React.CSSProperties = {
+        position: 'fixed',
+        top: scrolled ? '12px' : '0',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: scrolled ? '95%' : '100%',
+        maxWidth: scrolled ? '1400px' : '100%',
+        height: scrolled ? '70px' : '90px',
+        background: isDark ? 'rgba(11, 15, 25, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        // Use individual properties to avoid shorthand conflicts
+        borderBottomWidth: '1px',
+        borderBottomStyle: 'solid',
+        borderBottomColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+        borderLeftWidth: scrolled ? '1px' : '0',
+        borderRightWidth: scrolled ? '1px' : '0',
+        borderTopWidth: scrolled ? '1px' : '0',
+        borderLeftStyle: 'solid',
+        borderRightStyle: 'solid',
+        borderTopStyle: 'solid',
+        borderLeftColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+        borderRightColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+        borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+        borderRadius: scrolled ? '22px' : '0',
+        boxShadow: scrolled ? (isDark ? '0 20px 40px rgba(0,0,0,0.4)' : '0 20px 40px rgba(0,0,0,0.05)') : 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: 9999,
     };
 
-    const themeBtnStyle = {
-        borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(24, 0, 173, 0.3)',
-        background: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(24, 0, 173, 0.05)',
-        cursor: 'pointer' as const,
-        color: theme === 'dark' ? '#FFFFFF' : '#1800AD',
+    const containerStyle: React.CSSProperties = {
+        width: '100%',
+        maxWidth: '1300px',
+        padding: '0 30px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     };
 
-    const secondaryBtnStyle = {
-        color: theme === 'dark' ? '#FFFFFF' : '#3D4270',
-        background: 'transparent',
-        border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(24, 0, 173, 0.3)',
-        borderRadius: '8px',
-        padding: '8px 18px',
-        fontSize: '14px',
-        fontWeight: '500' as const,
-        cursor: 'pointer' as const,
+    const linkStyle: React.CSSProperties = {
+        color: 'var(--clr-text)',
+        fontSize: '0.85rem',
+        fontWeight: 600,
+        textDecoration: 'none',
+        transition: 'all 0.2s ease',
+        cursor: 'pointer',
     };
 
-    const primaryBtnStyle = {
-        background: '#1800AD',
-        color: '#FFFFFF',
-        border: '1px solid #1800AD',
-        borderRadius: '8px',
-        padding: '8px 18px',
-        fontSize: '14px',
-        fontWeight: '500' as const,
-        cursor: 'pointer' as const,
-    };
-
-    // Render neutral version until mounted (avoid hydration mismatch)
-    if (!mounted) {
-        return (
-            <header
-                className="sticky top-0 left-0 right-0 z-50 h-16 flex items-center px-4 md:px-8"
-                style={headerStyles}
-            >
-                <div className="flex justify-between items-center w-full">
-                    <div>
-                        <img
-                            src="/images/logov3.png"
-                            alt="SIERCP"
-                            className="h-8 md:h-10 w-auto cursor-pointer"
-                            onClick={() => router.push('/')}
-                        />
-                    </div>
-                    <nav className="hidden md:flex gap-8">
-                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
-                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
-                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
-                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
-                    </nav>
-                    <div className="flex items-center gap-4">
-                        <button
-                            className="w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300"
-                            style={themeBtnStyle}
-                            aria-label="Toggle theme"
-                        >
-                            <Moon size={20} color="white" />
-                        </button>
-                        <button className="text-sm font-medium transition-all duration-200 cursor-pointer" style={secondaryBtnStyle}>
-                            Iniciar sesión
-                        </button>
-                        <button className="text-sm font-semibold transition-all duration-200 flex items-center gap-2 cursor-pointer" style={primaryBtnStyle}>
-                            Registrarse
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </header>
-        );
-    }
-
-    // Once mounted, render with actual pathname logic
     return (
-        <header
-            className="sticky top-0 left-0 right-0 z-50 h-16 flex items-center px-4 md:px-8"
-            style={headerStyles}
-        >
-            <div className="flex justify-between items-center w-full">
-                <div>
+        <header style={navStyle}>
+            <div style={containerStyle}>
+                {/* Logo Area */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                     <img
-                        src="/images/logov3.png"
+                        src={isDark ? "/assets/JOMAR/LogoTextov2.png" : "/assets/JOMAR/LogoTexto.png"}
                         alt="SIERCP"
-                        className="h-8 md:h-10 w-auto cursor-pointer"
+                        style={{ height: scrolled ? '38px' : '45px', width: 'auto', cursor: 'pointer', transition: 'all 0.3s ease' }}
                         onClick={() => router.push('/')}
                     />
                 </div>
-                <nav className="hidden md:flex gap-8">
-                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
-                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
-                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
-                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
-                </nav>
-                <div className="flex items-center gap-4">
-                    {/* Theme Toggle */}
+
+                {/* Nav Links (Desktop) */}
+                <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="d-none d-lg-flex">
+                    {['Documentación', 'Planes', 'Contacto', 'Sobre nosotros'].map((item) => (
+                        <a key={item} style={linkStyle} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--clr-primary)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--clr-text)'}>
+                            {item}
+                        </a>
+                    ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <button
-                        className="w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300"
-                        style={themeBtnStyle}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.18)' : 'rgba(24, 0, 173, 0.12)';
-                            e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(24, 0, 173, 0.6)';
-                            e.currentTarget.style.transform = 'rotate(20deg)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(24, 0, 173, 0.05)';
-                            e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(24, 0, 173, 0.3)';
-                            e.currentTarget.style.transform = 'rotate(0deg)';
-                        }}
                         onClick={toggleTheme}
-                        aria-label="Toggle theme"
-                        title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                        style={{
+                            background: isDark ? 'rgba(255,255,255,0.05)' : 'var(--clr-primary-alpha)',
+                            border: 'none',
+                            color: 'var(--clr-primary)',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.3s ease',
+                            cursor: 'pointer',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                     >
-                        <div style={{ transition: 'transform 0.4s ease', transform: theme === 'dark' ? 'rotate(0deg)' : 'rotate(180deg)' }}>
-                            {theme === 'dark' ? <Moon size={20} color="white" /> : <Sun size={20} color="#1800AD" />}
-                        </div>
+                        <i className={`bi ${isDark ? 'bi-sun-fill' : 'bi-moon-stars-fill'}`} style={{ fontSize: '1rem' }} />
                     </button>
 
-                    {/* Left Button: "Iniciar sesión" or "← Volver" */}
-                    {isLogin ? (
-                        <button
-                            className="text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1"
-                            style={secondaryBtnStyle}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(24, 0, 173, 0.05)';
-                                e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(24, 0, 173, 0.6)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(24, 0, 173, 0.3)';
-                            }}
-                            onClick={() => router.push('/')}
-                        >
-                            ← Volver
-                        </button>
-                    ) : (
-                        <button
-                            className="text-sm font-medium transition-all duration-200 cursor-pointer"
-                            style={secondaryBtnStyle}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                            }}
-                            onClick={() => router.push('/login')}
-                        >
-                            Iniciar sesión
-                        </button>
-                    )}
+                    <button
+                        onClick={() => router.push(isLogin ? '/' : '/login')}
+                        style={{
+                            background: 'transparent',
+                            border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                            borderRadius: '12px',
+                            padding: '10px 20px',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                            color: 'var(--clr-text)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--clr-bg-light)'; e.currentTarget.style.borderColor = 'var(--clr-primary)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'; }}
+                    >
+                        {isLogin ? '← Inicio' : 'Acceder'}
+                    </button>
 
-                    {/* Right Button: "Registrarse →" or "← Volver" */}
-                    {isLogin ? (
-                        <button
-                            className="text-sm font-semibold transition-all duration-200 flex items-center gap-2 cursor-pointer"
-                            style={primaryBtnStyle}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#2200d4';
-                                e.currentTarget.style.borderColor = '#2200d4';
-                                e.currentTarget.style.transform = 'translateX(2px)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#1800AD';
-                                e.currentTarget.style.borderColor = '#1800AD';
-                                e.currentTarget.style.transform = 'translateX(0)';
-                            }}
-                            onClick={() => router.push('/register')}
-                        >
-                            Registrarse
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    ) : (
-                        <button
-                            className="text-sm font-semibold transition-all duration-200 flex items-center gap-2 cursor-pointer"
-                            style={primaryBtnStyle}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#2200d4';
-                                e.currentTarget.style.borderColor = '#2200d4';
-                                e.currentTarget.style.transform = 'translateX(2px)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#1800AD';
-                                e.currentTarget.style.borderColor = '#1800AD';
-                                e.currentTarget.style.transform = 'translateX(0)';
-                            }}
-                            onClick={() => router.push('/')}
-                        >
-                            ← Volver
-                        </button>
-                    )}
+                    <button
+                        onClick={() => router.push('/register')}
+                        className="btn-brand"
+                        style={{
+                            padding: '12px 24px',
+                            borderRadius: '12px',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: '0 4px 15px var(--clr-primary-alpha)',
+                        }}
+                    >
+                        {isLogin ? 'Registrarse' : 'Crear Cuenta'}
+                        <i className="bi bi-chevron-right" style={{ fontSize: '0.75rem' }} />
+                    </button>
                 </div>
             </div>
         </header>

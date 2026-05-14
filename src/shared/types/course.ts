@@ -8,6 +8,7 @@ export interface Enrollment {
     avgScore: number;
     sessionCount: number;
     status: 'active' | 'completed';
+    grupoId?: string; // Nuevo: Para rastrear en qué horario se inscribió
 }
 
 export interface CourseModel {

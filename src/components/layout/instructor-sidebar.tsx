@@ -8,7 +8,7 @@ import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Monitor, BookOpen, Users, Clock,
     BarChart2, Award, Trophy, CheckSquare, User, LogOut,
-    Sun, Moon
+    Sun, Moon, Globe
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -211,6 +211,44 @@ export function InstructorSidebar({ collapsed, onToggle }: { collapsed?: boolean
                         </p>
                     </div>
                 )}
+
+                <Link href="/" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isCollapsed ? 'center' : 'flex-start',
+                        gap: isCollapsed ? 0 : '10px',
+                        padding: isCollapsed ? '10px' : '10px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        color: 'var(--sidebar-text)',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        width: isCollapsed ? 44 : 'auto',
+                        marginLeft: isCollapsed ? 'auto' : 0,
+                        marginRight: isCollapsed ? 'auto' : 0,
+                        marginBottom: '4px',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'var(--sidebar-text)';
+                    }}
+                    title={isCollapsed ? 'Volver al sitio' : undefined}
+                    >
+                        <Globe size={20} />
+                        <span style={{
+                            opacity: isCollapsed ? 0 : 1,
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            maxWidth: isCollapsed ? 0 : '200px',
+                            transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                        }}>Volver al sitio</span>
+                    </div>
+                </Link>
 
                 <Link href="/instructor/profile" style={{ textDecoration: 'none' }}>
                     <div style={{

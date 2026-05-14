@@ -42,7 +42,6 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
     try {
         const snap = await getDoc(doc(db, 'users', uid));
         if (!snap.exists()) {
-            console.log('User not in Firestore, creating...');
             return {
                 uid,
                 email: '',
@@ -78,6 +77,9 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
     }
 }
 
+// Flag de módulo para evitar múltiples listeners
+let _unsubscribe: (() => void) | null = null;
+
 export const useAuthStore = create<AuthStore>()(
     persist(
         (set, get) => ({
@@ -88,45 +90,41 @@ export const useAuthStore = create<AuthStore>()(
             error: null,
 
             initialize: () => {
-                const state = get();
-                if (state.firebaseUser && state.user && state.initialized) {
-                    return () => {};
-                }
+                if (_unsubscribe) return _unsubscribe;
+                const alreadyHasUser = !!get().user;
+                set({ loading: !alreadyHasUser });
+                _unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        try {
+            if (firebaseUser) {
+                const user = await fetchUserModel(firebaseUser.uid);
+                set({ user, firebaseUser, loading: false, initialized: true, error: null });
+            } else {
+                set({ user: null, firebaseUser: null, loading: false, initialized: true });
+            }
+        } catch (error) {
+            set({ initialized: true, loading: false, error: String(error) });
+        }
+    });
 
-                if (!state.firebaseUser) {
-                    set({ loading: true });
-                }
-
-                const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-                    try {
-                        if (firebaseUser) {
-                            const user = await fetchUserModel(firebaseUser.uid);
-                            set({ user, firebaseUser, loading: false, initialized: true, error: null });
-                        } else {
-                            set({ user: null, firebaseUser: null, loading: false, initialized: true });
-                        }
-                    } catch (error) {
-                        console.error('[AUTH] Error en onAuthStateChanged:', error);
-                        set({
-                            initialized: true,
-                            loading: false,
-                            error: String(error),
-                        });
-                    }
-                });
-                return unsub;
-            },
+    return _unsubscribe;
+},
 
             login: async (email, password) => {
-                set({ loading: true, error: null });
-                try {
-                    console.log('Login attempt:', email);
-                    const cred = await signInWithEmailAndPassword(auth, email, password);
-                    console.log('Login success:', cred.user.uid);
-                    const user = await fetchUserModel(cred.user.uid);
-                    set({ user, firebaseUser: cred.user, loading: false });
-                } catch (err: unknown) {
-                    console.error('Login error:', err);
+               set({ loading: true, error: null });
+    try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+
+        const idToken = await cred.user.getIdToken();
+        const res = await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken }),
+        });
+        if (!res.ok) throw new Error('Error al crear sesión en servidor');
+
+        const user = await fetchUserModel(cred.user.uid);
+        set({ user, firebaseUser: cred.user, loading: false, initialized: true });
+    } catch (err: unknown) {
                     let msg = 'Error al iniciar sesión';
                     if (err && typeof err === 'object' && 'code' in err) {
                         const code = String((err as { code?: unknown }).code);
@@ -139,7 +137,7 @@ export const useAuthStore = create<AuthStore>()(
                         msg = err.message;
                     }
                     set({ loading: false, error: msg });
-                    throw err;
+                    throw new Error(msg);
                 }
             },
 
@@ -147,7 +145,6 @@ export const useAuthStore = create<AuthStore>()(
                 set({ loading: true, error: null });
                 try {
                     const roleValue = (role as UserModel['role']) ?? ROLE_STUDENT;
-                    
                     if (roleValue === ROLE_SUPER_ADMIN || roleValue === 'ADMIN') {
                         throw new Error('Rol no permitido en registro público');
                     }
@@ -165,7 +162,6 @@ export const useAuthStore = create<AuthStore>()(
                     }
 
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
-                    
                     if (!finalInstitutionId) finalInstitutionId = cred.user.uid;
 
                     const userModel: Omit<UserModel, 'createdAt' | 'updatedAt'> = {
@@ -195,7 +191,7 @@ export const useAuthStore = create<AuthStore>()(
                         updatedAt: serverTimestamp(),
                     });
                     const user = await fetchUserModel(cred.user.uid);
-                    set({ user, firebaseUser: cred.user, loading: false });
+                    set({ user, firebaseUser: cred.user, loading: false, initialized: true });
                 } catch (err: unknown) {
                     const msg = err instanceof Error ? err.message : 'Error al registrar';
                     set({ loading: false, error: msg });
@@ -204,24 +200,30 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             logout: async () => {
-                try {
-                    await firebaseSignOut(auth);
-                } catch (error) {
-                    console.error('Firebase signOut error:', error);
-                } finally {
-                    set({ user: null, firebaseUser: null, error: null, initialized: true });
-                }
-            },
+    await fetch('/api/auth/session', { method: 'DELETE' });
+    
+    if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
+    try {
+        await firebaseSignOut(auth);
+    } catch (error) {
+        console.error('Firebase signOut error:', error);
+    } finally {
+        set({ user: null, firebaseUser: null, error: null, initialized: true, loading: false });
+    }
+},
 
             clearError: () => set({ error: null }),
 
             updateLocalUser: (userData) => set((state) => ({
-                user: state.user ? { ...state.user, ...userData } : null
+                user: state.user ? { ...state.user, ...userData } : null,
             })),
         }),
         {
             name: 'siercp-auth',
-            partialize: (state) => ({ user: state.user }),
+            partialize: (state) => ({
+                user: state.user,
+                initialized: state.initialized,
+            }),
         },
     ),
 );
