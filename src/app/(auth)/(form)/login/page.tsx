@@ -2,7 +2,7 @@
 
 import type { FormEvent } from 'react';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { useThemeStore } from '@/stores/theme-store';
 import toast from 'react-hot-toast';
@@ -14,6 +14,8 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const nextParam = searchParams.get('next');
     const { theme } = useThemeStore();
 
     useEffect(() => {
@@ -38,23 +40,27 @@ export default function LoginPage() {
         e.preventDefault();
         setLoading(true);
         setError(null);
-        
+
         try {
             const { useAuthStore } = await import('@/stores/auth-store');
             await useAuthStore.getState().login(email, password);
             toast.success('Inicio de sesión exitoso');
             const currentUser = useAuthStore.getState().user;
             const role = currentUser?.role ?? 'ESTUDIANTE';
-            switch (role) {
-                case 'ADMIN':
-                case 'SUPER_ADMIN':
-                    router.replace('/admin/dashboard');
-                    break;
-                case 'INSTRUCTOR':
-                    router.replace('/instructor/dashboard');
-                    break;
-                default:
-                    router.replace('/student/home');
+            if (nextParam) {
+                router.replace(nextParam);
+            } else {
+                switch (role) {
+                    case 'ADMIN':
+                    case 'SUPER_ADMIN':
+                        router.replace('/admin/dashboard');
+                        break;
+                    case 'INSTRUCTOR':
+                        router.replace('/instructor/dashboard');
+                        break;
+                    default:
+                        router.replace('/student/home');
+                }
             }
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Error al iniciar sesión';
@@ -64,103 +70,91 @@ export default function LoginPage() {
         }
     }
 
+    const inputStyle = {
+        width: "100%", padding: "14px 16px", borderRadius: "12px", border: "1px solid var(--clr-border)",
+        background: "var(--clr-bg)", color: "var(--clr-text)", fontSize: "0.95rem", transition: "all 0.2s ease"
+    };
+
     return (
-        <div className="w-full space-y-6">
-            <div className="space-y-2">
-                <h1 className="text-2xl font-bold" style={{ color: theme === 'dark' ? '#FFFFFF' : '#0F172A' }}>Iniciar sesión</h1>
-                <p className="text-sm" style={{ color: theme === 'dark' ? '#A5B4FC' : '#475569' }}>Bienvenido de nuevo a SIERCP</p>
+        <div className="w-full">
+            <div className="text-center mb-8">
+                <h1 style={{ fontSize: "2.5rem", fontWeight: 900, marginBottom: "12px", color: "var(--clr-text-head)", letterSpacing: "-1px" }}>¡Bienvenido!</h1>
+                <p style={{ color: "var(--clr-muted)", fontSize: "1.05rem" }}>Inicia sesión para acceder a tu panel de control SIERCP.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                    <div className="px-4 py-3 rounded-lg text-sm" style={{ 
-                        background: theme === 'dark' ? 'rgba(252, 165, 165, 0.1)' : '#FEF2F2', 
-                        color: theme === 'dark' ? '#FCA5A5' : '#DC2626', 
-                        border: `1px solid ${theme === 'dark' ? 'rgba(252, 165, 165, 0.3)' : '#FCA5A5'}` 
+                    <div className="px-4 py-3 rounded-xl text-sm d-flex align-items-center gap-3" style={{
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: '#ef4444',
+                        border: '1px solid rgba(239, 68, 68, 0.2)'
                     }}>
+                        <i className="bi bi-exclamation-circle-fill" />
                         {error}
                     </div>
                 )}
 
-                <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: theme === 'dark' ? '#A5B4FC' : '#64748B' }} htmlFor="email">
-                        Correo electrónico
-                    </label>
-                    <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="dr.ejemplo@hospital.com"
-                        className="w-full px-4 py-3 outline-none text-base transition-all"
-                        style={{ 
-                            background: theme === 'dark' ? '#1e2040' : '#F8FAFC', 
-                            border: `1px solid ${theme === 'dark' ? '#2a2e55' : '#E2E8F0'}`, 
-                            borderRadius: '8px',
-                            color: theme === 'dark' ? '#FFFFFF' : '#0F172A'
-                        }}
-                        onFocus={(e) => { e.currentTarget.style.borderColor = '#1800AD'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24, 0, 173, 0.1)'; }}
-                        onBlur={(e) => { e.currentTarget.style.borderColor = theme === 'dark' ? '#2a2e55' : '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
-                        required
-                    />
-                </div>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--clr-text)", marginBottom: "8px", display: "block" }} htmlFor="email">
+                            Correo electrónico
+                        </label>
+                        <div className="position-relative">
+                            <i className="bi bi-envelope position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
+                            <input
+                                id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                                placeholder="tu@correo.com"
+                                style={{ ...inputStyle, paddingLeft: '45px' }}
+                                onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--clr-primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--clr-primary-alpha)'; }}
+                                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--clr-border)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                required
+                            />
+                        </div>
+                    </div>
 
-                <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest font-semibold block" style={{ color: theme === 'dark' ? '#A5B4FC' : '#64748B' }} htmlFor="password">
-                        Contraseña
-                    </label>
-                    <div className="relative">
-                        <input
-                            id="password"
-                            type={showPassword ? 'text' : 'password'}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full px-4 py-3 outline-none text-base pr-12 transition-all"
-                            style={{ 
-                                background: theme === 'dark' ? '#1e2040' : '#F8FAFC', 
-                                border: `1px solid ${theme === 'dark' ? '#2a2e55' : '#E2E8F0'}`, 
-                                borderRadius: '8px',
-                                color: theme === 'dark' ? '#FFFFFF' : '#0F172A'
-                            }}
-                            onFocus={(e) => { e.currentTarget.style.borderColor = '#1800AD'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24, 0, 173, 0.1)'; }}
-                            onBlur={(e) => { e.currentTarget.style.borderColor = theme === 'dark' ? '#2a2e55' : '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
-                            required
-                        />
-                        <button
-                            type="button"
-                            className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center p-1"
-                            style={{ color: '#6B7FCC' }}
-                            onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        >
-                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
+                    <div className="space-y-2">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--clr-text)", margin: 0 }} htmlFor="password">
+                                Contraseña
+                            </label>
+                            <a href="#" style={{ fontSize: "0.8rem", color: "var(--clr-primary)", fontWeight: 700, textDecoration: "none" }}>¿Olvidaste tu contraseña?</a>
+                        </div>
+                        <div className="position-relative">
+                            <i className="bi bi-shield-lock position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
+                            <input
+                                id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                style={{ ...inputStyle, paddingLeft: '45px', paddingRight: '45px' }}
+                                onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--clr-primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--clr-primary-alpha)'; }}
+                                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--clr-border)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="position-absolute border-0 bg-transparent p-0"
+                                style={{ right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)', display: 'flex' }}
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div className="pt-2 space-y-4">
+                <div className="pt-4 space-y-4">
                     <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-3 font-semibold transition-opacity disabled:opacity-50 text-white"
-                        style={{ background: '#1800AD', borderRadius: '8px' }}
-                        onMouseOver={(e) => { e.currentTarget.style.opacity = '0.9'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.opacity = '1'; }}
+                        type="submit" disabled={loading}
+                        className="btn-brand w-100"
+                        style={{ padding: "16px", borderRadius: "16px", fontSize: "1.1rem", justifyContent: "center" }}
                     >
-                        {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                        {loading ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="bi bi-box-arrow-in-right me-2" />}
+                        {loading ? 'Cargando...' : 'Iniciar Sesión'}
                     </button>
 
-                    <div className="text-center">
-                        <button
-                            type="button"
-                            className="transition-colors underline-offset-4 hover:underline text-sm font-semibold"
-                            style={{ color: '#1800AD' }}
-                            onClick={() => router.push('/register')}
-                        >
-                            ¿No tienes cuenta? Regístrate aquí
-                        </button>
-                    </div>
+                    <p className="text-center" style={{ fontSize: "0.95rem", color: "var(--clr-muted)" }}>
+                        ¿Aún no tienes cuenta?{' '}
+                        <button type="button" onClick={() => router.push('/register')} style={{ color: "var(--clr-primary)", fontWeight: 800, background: "none", border: "none", padding: 0 }}>Regístrate aquí</button>
+                    </p>
                 </div>
             </form>
         </div>
