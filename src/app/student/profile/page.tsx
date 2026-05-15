@@ -5,7 +5,7 @@ import { ProfileContent } from '@/components/profile/profile-content';
 
 export default function StudentProfilePage() {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Mi Perfil" />
             
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>

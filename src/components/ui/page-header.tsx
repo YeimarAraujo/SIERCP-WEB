@@ -12,18 +12,18 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
             alignItems: 'flex-start',
             marginBottom: 24,
             paddingBottom: 16,
-            borderBottom: '1px solid #E2E4F0',
+            borderBottom: '1px solid var(--border)',
         }}>
             <div>
                 <h1 style={{
                     fontSize: 24, fontWeight: 600,
-                    color: '#0B1C30', margin: 0,
+                    color: 'var(--foreground)', margin: 0,
                 }}>
                     {title}
                 </h1>
                 {subtitle && (
                     <p style={{
-                        fontSize: 14, color: '#8892A4',
+                        fontSize: 14, color: 'var(--text-muted)',
                         margin: '4px 0 0',
                     }}>
                         {subtitle}

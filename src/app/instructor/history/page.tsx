@@ -40,12 +40,12 @@ export default function InstructorHistoryPage() {
             label: 'Estudiante',
             render: (_: unknown, row: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700, fontSize: 11 }}>{row.studentName?.charAt(0) ?? ''}</div>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontWeight: 700, fontSize: 11 }}>{row.studentName?.charAt(0) ?? ''}</div>
                     <span style={{ fontWeight: 600 }}>{row.studentName}</span>
                 </div>
             )
         },
-        { key: 'courseName', label: 'Curso', render: (_: unknown, row: any) => <div style={{ fontSize: 13, color: '#64748B' }}><BookOpen size={12} style={{ marginRight: 4 }} />{row.courseName}</div> },
+        { key: 'courseName', label: 'Curso', render: (_: unknown, row: any) => <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}><BookOpen size={12} style={{ marginRight: 4 }} />{row.courseName}</div> },
         { key: 'scenarioTitle', label: 'Escenario', render: (_: unknown, row: any) => <div style={{ fontSize: 13, fontWeight: 500 }}>{row.scenarioTitle}</div> },
         {
             key: 'qualityScore',
@@ -55,11 +55,11 @@ export default function InstructorHistoryPage() {
                 return <div style={{ fontWeight: 800, color: score >= 85 ? '#10B981' : '#F59E0B' }}>{score}%</div>;
             }
         },
-        { key: 'startedAt', label: 'Fecha', render: (_: unknown, row: any) => <div style={{ fontSize: 12, color: '#94A3B8' }}>{formatDate(row.startedAt)}</div> },
+        { key: 'startedAt', label: 'Fecha', render: (_: unknown, row: any) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDate(row.startedAt)}</div> },
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Historial de Sesiones" />
 
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -70,15 +70,15 @@ export default function InstructorHistoryPage() {
                     parentHref="/instructor/dashboard"
                 />
 
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ marginBottom: 24, position: 'relative', maxWidth: 400 }}>
-                        <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                        <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                         <input
                             type="text"
                             placeholder="Buscar por estudiante, curso o escenario..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none' }}
+                            style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid var(--border)', fontSize: 14, outline: 'none' }}
                         />
                     </div>
 

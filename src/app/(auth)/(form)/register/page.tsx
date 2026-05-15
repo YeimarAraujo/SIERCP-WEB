@@ -1,12 +1,12 @@
 'use client';
 
 import type { ChangeEvent, FormEvent } from 'react';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useThemeStore } from '@/stores/theme-store';
 import toast from 'react-hot-toast';
 
-export default function RegisterPage() {
+function RegisterContent() {
     const [step, setStep] = useState(1);
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
@@ -230,5 +230,13 @@ export default function RegisterPage() {
                 </p>
             </form>
         </div>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={<div className="w-full text-center py-8">Cargando...</div>}>
+            <RegisterContent />
+        </Suspense>
     );
 }

@@ -34,7 +34,7 @@ const variantColors = {
     info: {
         bg: 'var(--info-bg)',
         text: 'var(--info-text)',
-        btn: '#1800AD',
+        btn: 'var(--brand)',
     },
 };
 
@@ -128,7 +128,7 @@ export function ConfirmModal({
                         disabled={loading}
                         style={{
                             background: colors.btn,
-                            color: '#FFFFFF',
+                            color: 'var(--text-on-brand)',
                             border: 'none',
                             borderRadius: 'var(--radius-md)',
                             padding: '10px 20px',

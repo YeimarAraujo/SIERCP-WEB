@@ -60,7 +60,7 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
             <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
                 <Header title="Cargando módulo..." />
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: 40, height: 40, border: '3px solid #E2E4F0', borderTopColor: '#1800AD', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                 </div>
                 <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
@@ -72,14 +72,14 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
             <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
                 <Header title="Módulo no encontrado" />
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <p style={{ color: '#64748B' }}>El módulo no existe.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>El módulo no existe.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--muted)' }}>
             <Header 
                 title={module.title}
                 showBack
@@ -89,23 +89,23 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
             <div style={{ flex: 1, overflowY: 'auto' }}>
                 {/* Module Info */}
                 <div style={{
-                    background: '#FFFFFF', borderBottom: '1px solid #E2E4F0',
+                    background: 'var(--card)', borderBottom: '1px solid var(--border)',
                     padding: '16px 24px'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <div style={{
                                 width: 40, height: 40, borderRadius: 10,
-                                background: '#EEF0FF', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#1800AD'
+                                background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: 'var(--brand)'
                             }}>
                                 <BookOpen size={20} />
                             </div>
                             <div>
-                                <span style={{ fontSize: 11, fontWeight: 700, color: '#1800AD', textTransform: 'uppercase' }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>
                                     Teoría
                                 </span>
-                                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                                <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--foreground)', margin: 0 }}>
                                     {module.title}
                                 </h3>
                             </div>
@@ -124,13 +124,13 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
 
                 {/* Tabs */}
                 {module.contentUrl && module.videoUrl && (
-                    <div style={{ display: 'flex', background: '#FFFFFF', borderBottom: '1px solid #E2E4F0' }}>
+                    <div style={{ display: 'flex', background: 'var(--card)', borderBottom: '1px solid var(--border)' }}>
                         <button
                             onClick={() => setActiveTab('pdf')}
                             style={{
                                 flex: 1, padding: '14px', border: 'none', background: 'transparent',
-                                borderBottom: activeTab === 'pdf' ? '2px solid #1800AD' : '2px solid transparent',
-                                color: activeTab === 'pdf' ? '#1800AD' : '#64748B',
+                                borderBottom: activeTab === 'pdf' ? '2px solid var(--brand)' : '2px solid transparent',
+                                color: activeTab === 'pdf' ? 'var(--brand)' : 'var(--text-secondary)',
                                 fontWeight: activeTab === 'pdf' ? 700 : 500, fontSize: 14, cursor: 'pointer',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
                             }}
@@ -142,8 +142,8 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
                             onClick={() => setActiveTab('video')}
                             style={{
                                 flex: 1, padding: '14px', border: 'none', background: 'transparent',
-                                borderBottom: activeTab === 'video' ? '2px solid #1800AD' : '2px solid transparent',
-                                color: activeTab === 'video' ? '#1800AD' : '#64748B',
+                                borderBottom: activeTab === 'video' ? '2px solid var(--brand)' : '2px solid transparent',
+                                color: activeTab === 'video' ? 'var(--brand)' : 'var(--text-secondary)',
                                 fontWeight: activeTab === 'video' ? 700 : 500, fontSize: 14, cursor: 'pointer',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
                             }}
@@ -158,7 +158,7 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
                 <div style={{ padding: 24 }}>
                     {activeTab === 'pdf' && module.contentUrl && (
                         <div style={{
-                            background: '#FFFFFF', borderRadius: 16, border: '1px solid #E2E4F0',
+                            background: 'var(--card)', borderRadius: 16, border: '1px solid var(--border)',
                             overflow: 'hidden', height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center'
                         }}>
                             <iframe
@@ -186,10 +186,10 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
 
                     {!module.contentUrl && !module.videoUrl && (
                         <div style={{
-                            background: '#FFFFFF', borderRadius: 16, padding: 40, textAlign: 'center',
-                            border: '1px solid #E2E4F0'
+                            background: 'var(--card)', borderRadius: 16, padding: 40, textAlign: 'center',
+                            border: '1px solid var(--border)'
                         }}>
-                            <p style={{ color: '#64748B' }}>No hay contenido disponible para este módulo.</p>
+                            <p style={{ color: 'var(--text-secondary)' }}>No hay contenido disponible para este módulo.</p>
                         </div>
                     )}
                 </div>
@@ -202,7 +202,7 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
                             disabled={marking}
                             style={{
                                 width: '100%', padding: '16px 24px', borderRadius: 14,
-                                background: '#1800AD', color: '#FFFFFF', border: 'none',
+                                background: 'var(--brand)', color: 'var(--text-on-brand)', border: 'none',
                                 fontSize: 15, fontWeight: 700, cursor: marking ? 'not-allowed' : 'pointer',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                                 opacity: marking ? 0.7 : 1
@@ -210,7 +210,7 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
                         >
                             {marking ? (
                                 <>
-                                    <div style={{ width: 20, height: 20, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                                    <div style={{ width: 20, height: 20, border: '2px solid var(--card)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                                     Guardando...
                                 </>
                             ) : (

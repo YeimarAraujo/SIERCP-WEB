@@ -37,8 +37,8 @@ export default function StudentHistoryPage() {
             label: 'Fecha y Hora', 
             render: (val: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Clock size={14} style={{ color: '#94A3B8' }} />
-                    <div style={{ fontWeight: 600, color: '#475569' }}>{formatDate(val)}</div>
+                    <Clock size={14} style={{ color: 'var(--text-muted)' }} />
+                    <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{formatDate(val)}</div>
                 </div>
             )
         },
@@ -47,8 +47,8 @@ export default function StudentHistoryPage() {
             label: 'Escenario', 
             render: (val: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Activity size={14} style={{ color: '#94A3B8' }} />
-                    <div style={{ color: '#0F172A', fontWeight: 800 }}>{val || 'Sesión RCP'}</div>
+                    <Activity size={14} style={{ color: 'var(--text-muted)' }} />
+                    <div style={{ color: 'var(--foreground)', fontWeight: 800 }}>{val || 'Sesión RCP'}</div>
                 </div>
             )
         },
@@ -88,12 +88,12 @@ export default function StudentHistoryPage() {
         {
             key: 'actions',
             label: '',
-            render: () => <ChevronRight size={18} style={{ color: '#CBD5E1' }} />
+            render: () => <ChevronRight size={18} style={{ color: 'var(--border-strong)' }} />
         }
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Mi Historial" />
             
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -104,16 +104,16 @@ export default function StudentHistoryPage() {
                     parentHref="/student/home"
                 />
 
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                         <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
-                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
                                 type="text"
                                 placeholder="Buscar por escenario..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none' }}
+                                style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid var(--border)', fontSize: 14, outline: 'none' }}
                             />
                         </div>
                     </div>
@@ -122,7 +122,7 @@ export default function StudentHistoryPage() {
                         columns={columns}
                         data={filtered}
                         loading={loading}
-                        onRowClick={(row) => router.push(`/student/sessions/${row.id}`)}
+                        onRowClick={(row) => router.push(`/session/${row.id}`)}
                         emptyMessage="Aún no tienes sesiones registradas en tu historial."
                         enablePagination={true}
                     />

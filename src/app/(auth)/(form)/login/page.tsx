@@ -1,13 +1,13 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { useThemeStore } from '@/stores/theme-store';
 import toast from 'react-hot-toast';
 
-export default function LoginPage() {
+function LoginContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -158,5 +158,13 @@ export default function LoginPage() {
                 </div>
             </form>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="w-full text-center py-8">Cargando...</div>}>
+            <LoginContent />
+        </Suspense>
     );
 }

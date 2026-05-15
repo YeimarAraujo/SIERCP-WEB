@@ -84,7 +84,7 @@ export default function StudentCourseDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
                 <Header title="Cargando..." />
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: 40, height: 40, border: '3px solid #E2E4F0', borderTopColor: '#1800AD', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                 </div>
                 <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
@@ -96,48 +96,48 @@ export default function StudentCourseDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
                 <Header title="Curso no encontrado" />
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <p style={{ color: '#64748B' }}>El curso no existe o no tienes acceso.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>El curso no existe o no tienes acceso.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--muted)' }}>
             <Header title={course.title} />
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
                 {/* Course Header */}
                 <div style={{
-                    background: '#FFFFFF', borderRadius: 20, padding: 20, marginBottom: 24,
-                    border: '1px solid #E2E4F0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                    background: 'var(--card)', borderRadius: 20, padding: 20, marginBottom: 24,
+                    border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                         <div>
-                            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0F172A', margin: 0 }}>{course.title}</h2>
-                            <p style={{ fontSize: 13, color: '#64748B', marginTop: 4 }}>Instructor: {course.instructorName}</p>
+                            <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--foreground)', margin: 0 }}>{course.title}</h2>
+                            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Instructor: {course.instructorName}</p>
                         </div>
                         <div style={{
-                            background: '#EEF0FF', padding: '8px 16px', borderRadius: 12,
-                            color: '#1800AD', fontWeight: 700, fontSize: 13
+                            background: 'var(--accent)', padding: '8px 16px', borderRadius: 12,
+                            color: 'var(--brand)', fontWeight: 700, fontSize: 13
                         }}>
                             {course.certification}
                         </div>
                     </div>
 
                     {/* Progress Bar */}
-                    <div style={{ background: '#F1F5F9', borderRadius: 12, padding: 16 }}>
+                    <div style={{ background: 'var(--muted)', borderRadius: 12, padding: 16 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>Tu progreso</span>
-                            <span style={{ fontSize: 12, color: '#64748B' }}>{completedCount} / {totalCount} módulos</span>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--foreground)' }}>Tu progreso</span>
+                            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{completedCount} / {totalCount} módulos</span>
                         </div>
-                        <div style={{ height: 8, background: '#E2E4F0', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
                             <div style={{
-                                height: '100%', width: `${progressPercent}%`, background: '#1800AD',
+                                height: '100%', width: `${progressPercent}%`, background: 'var(--brand)',
                                 borderRadius: 4, transition: 'width 0.3s ease'
                             }} />
                         </div>
-                        <p style={{ fontSize: 11, color: '#1800AD', fontWeight: 600, marginTop: 6, margin: 0 }}>
+                        <p style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, marginTop: 6, margin: 0 }}>
                             {progressPercent}% completado
                         </p>
                     </div>
@@ -145,16 +145,16 @@ export default function StudentCourseDetailPage() {
 
                 {/* Modules Section */}
                 <div>
-                    <h3 style={{ fontSize: 12, fontWeight: 700, color: '#64748B', letterSpacing: '0.1em', marginBottom: 16 }}>
+                    <h3 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: 16 }}>
                         MÓDULOS A COMPLETAR
                     </h3>
 
                     {modules.length === 0 ? (
                         <div style={{
-                            background: '#FFFFFF', borderRadius: 16, padding: 40, textAlign: 'center',
-                            border: '1px solid #E2E4F0'
+                            background: 'var(--card)', borderRadius: 16, padding: 40, textAlign: 'center',
+                            border: '1px solid var(--border)'
                         }}>
-                            <p style={{ color: '#64748B' }}>No hay módulos disponibles aún.</p>
+                            <p style={{ color: 'var(--text-secondary)' }}>No hay módulos disponibles aún.</p>
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -173,8 +173,8 @@ export default function StudentCourseDetailPage() {
                                         }}
                                         style={{
                                             display: 'flex', alignItems: 'center', gap: 16,
-                                            background: '#FFFFFF', borderRadius: 16, padding: 16,
-                                            border: isLocked ? '1px solid #E2E4F0' : '1px solid #E2E4F0',
+                                            background: 'var(--card)', borderRadius: 16, padding: 16,
+                                            border: isLocked ? '1px solid var(--border)' : '1px solid var(--border)',
                                             opacity: isLocked ? 0.6 : 1,
                                             textDecoration: 'none',
                                             transition: 'all 0.2s ease',
@@ -183,16 +183,16 @@ export default function StudentCourseDetailPage() {
                                     >
                                         <div style={{
                                             width: 44, height: 44, borderRadius: 12,
-                                            background: isCompleted ? '#22C55E' : isLocked ? '#F1F5F9' : '#EEF0FF',
+                                            background: isCompleted ? '#22C55E' : isLocked ? 'var(--muted)' : 'var(--accent)',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            color: isCompleted ? '#FFFFFF' : isLocked ? '#94A3B8' : '#1800AD',
+                                            color: isCompleted ? 'var(--text-on-brand)' : isLocked ? 'var(--text-muted)' : 'var(--brand)',
                                         }}>
                                             {isCompleted ? <CheckCircle size={22} /> : isLocked ? <Lock size={20} /> : typeInfo.icon}
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                 <span style={{
-                                                    fontSize: 11, fontWeight: 700, color: isLocked ? '#94A3B8' : '#1800AD',
+                                                    fontSize: 11, fontWeight: 700, color: isLocked ? 'var(--text-muted)' : 'var(--brand)',
                                                     textTransform: 'uppercase', letterSpacing: '0.05em'
                                                 }}>
                                                     {typeInfo.label}
@@ -202,18 +202,18 @@ export default function StudentCourseDetailPage() {
                                                 )}
                                             </div>
                                             <h4 style={{
-                                                fontSize: 15, fontWeight: 700, color: isLocked ? '#94A3B8' : '#0F172A',
+                                                fontSize: 15, fontWeight: 700, color: isLocked ? 'var(--text-muted)' : 'var(--foreground)',
                                                 margin: '4px 0 0'
                                             }}>
                                                 {module.title}
                                             </h4>
                                             {module.estimatedMinutes && (
-                                                <p style={{ fontSize: 12, color: '#94A3B8', margin: '4px 0 0' }}>
+                                                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>
                                                     {module.estimatedMinutes} min
                                                 </p>
                                             )}
                                         </div>
-                                        {!isLocked && <ChevronRight size={20} style={{ color: '#CBD5E1' }} />}
+                                        {!isLocked && <ChevronRight size={20} style={{ color: 'var(--border-strong)' }} />}
                                     </Link>
                                 );
                             })}
@@ -226,7 +226,7 @@ export default function StudentCourseDetailPage() {
                     <div style={{ marginTop: 24 }}>
                         <Link href={`/student/courses/${courseId}/start`} style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                            background: '#1800AD', color: '#FFFFFF', padding: '16px 24px',
+                            background: 'var(--brand)', color: 'var(--text-on-brand)', padding: '16px 24px',
                             borderRadius: 14, fontWeight: 700, fontSize: 15, textDecoration: 'none',
                             boxShadow: '0 4px 12px rgba(24, 0, 173, 0.3)'
                         }}>

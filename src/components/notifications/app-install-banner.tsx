@@ -238,7 +238,7 @@ export function AppDownloadPrompt({ className }: AppDownloadPromptProps) {
                                 onClick={handleDismiss}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-transform hover:scale-105"
                                 style={{ 
-                                    background: '#FFFFFF',
+                                    background: 'var(--card)',
                                     color: '#0E0080',
                                 }}
                             >

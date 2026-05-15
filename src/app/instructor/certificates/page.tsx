@@ -59,7 +59,7 @@ export default function InstructorCertificatesPage() {
     );
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Certificaciones" />
 
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -70,45 +70,45 @@ export default function InstructorCertificatesPage() {
                     parentHref="/instructor/dashboard"
                 />
 
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ maxWidth: 400, marginBottom: 24, position: 'relative' }}>
-                        <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                        <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Filtrar certificaciones..."
-                            style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none', background: '#F8FAFC' }}
+                            style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid var(--border)', fontSize: 14, outline: 'none', background: 'var(--muted)' }}
                         />
                     </div>
 
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: 48 }}>
-                            <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: '#1800AD' }} />
+                            <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--brand)' }} />
                         </div>
                     ) : filtered.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: 48 }}>
-                            <Award size={48} style={{ color: '#CBD5E1', marginBottom: 16 }} />
-                            <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0F172A', marginBottom: 8 }}>Sin certificaciones</h3>
-                            <p style={{ color: '#64748B', fontSize: 14 }}>
+                            <Award size={48} style={{ color: 'var(--border-strong)', marginBottom: 16 }} />
+                            <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--foreground)', marginBottom: 8 }}>Sin certificaciones</h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
                                 Aún no hay estudiantes que hayan alcanzado el 85% de calidad en sus simulaciones.
                             </p>
                         </div>
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
                             {filtered.map(g => (
-                                <div key={g.code} style={{ padding: 24, borderRadius: 20, background: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                <div key={g.code} style={{ padding: 24, borderRadius: 20, background: 'var(--muted)', border: '1px solid var(--muted)', display: 'flex', flexDirection: 'column', gap: 16 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <div style={{ width: 44, height: 44, borderRadius: 12, background: '#FFFFFF', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+                                        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--card)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
                                             <CheckCircle size={22} />
                                         </div>
-                                        <div style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase' }}>Código: {g.code}</div>
+                                        <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Código: {g.code}</div>
                                     </div>
                                     <div>
-                                        <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F172A' }}>{g.title}</h4>
-                                        <p style={{ margin: '4px 0 0 0', fontSize: 13, color: '#64748B' }}>{g.count} certificaciones emitidas</p>
+                                        <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: 'var(--foreground)' }}>{g.title}</h4>
+                                        <p style={{ margin: '4px 0 0 0', fontSize: 13, color: 'var(--text-secondary)' }}>{g.count} certificaciones emitidas</p>
                                     </div>
-                                    <button style={{ width: '100%', padding: '12px', borderRadius: 12, background: '#FFFFFF', border: '1px solid #E2E8F0', color: '#1800AD', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                                    <button style={{ width: '100%', padding: '12px', borderRadius: 12, background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--brand)', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                                         <FileText size={16} /> Ver Listado ({g.count})
                                     </button>
                                 </div>

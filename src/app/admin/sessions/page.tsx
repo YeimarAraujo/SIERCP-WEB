@@ -29,8 +29,8 @@ export default function AdminSessionsPage() {
                 />
 
                 <div style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #E2E4F0',
+                    background: 'var(--card)',
+                    border: '1px solid var(--border)',
                     borderRadius: 16,
                     overflow: 'hidden',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
@@ -38,12 +38,12 @@ export default function AdminSessionsPage() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                         <thead>
                             <tr style={{
-                                background: '#F8FAFC',
-                                color: '#64748B',
+                                background: 'var(--muted)',
+                                color: 'var(--text-secondary)',
                                 fontSize: 11,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.05em',
-                                borderBottom: '1px solid #E2E4F0'
+                                borderBottom: '1px solid var(--border)'
                             }}>
                                 <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 600 }}>Alumno / Fecha</th>
                                 <th style={{ padding: '16px 20px', textAlign: 'left', fontWeight: 600 }}>Curso / Escenario</th>
@@ -55,37 +55,37 @@ export default function AdminSessionsPage() {
                         <tbody>
                             {loading ? (
                                 [1, 2, 3, 4, 5].map(i => (
-                                    <tr key={i}><td colSpan={5} style={{ padding: 20 }}><div style={{ height: 40, background: '#F8FAFC', borderRadius: 8, animation: 'pulse 2s infinite' }} /></td></tr>
+                                    <tr key={i}><td colSpan={5} style={{ padding: 20 }}><div style={{ height: 40, background: 'var(--muted)', borderRadius: 8, animation: 'pulse 2s infinite' }} /></td></tr>
                                 ))
                             ) : sessions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} style={{ padding: 64, textAlign: 'center', color: '#64748B' }}>
+                                    <td colSpan={5} style={{ padding: 64, textAlign: 'center', color: 'var(--text-secondary)' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-                                            <Clock size={40} style={{ color: '#E2E4F0' }} />
+                                            <Clock size={40} style={{ color: 'var(--border)' }} />
                                             <p>No hay sesiones registradas recientemente</p>
                                         </div>
                                     </td>
                                 </tr>
                             ) : (
                                 sessions.map((s) => (
-                                    <tr key={s.id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s' }}>
+                                    <tr key={s.id} style={{ borderBottom: '1px solid var(--muted)', transition: 'background 0.2s' }}>
                                         <td style={{ padding: '16px 20px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                <div style={{ width: 32, height: 32, borderRadius: 8, background: '#EEF0FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD' }}>
+                                                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)' }}>
                                                     <User size={16} />
                                                 </div>
                                                 <div>
-                                                    <div style={{ fontWeight: 600, color: '#0F172A' }}>{s.studentName}</div>
-                                                    <div style={{ fontSize: 11, color: '#64748B' }}>{formatDate(s.startedAt)}</div>
+                                                    <div style={{ fontWeight: 600, color: 'var(--foreground)' }}>{s.studentName}</div>
+                                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{formatDate(s.startedAt)}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td style={{ padding: '16px 20px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <Book size={14} style={{ color: '#94A3B8' }} />
-                                                <div style={{ color: '#475569', fontWeight: 500 }}>{s.courseId || 'Práctica Libre'}</div>
+                                                <Book size={14} style={{ color: 'var(--text-muted)' }} />
+                                                <div style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{s.courseId || 'Práctica Libre'}</div>
                                             </div>
-                                            <div style={{ fontSize: 11, color: '#94A3B8', marginLeft: 22 }}>{s.scenarioTitle}</div>
+                                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 22 }}>{s.scenarioTitle}</div>
                                         </td>
                                         <td style={{ padding: '16px 20px', textAlign: 'center' }}>
                                             <div style={{ 
@@ -106,7 +106,7 @@ export default function AdminSessionsPage() {
                                             </span>
                                         </td>
                                         <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                                            <ChevronRight size={18} style={{ color: '#E2E4F0', cursor: 'pointer' }} />
+                                            <ChevronRight size={18} style={{ color: 'var(--border)', cursor: 'pointer' }} />
                                         </td>
                                     </tr>
                                 ))

@@ -2,7 +2,7 @@
 
 import { PageHeader } from '@/components/ui/page-header';
 import { CreditCard, Users, Radio } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const plans = [
     {
@@ -35,6 +35,8 @@ const plans = [
 ];
 
 export default function SuperAdminPlansPage() {
+    const router = useRouter();
+
     return (
         <div>
             <PageHeader
@@ -106,7 +108,7 @@ export default function SuperAdminPlansPage() {
                                 </div>
                             </div>
 
-                            <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => toast.error('Gestión de planes disponible próximamente')}>
+                            <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => router.push('/super-admin/institutions')}>
                                 Gestionar
                             </button>
                         </div>

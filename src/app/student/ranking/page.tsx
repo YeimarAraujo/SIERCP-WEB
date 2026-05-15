@@ -83,7 +83,7 @@ export default function StudentRankingPage() {
                     );
                 }
                 return (
-                    <div style={{ paddingLeft: '8px', fontWeight: 700, color: '#64748B' }}>
+                    <div style={{ paddingLeft: '8px', fontWeight: 700, color: 'var(--text-secondary)' }}>
                         {rank}
                     </div>
                 );
@@ -94,8 +94,8 @@ export default function StudentRankingPage() {
             label: 'Estudiante',
             render: (val: any, row: RankingEntry) => (
                 <div style={{
-                    fontWeight: 800, color: '#0F172A',
-                    ...(row.uid === user?.uid ? { color: '#1800AD' } : {}),
+                    fontWeight: 800, color: 'var(--foreground)',
+                    ...(row.uid === user?.uid ? { color: 'var(--brand)' } : {}),
                 }}>
                     {val} {row.uid === user?.uid ? '(Tú)' : ''}
                 </div>
@@ -105,14 +105,14 @@ export default function StudentRankingPage() {
             key: 'averageScore',
             label: 'Puntaje AHA',
             render: (val: any) => (
-                <div style={{ fontWeight: 900, color: '#1800AD', fontSize: 16 }}>{val}%</div>
+                <div style={{ fontWeight: 900, color: 'var(--brand)', fontSize: 16 }}>{val}%</div>
             )
         },
         {
             key: 'sessions',
             label: 'Sesiones',
             render: (val: any) => (
-                <div style={{ color: '#64748B', fontWeight: 600 }}>{val} prácticas</div>
+                <div style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{val} prácticas</div>
             )
         },
         {
@@ -120,13 +120,13 @@ export default function StudentRankingPage() {
             render: (val: unknown) => {
                 if (val === 'up') return <TrendingUp size={18} style={{ color: '#10B981' }} />;
                 if (val === 'down') return <TrendingDown size={18} style={{ color: '#EF4444' }} />;
-                return <Minus size={18} style={{ color: '#94A3B8' }} />;
+                return <Minus size={18} style={{ color: 'var(--text-muted)' }} />;
             },
         },
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Ranking Institucional" />
 
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -139,7 +139,7 @@ export default function StudentRankingPage() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
                     <div style={{
-                        background: '#1800AD', borderRadius: 24, padding: 32, color: '#FFFFFF',
+                        background: 'var(--brand)', borderRadius: 24, padding: 32, color: 'var(--text-on-brand)',
                         display: 'flex', alignItems: 'center', gap: 24, boxShadow: '0 10px 15px -3px rgba(24, 0, 173, 0.3)'
                     }}>
                         <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -157,30 +157,30 @@ export default function StudentRankingPage() {
                     </div>
 
                     <div style={{
-                        background: '#FFFFFF', borderRadius: 24, padding: 32, border: '1px solid #E2E8F0',
+                        background: 'var(--card)', borderRadius: 24, padding: 32, border: '1px solid var(--border)',
                         display: 'flex', alignItems: 'center', gap: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                     }}>
-                        <div style={{ width: 64, height: 64, borderRadius: 20, background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+                        <div style={{ width: 64, height: 64, borderRadius: 20, background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
                             <Target size={32} />
                         </div>
                         <div>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: 4 }}>Meta de Excelencia</div>
-                            <div style={{ fontSize: 24, fontWeight: 800, color: '#0F172A' }}>95% de Calidad</div>
-                            <div style={{ fontSize: 13, color: '#64748B', marginTop: 4 }}>Sigue practicando para alcanzar el top 3</div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Meta de Excelencia</div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--foreground)' }}>95% de Calidad</div>
+                            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Sigue practicando para alcanzar el top 3</div>
                         </div>
                     </div>
                 </div>
 
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 20 }}>
                         <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
-                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Filtrar por estudiante..."
-                                style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none', background: '#F8FAFC' }}
+                                style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid var(--border)', fontSize: 14, outline: 'none', background: 'var(--muted)' }}
                             />
                         </div>
                     </div>

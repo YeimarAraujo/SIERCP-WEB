@@ -23,10 +23,10 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-    const bgColor = dark ? '#0F172A' : '#FFFFFF';
-    const borderColor = dark ? 'rgba(255,255,255,0.1)' : '#E2E8F0';
-    const textColor = dark ? '#FFFFFF' : '#0F172A';
-    const subTextColor = dark ? '#94A3B8' : '#64748B';
+    const bgColor = dark ? 'var(--foreground)' : 'var(--text-on-brand)';
+    const borderColor = dark ? 'rgba(255,255,255,0.1)' : 'var(--border)';
+    const textColor = dark ? 'var(--text-on-brand)' : 'var(--foreground)';
+    const subTextColor = dark ? 'var(--text-muted)' : 'var(--text-secondary)';
     
     const profileHref = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' 
         ? '/admin/profile' 
@@ -48,7 +48,7 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                             style={{ 
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 width: 32, height: 32, borderRadius: 8, border: 'none',
-                                background: dark ? 'rgba(255,255,255,0.1)' : '#F1F5F9',
+                                background: dark ? 'rgba(255,255,255,0.1)' : 'var(--muted)',
                                 color: textColor, cursor: 'pointer', padding: 0
                             }}
                         >
@@ -96,9 +96,9 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                                 <div style={{ position: 'relative' }}>
                                     <div style={{ 
                                         display: 'flex', width: 38, height: 38, alignItems: 'center', justifyContent: 'center', 
-                                        borderRadius: 12, background: 'linear-gradient(135deg, #1800AD 0%, #6366F1 100%)', 
-                                        color: '#FFFFFF', fontSize: 13, fontWeight: 800, boxShadow: '0 4px 6px -1px rgba(24, 0, 173, 0.2)',
-                                        border: '2px solid #FFFFFF', overflow: 'hidden'
+                                        borderRadius: 12, background: 'linear-gradient(135deg, var(--brand) 0%, var(--clr-accent) 100%)', 
+                                        color: 'var(--text-on-brand)', fontSize: 13, fontWeight: 800, boxShadow: '0 4px 6px -1px rgba(24, 0, 173, 0.2)',
+                                        border: '2px solid var(--card)', overflow: 'hidden'
                                     }}>
                                         {user.avatarUrl ? (
                                             <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -116,21 +116,21 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                             {isProfileOpen && (
                                 <div style={{ 
                                     position: 'absolute', top: 'calc(100% + 12px)', right: 0, width: 220, 
-                                    background: '#FFFFFF', borderRadius: 16, border: '1px solid #E2E8F0',
+                                    background: 'var(--card)', borderRadius: 16, border: '1px solid var(--border)',
                                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', overflow: 'hidden', zIndex: 60
                                 }}>
-                                    <div style={{ padding: '16px 20px', borderBottom: '1px solid #F1F5F9' }}>
-                                        <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em' }}>MI CUENTA</p>
+                                    <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--muted)' }}>
+                                        <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.05em' }}>MI CUENTA</p>
                                     </div>
                                     <div style={{ padding: 8 }}>
-                                        <Link href={profileHref} onClick={() => setIsProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: '#475569', fontSize: 13, fontWeight: 600 }} className="dropdown-item">
+                                        <Link href={profileHref} onClick={() => setIsProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600 }} className="dropdown-item">
                                             <UserIcon size={16} /> Ver Perfil
                                         </Link>
-                                        <Link href={profileHref} onClick={() => setIsProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: '#475569', fontSize: 13, fontWeight: 600 }} className="dropdown-item">
+                                        <Link href={profileHref} onClick={() => setIsProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600 }} className="dropdown-item">
                                             <Settings size={16} /> Configuración
                                         </Link>
                                     </div>
-                                    <div style={{ padding: 8, borderTop: '1px solid #F1F5F9' }}>
+                                    <div style={{ padding: 8, borderTop: '1px solid var(--muted)' }}>
                                         <button onClick={() => { logout(); setIsProfileOpen(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, border: 'none', background: 'transparent', color: '#EF4444', fontSize: 13, fontWeight: 700, cursor: 'pointer' }} className="dropdown-item-danger">
                                             <LogOut size={16} /> Cerrar Sesión
                                         </button>
@@ -142,15 +142,15 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                 </div>
                 <style jsx>{`
                     .header-profile-hover:hover {
-                        background: ${dark ? 'rgba(255,255,255,0.05)' : '#F8FAFC'};
+                        background: ${dark ? 'rgba(255,255,255,0.05)' : 'var(--muted)'};
                     }
                     .header-icon-btn:hover {
-                        background: ${dark ? 'rgba(255,255,255,0.05)' : '#F1F5F9'};
-                        color: #1800AD;
+                        background: ${dark ? 'rgba(255,255,255,0.05)' : 'var(--muted)'};
+                        color: var(--brand);
                     }
                     .dropdown-item:hover {
-                        background: #F8FAFC;
-                        color: #1800AD !important;
+                        background: var(--muted);
+                        color: var(--brand) !important;
                     }
                     .dropdown-item-danger:hover {
                         background: #FEF2F2;

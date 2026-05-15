@@ -73,26 +73,26 @@ export default function EditGuidePage() {
                     />
 
                     <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 24, marginTop: 24 }}>
-                        <div style={{ background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 16, padding: 24, display: 'grid', gap: 20 }}>
+                        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, padding: 24, display: 'grid', gap: 20 }}>
                             <div style={{ display: 'grid', gap: 8 }}>
-                                <label style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>Título del módulo</label>
+                                <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>Título del módulo</label>
                                 <input
                                     name="title"
                                     value={formData.title}
                                     onChange={handleChange}
                                     required
-                                    style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1px solid #E2E8F0', outline: 'none', fontSize: 14 }}
+                                    style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', outline: 'none', fontSize: 14 }}
                                 />
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                 <div style={{ display: 'grid', gap: 8 }}>
-                                    <label style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>Categoría</label>
+                                    <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>Categoría</label>
                                     <select
                                         name="category"
                                         value={formData.category}
                                         onChange={handleChange}
-                                        style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1px solid #E2E8F0', outline: 'none', fontSize: 14 }}
+                                        style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', outline: 'none', fontSize: 14 }}
                                     >
                                         {Object.entries(CATEGORY_LABELS).map(([val, label]) => (
                                             <option key={val} value={val}>{label}</option>
@@ -100,28 +100,28 @@ export default function EditGuidePage() {
                                     </select>
                                 </div>
                                 <div style={{ display: 'grid', gap: 8 }}>
-                                    <label style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>Tiempo estimado (min)</label>
+                                    <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>Tiempo estimado (min)</label>
                                     <input
                                         type="number"
                                         name="estimatedMinutes"
                                         value={formData.estimatedMinutes}
                                         onChange={handleChange}
                                         required
-                                        style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1px solid #E2E8F0', outline: 'none', fontSize: 14 }}
+                                        style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)', outline: 'none', fontSize: 14 }}
                                     />
                                 </div>
                             </div>
 
                             <div style={{ display: 'grid', gap: 8 }}>
-                                <label style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>URL del PDF</label>
+                                <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>URL del PDF</label>
                                 <div style={{ position: 'relative' }}>
-                                    <FileText size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                                    <FileText size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                                     <input
                                         name="contentUrl"
                                         value={formData?.contentUrl}
                                         onChange={handleChange}
                                         required
-                                        style={{ width: '100%', padding: '12px 16px 12px 40px', borderRadius: 10, border: '1px solid #E2E8F0', outline: 'none', fontSize: 14 }}
+                                        style={{ width: '100%', padding: '12px 16px 12px 40px', borderRadius: 10, border: '1px solid var(--border)', outline: 'none', fontSize: 14 }}
                                     />
                                 </div>
                             </div>
@@ -130,21 +130,21 @@ export default function EditGuidePage() {
                                 onClick={handleToggle}
                                 style={{ 
                                     display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, 
-                                    background: formData.required ? '#EEF0FF' : '#F8FAFC', cursor: 'pointer', border: '1px solid',
-                                    borderColor: formData.required ? '#1800AD' : '#E2E4F0', transition: 'all 0.2s'
+                                    background: formData.required ? 'var(--accent)' : 'var(--muted)', cursor: 'pointer', border: '1px solid',
+                                    borderColor: formData.required ? 'var(--brand)' : 'var(--border)', transition: 'all 0.2s'
                                 }}
                             >
-                                <ShieldCheck size={20} style={{ color: formData.required ? '#1800AD' : '#94A3B8' }} />
+                                <ShieldCheck size={20} style={{ color: formData.required ? 'var(--brand)' : 'var(--text-muted)' }} />
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: 14, fontWeight: 700, color: formData.required ? '#1800AD' : '#475569' }}>Módulo Obligatorio</div>
-                                    <div style={{ fontSize: 12, color: formData.required ? '#1800AD' : '#64748B', opacity: 0.8 }}>Los estudiantes deben completar este módulo para aprobar.</div>
+                                    <div style={{ fontSize: 14, fontWeight: 700, color: formData.required ? 'var(--brand)' : 'var(--text-secondary)' }}>Módulo Obligatorio</div>
+                                    <div style={{ fontSize: 12, color: formData.required ? 'var(--brand)' : 'var(--text-secondary)', opacity: 0.8 }}>Los estudiantes deben completar este módulo para aprobar.</div>
                                 </div>
                                 <div style={{ 
-                                    width: 40, height: 20, borderRadius: 20, background: formData.required ? '#1800AD' : '#CBD5E1',
+                                    width: 40, height: 20, borderRadius: 20, background: formData.required ? 'var(--brand)' : 'var(--border-strong)',
                                     position: 'relative', transition: 'all 0.2s'
                                 }}>
                                     <div style={{ 
-                                        width: 14, height: 14, borderRadius: '50%', background: '#FFFFFF',
+                                        width: 14, height: 14, borderRadius: '50%', background: 'var(--card)',
                                         position: 'absolute', top: 3, left: formData.required ? 23 : 3, transition: 'all 0.2s'
                                     }} />
                                 </div>
@@ -157,7 +157,7 @@ export default function EditGuidePage() {
                                 onClick={() => router.back()}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10,
-                                    background: '#F1F5F9', color: '#64748B', border: 'none', fontWeight: 600, cursor: 'pointer'
+                                    background: 'var(--muted)', color: 'var(--text-secondary)', border: 'none', fontWeight: 600, cursor: 'pointer'
                                 }}
                             >
                                 <X size={18} /> Cancelar
@@ -167,7 +167,7 @@ export default function EditGuidePage() {
                                 disabled={saving}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', borderRadius: 10,
-                                    background: '#1800AD', color: '#FFFFFF', border: 'none', fontWeight: 700, cursor: 'pointer',
+                                    background: 'var(--brand)', color: 'var(--text-on-brand)', border: 'none', fontWeight: 700, cursor: 'pointer',
                                     opacity: saving ? 0.7 : 1
                                 }}
                             >

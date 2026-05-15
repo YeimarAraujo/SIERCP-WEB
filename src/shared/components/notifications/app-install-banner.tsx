@@ -133,7 +133,7 @@ export function NotificationPrompt({ onPermissionGranted }: NotificationPromptPr
                     className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ background: 'rgba(24, 0, 173, 0.1)' }}
                 >
-                    <Bell className="w-5 h-5" style={{ color: '#1800AD' }} />
+                    <Bell className="w-5 h-5" style={{ color: 'var(--brand)' }} />
                 </div>
 
                 <div className="flex-1">
@@ -150,7 +150,7 @@ export function NotificationPrompt({ onPermissionGranted }: NotificationPromptPr
                             disabled={isLoading}
                             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                             style={{ 
-                                background: '#1800AD',
+                                background: 'var(--brand)',
                                 color: 'white',
                             }}
                         >
@@ -238,7 +238,7 @@ export function AppDownloadPrompt({ className }: AppDownloadPromptProps) {
                                 onClick={handleDismiss}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-transform hover:scale-105"
                                 style={{ 
-                                    background: '#FFFFFF',
+                                    background: 'var(--card)',
                                     color: '#0E0080',
                                 }}
                             >

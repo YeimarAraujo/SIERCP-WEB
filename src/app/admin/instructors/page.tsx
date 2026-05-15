@@ -54,12 +54,12 @@ export default function AdminInstructorsPage() {
             label: 'Instructor',
             render: (_: any, row: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD', fontWeight: 700 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', fontWeight: 700 }}>
                         {row.displayName?.charAt(0) || 'I'}
                     </div>
                     <div>
-                        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 14 }}>{row.displayName}</div>
-                        <div style={{ fontSize: 12, color: '#64748B' }}>{row.specialty || 'Instructor RCP'}</div>
+                        <div style={{ fontWeight: 800, color: 'var(--foreground)', fontSize: 14 }}>{row.displayName}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{row.specialty || 'Instructor RCP'}</div>
                     </div>
                 </div>
             )
@@ -68,7 +68,7 @@ export default function AdminInstructorsPage() {
             key: 'email', 
             label: 'Contacto',
             render: (val: string) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#475569', fontSize: 13 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)', fontSize: 13 }}>
                     <Mail size={14} /> {val}
                 </div>
             )
@@ -78,8 +78,8 @@ export default function AdminInstructorsPage() {
             label: 'Carga Académica',
             render: (_: any, row: any) => (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>{row.coursesCount} Cursos</div>
-                    <div style={{ fontSize: 11, color: '#94A3B8' }}>{row.studentsCount} Alumnos totales</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--foreground)' }}>{row.coursesCount} Cursos</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{row.studentsCount} Alumnos totales</div>
                 </div>
             )
         },
@@ -98,7 +98,7 @@ export default function AdminInstructorsPage() {
             render: (_: any, row: any) => (
                 <button 
                     onClick={() => router.push(`/admin/instructors/${row.uid}`)}
-                    style={{ background: 'none', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: 8 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--border-strong)', cursor: 'pointer', padding: 8 }}
                 >
                     <ChevronRight size={20} />
                 </button>
@@ -107,7 +107,7 @@ export default function AdminInstructorsPage() {
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Gestión de Facultad" />
             
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -120,7 +120,7 @@ export default function AdminInstructorsPage() {
                         <button 
                             onClick={() => router.push('/admin/instructors/new')}
                             style={{ 
-                                padding: '12px 24px', borderRadius: 14, background: '#1800AD', color: '#FFFFFF', 
+                                padding: '12px 24px', borderRadius: 14, background: 'var(--brand)', color: 'var(--text-on-brand)', 
                                 border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
                                 display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)' 
                             }}
@@ -130,18 +130,18 @@ export default function AdminInstructorsPage() {
                     }
                 />
 
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
                         <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
-                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
                                 type="text"
                                 placeholder="Buscar por nombre o correo..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{
-                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
-                                    fontSize: 14, outline: 'none', background: '#F8FAFC'
+                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid var(--border)',
+                                    fontSize: 14, outline: 'none', background: 'var(--muted)'
                                 }}
                             />
                         </div>

@@ -20,12 +20,12 @@ export default function InstructorError({
                 width: 64, height: 64, borderRadius: '50%', background: '#FEF2F2',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
             }}>⚠️</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', margin: 0 }}>Error en el módulo de Instructor</h2>
-            <p style={{ color: '#64748B', fontSize: 14, margin: 0, maxWidth: 400 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--foreground)', margin: 0 }}>Error en el módulo de Instructor</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0, maxWidth: 400 }}>
                 Ocurrió un error inesperado. Intenta de nuevo o contacta al administrador.
             </p>
             <button onClick={reset} style={{
-                padding: '10px 24px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
+                padding: '10px 24px', borderRadius: 12, background: 'var(--brand)', color: 'var(--text-on-brand)',
                 border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 14,
             }}>
                 Reintentar
