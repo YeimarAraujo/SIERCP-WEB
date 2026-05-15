@@ -64,18 +64,23 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div style={{
+        <div className="app-shell-root" style={{
             display: 'flex',
-            minHeight: '100vh',
+            height: '100dvh',
+            minHeight: '100dvh',
             background: 'var(--bg-page)',
             color: 'var(--text-primary)',
+            overflow: 'hidden',
         }}>
-            <SuperAdminSidebar />
-            <main style={{
+            <SuperAdminSidebar collapsed />
+            <main className="app-main" style={{
                 flex: 1,
                 overflowY: 'auto',
                 background: 'var(--bg-page)',
                 padding: '32px',
+                minHeight: '100dvh',
+                display: 'flex',
+                flexDirection: 'column',
             }}>
                 {children}
             </main>

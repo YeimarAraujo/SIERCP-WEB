@@ -62,8 +62,8 @@ export function Sidebar() {
             height: '100vh',
             width: 224,
             flexShrink: 0,
-            background: '#FFFFFF',
-            borderRight: '1px solid #E2E4F0',
+            background: 'var(--card)',
+            borderRight: '1px solid var(--border)',
         }}>
             {/* Logo */}
             <div style={{
@@ -71,7 +71,7 @@ export function Sidebar() {
                 alignItems: 'center',
                 gap: 8,
                 height: 56,
-                borderBottom: '1px solid #E2E4F0',
+                borderBottom: '1px solid var(--border)',
                 padding: '0 16px',
             }}>
                 <div style={{
@@ -81,8 +81,8 @@ export function Sidebar() {
                     width: 28,
                     height: 28,
                     borderRadius: 6,
-                    background: '#1800AD',
-                    color: '#FFFFFF',
+                    background: 'var(--brand)',
+                    color: 'var(--text-on-brand)',
                     fontSize: 12,
                     fontWeight: 700,
                 }}>
@@ -91,7 +91,7 @@ export function Sidebar() {
                 <span style={{
                     fontWeight: 600,
                     fontSize: 14,
-                    color: '#0B1C30',
+                    color: 'var(--foreground)',
                 }}>
                     SIERCP
                 </span>
@@ -119,8 +119,8 @@ export function Sidebar() {
                             fontSize: 13,
                             fontWeight: 500,
                             textDecoration: 'none',
-                            background: isActive(href) ? '#EEF0FF' : 'transparent',
-                            color: isActive(href) ? '#1800AD' : '#4A5568',
+                            background: isActive(href) ? 'var(--accent)' : 'transparent',
+                            color: isActive(href) ? 'var(--brand)' : '#4A5568',
                             transition: 'background 0.15s',
                         }}
                         onMouseEnter={(e) => {
@@ -142,7 +142,7 @@ export function Sidebar() {
 
             {/* User + Logout */}
             <div style={{
-                borderTop: '1px solid #E2E4F0',
+                borderTop: '1px solid var(--border)',
                 padding: 12,
                 display: 'flex',
                 flexDirection: 'column',
@@ -153,7 +153,7 @@ export function Sidebar() {
                         <p style={{
                             fontSize: 12,
                             fontWeight: 500,
-                            color: '#0B1C30',
+                            color: 'var(--foreground)',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -162,7 +162,7 @@ export function Sidebar() {
                         </p>
                         <p style={{
                             fontSize: 11,
-                            color: '#8892A4',
+                            color: 'var(--text-muted)',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',

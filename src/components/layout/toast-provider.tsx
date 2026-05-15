@@ -10,18 +10,18 @@ export function ToastProvider() {
                 duration: 3000,
                 style: {
                     borderRadius: '12px',
-                    background: '#FFFFFF',
-                    color: '#0F172A',
+                    background: 'var(--card)',
+                    color: 'var(--foreground)',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                     fontSize: '14px',
                     fontWeight: 500,
-                    border: '1px solid #E2E8F0',
+                    border: '1px solid var(--border)',
                 },
                 success: {
-                    iconTheme: { primary: '#10B981', secondary: '#FFFFFF' },
+                    iconTheme: { primary: '#10B981', secondary: 'var(--text-on-brand)' },
                 },
                 error: {
-                    iconTheme: { primary: '#EF4444', secondary: '#FFFFFF' },
+                    iconTheme: { primary: '#EF4444', secondary: 'var(--text-on-brand)' },
                 },
             }}
         />

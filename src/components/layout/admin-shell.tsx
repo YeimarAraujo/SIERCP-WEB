@@ -9,7 +9,6 @@ import { ToastProvider } from '@/components/layout/toast-provider';
 export function AdminShell({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [ready, setReady] = useState(false);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     useEffect(() => {
         const checkAuth = () => {
@@ -70,18 +69,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div style={{
+        <div className="app-shell-root" style={{
             display: 'flex',
-            minHeight: '100vh',
+            height: '100dvh',
+            minHeight: '100dvh',
             background: 'var(--bg-page)',
             color: 'var(--text-primary)',
+            overflow: 'hidden',
         }}>
-            <AdminSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
-            <main style={{
+            <AdminSidebar collapsed />
+            <main className="app-main" style={{
                 flex: 1,
                 overflowY: 'auto',
                 background: 'var(--bg-page)',
                 padding: '32px',
+                minHeight: '100dvh',
+                display: 'flex',
+                flexDirection: 'column',
             }}>
                 {children}
             </main>
