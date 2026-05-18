@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
 import { StatCard } from '@/components/ui/stat-card';
 import { useAuthStore } from '@/stores/auth-store';
-import { SessionService, CourseService } from '@/services/firestore.service';
+import { SessionService } from '@/services/firestore.service';
+import { StudentEnrollmentService } from '@/services/student-enrollment.service';
 import type { SessionModel } from '@/models/session';
-import type { CourseModel } from '@/models/course';
+import type { StudentCourseCard } from '@/shared/types/student-course-card';
 import { 
     Activity, GraduationCap, Award, BookOpen, 
     Zap, Clock, ChevronRight, Signal,
@@ -18,7 +19,7 @@ import Link from 'next/link';
 export default function StudentHomePage() {
     const user = useAuthStore((s) => s.user);
     const [sessions, setSessions] = useState<SessionModel[]>([]);
-    const [courses, setCourses] = useState<CourseModel[]>([]);
+    const [courses, setCourses] = useState<StudentCourseCard[]>([]);
     const [totalSessionsCount, setTotalSessionsCount] = useState<number>(0);
     const [loading, setLoading] = useState(true);
 
@@ -27,8 +28,8 @@ export default function StudentHomePage() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                // 1. Obtener cursos en los que está inscrito el estudiante
-                const coursesData = await CourseService.getByStudent(user.uid);
+                // 1. Obtener cursos en los que está inscrito el estudiante (unificado)
+                const coursesData = await StudentEnrollmentService.getStudentCourses(user.uid);
                 setCourses(coursesData);
 
                 // 2. Obtener sesiones recientes del estudiante

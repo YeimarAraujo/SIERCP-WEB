@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { useAuth } from '@/shared/hooks/use-auth';
-import { CourseService } from '@/shared/lib/firestore.service';
+import { StudentEnrollmentService } from '@/shared/lib/student-enrollment.service';
 import type { CourseModel } from '@/shared/types/course';
 import { BookOpen, PlayCircle, ClipboardCheck, Award, Lock, CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ interface Module {
     id: string;
     title: string;
     description?: string;
-    type: 'teoria' | 'evaluacion_teorica' | 'practica_guiada' | 'certificacion';
+    type: 'teoria' | 'evaluacion_teorica' | 'practica_guiada' | 'certificacion' | string;
     order: number;
     estimatedMinutes?: number;
     isRequired: boolean;
@@ -36,19 +36,25 @@ export default function StudentCourseDetailPage() {
     const [modules, setModules] = useState<Module[]>([]);
     const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
+    const [isCourseLocked, setIsCourseLocked] = useState(false);
+    const [lockedReason, setLockedReason] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user || !courseId) return;
 
-        Promise.all([
-            CourseService.get(courseId),
-            CourseService.getModules(courseId),
-            CourseService.getStudentProgress(courseId, user.uid),
-        ]).then(([c, m, progress]) => {
-            setCourse(c);
-            setModules(m);
-            setCompletedModules(progress);
-        }).finally(() => setLoading(false));
+        StudentEnrollmentService.getCourseDetails(courseId, user.uid)
+            .then((data) => {
+                if (data) {
+                    setCourse(data.course);
+                    setModules(data.modules);
+                    setCompletedModules(data.progress);
+                    setIsCourseLocked(data.isLocked || false);
+                    setLockedReason(data.lockedReason || null);
+                } else {
+                    setCourse(null);
+                }
+            })
+            .finally(() => setLoading(false));
     }, [user, courseId]);
 
     const completedCount = completedModules.size;
@@ -149,7 +155,18 @@ export default function StudentCourseDetailPage() {
                         MÓDULOS A COMPLETAR
                     </h3>
 
-                    {modules.length === 0 ? (
+                    {isCourseLocked ? (
+                        <div style={{
+                            background: '#FFFBEB', borderRadius: 16, padding: 40, textAlign: 'center',
+                            border: '1px solid #FEF3C7'
+                        }}>
+                            <Lock size={32} color="#D97706" style={{ marginBottom: 16 }} />
+                            <h4 style={{ color: '#92400E', fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Curso No Iniciado</h4>
+                            <p style={{ color: '#B45309', margin: 0 }}>
+                                {lockedReason || 'El contenido estará disponible cuando inicie la formación.'}
+                            </p>
+                        </div>
+                    ) : modules.length === 0 ? (
                         <div style={{
                             background: '#FFFFFF', borderRadius: 16, padding: 40, textAlign: 'center',
                             border: '1px solid #E2E4F0'

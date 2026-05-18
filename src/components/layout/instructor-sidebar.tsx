@@ -8,7 +8,7 @@ import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Monitor, BookOpen, Users, Clock,
     BarChart2, Award, Trophy, CheckSquare, User, LogOut,
-    Sun, Moon, Globe
+    Sun, Moon, Globe, CalendarDays
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -28,6 +28,7 @@ const navItems: NavItem[] = [
     { label: 'Certificados',    href: '/instructor/certificates', icon: Award },
     { label: 'Ranking',         href: '/instructor/ranking',      icon: Trophy },
     { label: 'Evaluaciones',    href: '/instructor/evaluations',  icon: CheckSquare },
+    { label: 'Calendario',      href: '/instructor/calendar',     icon: CalendarDays },
 ];
 
 export function InstructorSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {

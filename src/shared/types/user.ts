@@ -19,6 +19,7 @@ export interface UserModel {
     identificacion?: string;
     isActive: boolean;
     institutionId: string;
+    phoneNumber?: string;
     status: 'PENDING' | 'ACTIVE';
     stats?: UserStats;
     fcmTokens?: string[];

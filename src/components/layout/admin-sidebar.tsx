@@ -8,7 +8,7 @@ import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Monitor, GraduationCap, Users, Cpu,
     BookOpen, BarChart2, FileText, Settings, Shield, User, LogOut,
-    Sun, Moon, Globe, Award
+    Sun, Moon, Globe, Award, Zap, CalendarDays
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -19,15 +19,17 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { label: 'Panel de control',  href: '/admin/dashboard',    icon: LayoutDashboard },
-    { label: 'Sesiones en vivo',  href: '/admin/sessions',     icon: Monitor },
-    { label: 'Instructores',      href: '/admin/instructors',  icon: GraduationCap },
-    { label: 'Estudiantes',       href: '/admin/students',     icon: Users },
-    { label: 'Dispositivos',      href: '/admin/devices',      icon: Cpu },
-    { label: 'Cursos',            href: '/admin/courses',      icon: BookOpen },
-    { label: 'Reportes',          href: '/admin/reports',      icon: BarChart2 },
-    { label: 'Certificados',      href: '/admin/certificates', icon: Award },
-    { label: 'Configuración',     href: '/admin/settings',     icon: Settings },
+    { label: 'Panel de control', href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Sesiones en vivo', href: '/admin/sessions', icon: Monitor },
+    { label: 'Instructores', href: '/admin/instructors', icon: GraduationCap },
+    { label: 'Estudiantes', href: '/admin/students', icon: Users },
+    { label: 'Dispositivos', href: '/admin/devices', icon: Cpu },
+    { label: 'Cursos', href: '/admin/courses', icon: BookOpen },
+    // { label: 'Oferta LMS',        href: '/admin/platform-courses', icon: Zap },
+    { label: 'Reportes', href: '/admin/reports', icon: BarChart2 },
+    { label: 'Certificados', href: '/admin/certificates', icon: Award },
+    { label: 'Calendario', href: '/admin/calendar', icon: CalendarDays },
+    { label: 'Configuración', href: '/admin/settings', icon: Settings },
 ];
 
 export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
@@ -47,7 +49,7 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
     };
 
     const handleLogout = async () => {
-        try { await logout(); } catch {}
+        try { await logout(); } catch { }
         router.replace('/');
     };
 
@@ -69,8 +71,8 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
             transition: 'width 0.25s ease, min-width 0.25s ease',
             zIndex: 50,
         }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
         >
             <div style={{
                 padding: isCollapsed ? '16px 12px' : '20px 20px 16px',
@@ -92,8 +94,8 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                     fontSize: 14, fontWeight: 700,
                     cursor: 'pointer',
                 }}
-                onClick={onToggle}
-                title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+                    onClick={onToggle}
+                    title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
                 >S</div>
                 <span style={{
                     fontSize: '16px',
@@ -150,18 +152,18 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                                 marginLeft: isCollapsed ? 'auto' : 0,
                                 marginRight: isCollapsed ? 'auto' : 0,
                             }}
-                            onMouseEnter={(e) => {
-                                if (!active) {
-                                    e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                                    e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!active) {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = 'var(--sidebar-text)';
-                                }
-                            }}
+                                onMouseEnter={(e) => {
+                                    if (!active) {
+                                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!active) {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.color = 'var(--sidebar-text)';
+                                    }
+                                }}
                             >
                                 <Icon
                                     size={20}
@@ -229,15 +231,15 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                         marginRight: isCollapsed ? 'auto' : 0,
                         marginBottom: '4px',
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                    }}
-                    title={isCollapsed ? 'Volver al sitio' : undefined}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'var(--sidebar-text)';
+                        }}
+                        title={isCollapsed ? 'Volver al sitio' : undefined}
                     >
                         <Globe size={20} />
                         <span style={{
@@ -266,15 +268,15 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                         marginLeft: isCollapsed ? 'auto' : 0,
                         marginRight: isCollapsed ? 'auto' : 0,
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                    }}
-                    title={isCollapsed ? 'Mi perfil' : undefined}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'var(--sidebar-text)';
+                        }}
+                        title={isCollapsed ? 'Mi perfil' : undefined}
                     >
                         <User size={20} />
                         <span style={{

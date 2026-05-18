@@ -8,7 +8,7 @@ import { useThemeStore } from '@/stores/theme-store';
 import {
     Home, BookOpen, Clock, BarChart2, Award, Trophy,
     Radio, Smartphone, Cpu, User, LogOut,
-    Sun, Moon, Globe
+    Sun, Moon, Globe, ClipboardList, CalendarDays
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -19,12 +19,15 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { label: 'Inicio',         href: '/student/home',         icon: Home },
-    { label: 'Mis cursos',     href: '/student/courses',      icon: BookOpen },
-    { label: 'Historial',      href: '/student/history',      icon: Clock },
-    { label: 'Mis reportes',   href: '/student/reports',      icon: BarChart2 },
-    { label: 'Certificados',   href: '/student/certificates', icon: Award },
-    { label: 'Ranking',        href: '/student/ranking',      icon: Trophy },
+    { label: 'Inicio', href: '/student/home', icon: Home },
+    { label: 'Mis cursos', href: '/student/courses', icon: BookOpen },
+    { label: 'Calendario', href: '/student/calendar', icon: CalendarDays },
+    // { label: 'Inscripciones',  href: '/student/enrollments',  icon: ClipboardList },
+    { label: 'Historial', href: '/student/history', icon: Clock },
+    { label: 'Mis reportes', href: '/student/reports', icon: BarChart2 },
+    { label: 'Certificados', href: '/student/certificates', icon: Award },
+    { label: 'Ranking', href: '/student/ranking', icon: Trophy },
+
 ];
 
 export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
@@ -44,7 +47,7 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
     };
 
     const handleLogout = async () => {
-        try { await logout(); } catch {}
+        try { await logout(); } catch { }
         router.replace('/');
     };
 
@@ -66,8 +69,8 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
             transition: 'width 0.25s ease, min-width 0.25s ease',
             zIndex: 50,
         }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
         >
             <div style={{
                 padding: isCollapsed ? '16px 12px' : '20px 20px 16px',
@@ -89,8 +92,8 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                     fontSize: 14, fontWeight: 700,
                     cursor: 'pointer',
                 }}
-                onClick={onToggle}
-                title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+                    onClick={onToggle}
+                    title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
                 >S</div>
                 <span style={{
                     fontSize: '16px',
@@ -147,18 +150,18 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                                 marginLeft: isCollapsed ? 'auto' : 0,
                                 marginRight: isCollapsed ? 'auto' : 0,
                             }}
-                            onMouseEnter={(e) => {
-                                if (!active) {
-                                    e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                                    e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!active) {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = 'var(--sidebar-text)';
-                                }
-                            }}
+                                onMouseEnter={(e) => {
+                                    if (!active) {
+                                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!active) {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.color = 'var(--sidebar-text)';
+                                    }
+                                }}
                             >
                                 <Icon
                                     size={20}
@@ -226,15 +229,15 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                         marginRight: isCollapsed ? 'auto' : 0,
                         marginBottom: '4px',
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                    }}
-                    title={isCollapsed ? 'Volver al sitio' : undefined}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'var(--sidebar-text)';
+                        }}
+                        title={isCollapsed ? 'Volver al sitio' : undefined}
                     >
                         <Globe size={20} />
                         <span style={{
@@ -263,15 +266,15 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                         marginLeft: isCollapsed ? 'auto' : 0,
                         marginRight: isCollapsed ? 'auto' : 0,
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                    }}
-                    title={isCollapsed ? 'Mi perfil' : undefined}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'var(--sidebar-text)';
+                        }}
+                        title={isCollapsed ? 'Mi perfil' : undefined}
                     >
                         <User size={20} />
                         <span style={{
