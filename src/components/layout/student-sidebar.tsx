@@ -188,7 +188,7 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                 gap: 4,
                 alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
-                {user && !collapsed && (
+                {user && !isCollapsed && (
                     <div style={{ padding: '8px 12px' }}>
                         <p style={{
                             fontSize: 12,

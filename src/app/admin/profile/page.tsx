@@ -5,7 +5,7 @@ import { ProfileContent } from '@/components/profile/profile-content';
 
 export default function AdminProfilePage() {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Perfil del Administrador" />
             
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>

@@ -97,7 +97,7 @@ export function DesktopAppModal({ onInstall }: DesktopAppModalProps) {
                         onClick={handleInstall}
                         className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition-transform hover:scale-[1.02]"
                         style={{ 
-                            background: '#FFFFFF',
+                            background: 'var(--card)',
                             color: '#0E0080',
                         }}
                     >

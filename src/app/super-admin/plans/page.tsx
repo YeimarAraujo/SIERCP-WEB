@@ -179,7 +179,6 @@ export default function SuperAdminPlansPage() {
                   )}
                 </div>
 
-                {/* Quick stats */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {[
                     { label: 'Estudiantes', val: fmt(plan.limits.maxStudents) },
@@ -211,7 +210,6 @@ export default function SuperAdminPlansPage() {
             <p style={{ fontSize: 12, color: '#94A3B8', margin: '4px 0 0' }}>Click en cada categoría para expandir los detalles</p>
           </div>
 
-          {/* Header row */}
           <div style={{
             display: 'grid', gridTemplateColumns: '280px repeat(3, 1fr)',
             borderBottom: '2px solid #E2E8F0', position: 'sticky', top: 0,
@@ -227,7 +225,6 @@ export default function SuperAdminPlansPage() {
             ))}
           </div>
 
-          {/* Categories */}
           {CATEGORIES.map(cat => {
             const expanded = expandedCat === cat.title || expandedCat === null;
             const CatIcon = cat.icon;
@@ -269,7 +266,7 @@ export default function SuperAdminPlansPage() {
                       <feat.icon size={13} style={{ color: '#94A3B8' }} />
                       {feat.label}
                     </div>
-                    {DEFAULT_PLANS.map((plan, idx) => {
+                    {DEFAULT_PLANS.map((plan) => {
                       const val = feat.getValue(plan.limits);
                       return (
                         <div key={plan.slug} style={{

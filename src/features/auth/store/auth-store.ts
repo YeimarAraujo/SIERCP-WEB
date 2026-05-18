@@ -14,6 +14,7 @@ import { auth, db } from '@/shared/lib/firebase';
 import type { UserModel } from '@/shared/types/user';
 import { ROLE_STUDENT, ROLE_INSTRUCTOR, ROLE_SUPER_ADMIN } from '@/shared/lib/constants';
 import { InstitutionService } from '@/features/institutions/services/institution.service';
+import { AuditService } from '@/features/audit/services/audit.service';
 
 interface AuthStore {
     user: UserModel | null;
@@ -124,6 +125,21 @@ export const useAuthStore = create<AuthStore>()(
 
         const user = await fetchUserModel(cred.user.uid);
         set({ user, firebaseUser: cred.user, loading: false, initialized: true });
+        if (user) {
+            AuditService.record({
+                actor: {
+                    uid: user.uid,
+                    email: user.email,
+                    name: `${user.firstName} ${user.lastName}`.trim(),
+                    role: user.role,
+                },
+                action: 'auth.login',
+                resource: 'auth',
+                resourceId: user.uid,
+                institutionId: user.institutionId,
+                metadata: { provider: 'firebase-auth' },
+            });
+        }
     } catch (err: unknown) {
                     let msg = 'Error al iniciar sesión';
                     if (err && typeof err === 'object' && 'code' in err) {
@@ -192,6 +208,19 @@ export const useAuthStore = create<AuthStore>()(
                     });
                     const user = await fetchUserModel(cred.user.uid);
                     set({ user, firebaseUser: cred.user, loading: false, initialized: true });
+                    AuditService.record({
+                        actor: {
+                            uid: cred.user.uid,
+                            email,
+                            name: `${firstName} ${lastName}`.trim(),
+                            role: roleValue,
+                        },
+                        action: 'create',
+                        resource: 'user',
+                        resourceId: cred.user.uid,
+                        institutionId: finalInstitutionId,
+                        metadata: { source: 'public-register', role: roleValue, status: finalStatus },
+                    });
                 } catch (err: unknown) {
                     const msg = err instanceof Error ? err.message : 'Error al registrar';
                     set({ loading: false, error: msg });
@@ -200,6 +229,21 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             logout: async () => {
+    const currentUser = get().user;
+    if (currentUser) {
+        AuditService.record({
+            actor: {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                name: `${currentUser.firstName} ${currentUser.lastName}`.trim(),
+                role: currentUser.role,
+            },
+            action: 'auth.logout',
+            resource: 'auth',
+            resourceId: currentUser.uid,
+            institutionId: currentUser.institutionId,
+        });
+    }
     await fetch('/api/auth/session', { method: 'DELETE' });
     
     if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }

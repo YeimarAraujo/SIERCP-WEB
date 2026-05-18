@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/shared/lib/firebase';
 import type { Institution as InstitutionType } from '@/shared/types/institution';
+import { AuditService } from '@/features/audit/services/audit.service';
 
 export const InstitutionService = {
     exists: async (code: string): Promise<boolean> => {
@@ -19,6 +20,13 @@ export const InstitutionService = {
         await setDoc(doc(db, 'institutions', code), {
             ...data,
             createdAt: serverTimestamp(),
+        });
+        await AuditService.record({
+            action: 'create',
+            resource: 'institution',
+            resourceId: code,
+            institutionId: code,
+            metadata: { name: data.name, plan: data.plan, status: data.status },
         });
     },
 

@@ -84,7 +84,7 @@ export default function StudentHomePage() {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Panel del Estudiante" />
             
             <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
@@ -98,22 +98,22 @@ export default function StudentHomePage() {
                     marginBottom: 32 
                 }}>
                     {[
-                        { label: 'Sesiones Totales', value: stats.totalSessions, icon: Activity, color: '#1800AD', sub: 'Prácticas RCP' },
+                        { label: 'Sesiones Totales', value: stats.totalSessions, icon: Activity, color: 'var(--brand)', sub: 'Prácticas RCP' },
                         { label: 'Score Promedio', value: `${stats.averageScore}%`, icon: Zap, color: getScoreColor(stats.averageScore), sub: 'Calidad AHA' },
                         { label: 'Mejor Desempeño', value: `${stats.bestScore}%`, icon: Award, color: '#10B981', sub: 'Récord personal' },
-                        { label: 'Cursos Activos', value: stats.activeCourses, icon: BookOpen, color: '#6366F1', sub: 'Matrículas vigentes' },
+                        { label: 'Cursos Activos', value: stats.activeCourses, icon: BookOpen, color: 'var(--clr-accent)', sub: 'Matrículas vigentes' },
                     ].map((m, i) => (
                         <div key={i} style={{
-                            background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 20, padding: 24,
+                            background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: 24,
                             boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: 12
                         }}>
                             <div style={{ width: 44, height: 44, borderRadius: 12, background: `${m.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: m.color }}>
                                 <m.icon size={22} />
                             </div>
                             <div>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: '#64748B', marginBottom: 4 }}>{m.label}</div>
-                                <div style={{ fontSize: 24, fontWeight: 800, color: '#0F172A' }}>{loading ? '...' : m.value}</div>
-                                <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 700, marginTop: 4 }}>{m.sub}</div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>{m.label}</div>
+                                <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--foreground)' }}>{loading ? '...' : m.value}</div>
+                                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginTop: 4 }}>{m.sub}</div>
                             </div>
                         </div>
                     ))}
@@ -121,32 +121,32 @@ export default function StudentHomePage() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
                     {/* Sesiones Recientes */}
-                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <Clock size={20} style={{ color: '#1800AD' }} /> Actividad Reciente
+                            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--foreground)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <Clock size={20} style={{ color: 'var(--brand)' }} /> Actividad Reciente
                             </h3>
-                            <Link href="/student/reports" style={{ fontSize: 13, color: '#1800AD', fontWeight: 700, textDecoration: 'none' }}>Ver Reportes</Link>
+                            <Link href="/student/reports" style={{ fontSize: 13, color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>Ver Reportes</Link>
                         </div>
 
                         <div style={{ display: 'grid', gap: 12 }}>
                             {loading ? (
-                                <div style={{ padding: '40px 0', textAlign: 'center', color: '#94A3B8' }}>Cargando actividad...</div>
+                                <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-muted)' }}>Cargando actividad...</div>
                             ) : sessions.length === 0 ? (
-                                <div style={{ padding: '40px 0', textAlign: 'center', color: '#94A3B8' }}>No hay sesiones registradas</div>
+                                <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-muted)' }}>No hay sesiones registradas</div>
                             ) : (
                                 sessions.slice(0, 5).map((s) => (
                                     <div key={s.id} style={{
-                                        padding: '16px 20px', borderRadius: 16, background: '#F8FAFC', border: '1px solid #F1F5F9',
+                                        padding: '16px 20px', borderRadius: 16, background: 'var(--muted)', border: '1px solid var(--muted)',
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                                            <div style={{ width: 40, height: 40, borderRadius: 12, background: '#FFFFFF', border: '1px solid #E2E4F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD' }}>
+                                            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--card)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)' }}>
                                                 <GraduationCap size={20} />
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 700, color: '#0F172A', fontSize: 14 }}>{s.scenarioTitle ?? 'Sesión RCP'}</div>
-                                                <div style={{ fontSize: 12, color: '#64748B' }}>{formatSessionDate(s.startedAt)} • {formatDuration(s.duration)}</div>
+                                                <div style={{ fontWeight: 700, color: 'var(--foreground)', fontSize: 14 }}>{s.scenarioTitle ?? 'Sesión RCP'}</div>
+                                                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{formatSessionDate(s.startedAt)} • {formatDuration(s.duration)}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -154,9 +154,9 @@ export default function StudentHomePage() {
                                                 <div style={{ fontSize: 15, fontWeight: 800, color: getScoreColor(s.metrics?.qualityScore || 0) }}>
                                                     {Math.round(s.metrics?.qualityScore || 0)}%
                                                 </div>
-                                                <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 700 }}>CALIDAD</div>
+                                                <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700 }}>CALIDAD</div>
                                             </div>
-                                            <ChevronRight size={18} style={{ color: '#CBD5E1' }} />
+                                            <ChevronRight size={18} style={{ color: 'var(--border-strong)' }} />
                                         </div>
                                     </div>
                                 ))
@@ -166,7 +166,7 @@ export default function StudentHomePage() {
 
                     {/* Mis Cursos Quick Link */}
                     <div style={{ 
-                        background: 'linear-gradient(135deg, #1800AD 0%, #6366F1 100%)', borderRadius: 24, padding: 32, color: '#FFFFFF',
+                        background: 'linear-gradient(135deg, var(--brand) 0%, var(--clr-accent) 100%)', borderRadius: 24, padding: 32, color: 'var(--text-on-brand)',
                         boxShadow: '0 10px 15px -3px rgba(24, 0, 173, 0.2)', position: 'relative', overflow: 'hidden',
                         display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%'
                     }}>
@@ -178,7 +178,7 @@ export default function StudentHomePage() {
                             Revisa tus cursos activos, descarga material de estudio y prepárate para tu próxima certificación AHA.
                         </p>
                         <Link href="/student/courses" style={{
-                            background: '#FFFFFF', color: '#1800AD', padding: '12px 24px', borderRadius: 12,
+                            background: 'var(--card)', color: 'var(--brand)', padding: '12px 24px', borderRadius: 12,
                             fontWeight: 800, fontSize: 13, textDecoration: 'none', textAlign: 'center',
                             display: 'inline-block', transition: 'all 0.2s', width: 'fit-content'
                         }}>

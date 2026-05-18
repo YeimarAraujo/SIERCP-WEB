@@ -85,7 +85,7 @@ export default function EditCoursePage() {
                         onClick={() => router.back()}
                         style={{ 
                             display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none',
-                            color: '#64748B', cursor: 'pointer', marginBottom: 16, fontSize: 14, fontWeight: 500
+                            color: 'var(--text-secondary)', cursor: 'pointer', marginBottom: 16, fontSize: 14, fontWeight: 500
                         }}
                     >
                         <ArrowLeft size={16} /> Volver
@@ -103,55 +103,55 @@ export default function EditCoursePage() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 16, padding: 32, display: 'grid', gap: 24 }}>
+                    <form onSubmit={handleSubmit} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, padding: 32, display: 'grid', gap: 24 }}>
                         <div style={{ display: 'grid', gap: 8 }}>
-                            <label style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Nombre del curso</label>
+                            <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--foreground)' }}>Nombre del curso</label>
                             <input 
                                 type="text"
                                 required
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 style={{ 
-                                    padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E4F0', fontSize: 14, outline: 'none'
+                                    padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', fontSize: 14, outline: 'none'
                                 }}
                             />
                         </div>
 
                         <div style={{ display: 'grid', gap: 8 }}>
-                            <label style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Descripción</label>
+                            <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--foreground)' }}>Descripción</label>
                             <textarea 
                                 rows={3}
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 style={{ 
-                                    padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E4F0', fontSize: 14, outline: 'none', resize: 'vertical'
+                                    padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', fontSize: 14, outline: 'none', resize: 'vertical'
                                 }}
                             />
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                             <div style={{ display: 'grid', gap: 8 }}>
-                                <label style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Certificación</label>
+                                <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--foreground)' }}>Certificación</label>
                                 <input 
                                     type="text"
                                     required
                                     value={formData.certification}
                                     onChange={(e) => setFormData({ ...formData, certification: e.target.value })}
                                     style={{ 
-                                        padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E4F0', fontSize: 14, outline: 'none'
+                                        padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', fontSize: 14, outline: 'none'
                                     }}
                                 />
                             </div>
                             <div style={{ display: 'grid', gap: 8 }}>
-                                <label style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Código de invitación</label>
+                                <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--foreground)' }}>Código de invitación</label>
                                 <input 
                                     type="text"
                                     required
                                     value={formData.inviteCode}
                                     onChange={(e) => setFormData({ ...formData, inviteCode: e.target.value.toUpperCase() })}
                                     style={{ 
-                                        padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E4F0', fontSize: 14, outline: 'none',
-                                        fontFamily: 'monospace', fontWeight: 600, color: '#1800AD'
+                                        padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', fontSize: 14, outline: 'none',
+                                        fontFamily: 'monospace', fontWeight: 600, color: 'var(--brand)'
                                     }}
                                 />
                             </div>
@@ -159,7 +159,7 @@ export default function EditCoursePage() {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                             <div style={{ display: 'grid', gap: 8 }}>
-                                <label style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Puntaje mínimo de aprobación (%)</label>
+                                <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--foreground)' }}>Puntaje mínimo de aprobación (%)</label>
                                 <input 
                                     type="number"
                                     min="1"
@@ -168,12 +168,12 @@ export default function EditCoursePage() {
                                     value={formData.minScore}
                                     onChange={(e) => setFormData({ ...formData, minScore: parseInt(e.target.value) })}
                                     style={{ 
-                                        padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E4F0', fontSize: 14, outline: 'none'
+                                        padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', fontSize: 14, outline: 'none'
                                     }}
                                 />
                             </div>
                             <div style={{ display: 'grid', gap: 8 }}>
-                                <label style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Total de módulos</label>
+                                <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--foreground)' }}>Total de módulos</label>
                                 <input 
                                     type="number"
                                     min="1"
@@ -181,7 +181,7 @@ export default function EditCoursePage() {
                                     value={formData.moduleCount}
                                     onChange={(e) => setFormData({ ...formData, moduleCount: parseInt(e.target.value) })}
                                     style={{ 
-                                        padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E4F0', fontSize: 14, outline: 'none'
+                                        padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', fontSize: 14, outline: 'none'
                                     }}
                                 />
                             </div>
@@ -195,7 +195,7 @@ export default function EditCoursePage() {
                                 onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                                 style={{ width: 18, height: 18, cursor: 'pointer' }}
                             />
-                            <label htmlFor="isActive" style={{ fontSize: 14, fontWeight: 500, color: '#0F172A', cursor: 'pointer' }}>
+                            <label htmlFor="isActive" style={{ fontSize: 14, fontWeight: 500, color: 'var(--foreground)', cursor: 'pointer' }}>
                                 Curso activo y visible para estudiantes
                             </label>
                         </div>
@@ -205,8 +205,8 @@ export default function EditCoursePage() {
                                 type="button"
                                 onClick={() => router.back()}
                                 style={{ 
-                                    padding: '12px 24px', borderRadius: 10, border: '1px solid #E2E4F0', 
-                                    background: 'transparent', color: '#64748B', fontWeight: 600, cursor: 'pointer'
+                                    padding: '12px 24px', borderRadius: 10, border: '1px solid var(--border)', 
+                                    background: 'transparent', color: 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer'
                                 }}
                             >
                                 Cancelar
@@ -216,7 +216,7 @@ export default function EditCoursePage() {
                                 disabled={saving}
                                 style={{ 
                                     padding: '12px 24px', borderRadius: 10, border: 'none', 
-                                    background: '#1800AD', color: '#FFFFFF', fontWeight: 600, 
+                                    background: 'var(--brand)', color: 'var(--text-on-brand)', fontWeight: 600, 
                                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
                                     opacity: saving ? 0.7 : 1
                                 }}

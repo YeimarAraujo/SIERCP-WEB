@@ -13,9 +13,9 @@ import { PageHero } from '@/components/ui/page-hero';
 
 const STATUS_STYLES: Record<string, { bg: string, color: string }> = {
     disponible: { bg: '#DCFCE7', color: '#166534' },
-    en_uso: { bg: '#E0E7FF', color: '#1D4ED8' },
+    en_uso: { bg: 'var(--accent)', color: 'var(--brand)' },
     mantenimiento: { bg: '#FEF3C7', color: '#92400E' },
-    offline: { bg: '#F1F5F9', color: '#475569' },
+    offline: { bg: 'var(--muted)', color: 'var(--text-secondary)' },
 };
 
 export default function AdminDevicesPage() {
@@ -31,7 +31,7 @@ export default function AdminDevicesPage() {
     const onlineCount = Object.keys(rtdbDevices).length;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Network Operations Center" />
             
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -42,7 +42,7 @@ export default function AdminDevicesPage() {
                     parentHref="/admin/dashboard"
                     actions={
                         <button onClick={() => router.push('/admin/devices/new')} style={{
-                            padding: '10px 20px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
+                            padding: '10px 20px', borderRadius: 12, background: 'var(--brand)', color: 'var(--text-on-brand)',
                             border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
                             boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
                         }}>
@@ -53,27 +53,27 @@ export default function AdminDevicesPage() {
 
                 <div style={{ display: 'flex', gap: 16, marginBottom: 32 }}>
                     <div style={{ 
-                        background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 20, padding: '16px 24px',
+                        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: '16px 24px',
                         display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', flex: 1
                     }}>
-                        <div style={{ width: 44, height: 44, borderRadius: 12, background: onlineCount > 0 ? '#10B98110' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: onlineCount > 0 ? '#10B981' : '#94A3B8' }}>
+                        <div style={{ width: 44, height: 44, borderRadius: 12, background: onlineCount > 0 ? '#10B98110' : 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: onlineCount > 0 ? '#10B981' : 'var(--text-muted)' }}>
                             <Radio size={22} className={onlineCount > 0 ? 'animate-pulse' : ''} />
                         </div>
                         <div>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Estado de Red</div>
-                            <div style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>{onlineCount} Nodos Activos</div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Estado de Red</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--foreground)' }}>{onlineCount} Nodos Activos</div>
                         </div>
                     </div>
                     <div style={{ 
-                        background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 20, padding: '16px 24px',
+                        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: '16px 24px',
                         display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', flex: 1
                     }}>
-                        <div style={{ width: 44, height: 44, borderRadius: 12, background: '#1800AD10', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD' }}>
+                        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)' }}>
                             <Server size={22} />
                         </div>
                         <div>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Capacidad Total</div>
-                            <div style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>{manikins.length} Maniquíes</div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Capacidad Total</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--foreground)' }}>{manikins.length} Maniquíes</div>
                         </div>
                     </div>
                 </div>
@@ -81,25 +81,25 @@ export default function AdminDevicesPage() {
                 {loading ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: 20 }}>
                         {[1, 2, 3, 4].map((i) => (
-                            <div key={i} style={{ height: 180, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, animation: 'pulse 2s infinite' }} />
+                            <div key={i} style={{ height: 180, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, animation: 'pulse 2s infinite' }} />
                         ))}
                     </div>
                 ) : manikins.length === 0 ? (
                     <div style={{ 
-                        background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 32, 
+                        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 32, 
                         padding: '80px 32px', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
                         maxWidth: 600, margin: '0 auto'
                     }}>
-                        <div style={{ width: 80, height: 80, borderRadius: 24, background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1', margin: '0 auto 24px' }}>
+                        <div style={{ width: 80, height: 80, borderRadius: 24, background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--border-strong)', margin: '0 auto 24px' }}>
                             <Cpu size={40} />
                         </div>
-                        <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', marginBottom: 12 }}>Sin infraestructura detectada</h3>
-                        <p style={{ color: '#64748B', fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
+                        <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--foreground)', marginBottom: 12 }}>Sin infraestructura detectada</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
                             No hay maniquíes vinculados a la organización. Comienza integrando tu primer nodo SIERCP-PRO para iniciar el monitoreo.
                         </p>
                         <button onClick={() => router.push('/admin/devices/new')} style={{ 
                             display: 'inline-flex', alignItems: 'center', gap: 10, padding: '12px 24px', 
-                            background: '#1800AD', color: '#FFFFFF', borderRadius: 12, fontWeight: 700, 
+                            background: 'var(--brand)', color: 'var(--text-on-brand)', borderRadius: 12, fontWeight: 700, 
                             border: 'none', cursor: 'pointer'
                         }}>
                             Configurar Nuevo Nodo
@@ -112,33 +112,33 @@ export default function AdminDevicesPage() {
                             const style = STATUS_STYLES[m.status] || STATUS_STYLES.offline;
                             return (
                                 <div key={m.id} style={{ 
-                                    background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24,
+                                    background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24,
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: 20,
                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.transform = 'translateY(-4px)';
                                     e.currentTarget.style.boxShadow = '0 12px 24px -10px rgba(0,0,0,0.1)';
-                                    e.currentTarget.style.borderColor = '#1800AD';
+                                    e.currentTarget.style.borderColor = 'var(--brand)';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.transform = 'translateY(0)';
                                     e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
-                                    e.currentTarget.style.borderColor = '#E2E8F0';
+                                    e.currentTarget.style.borderColor = 'var(--border)';
                                 }}
                                 >
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                                             <div style={{ 
-                                                width: 52, height: 52, borderRadius: 16, background: live ? '#10B98110' : '#F8FAFC', 
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: live ? '#10B981' : '#1800AD', 
-                                                border: '1px solid #F1F5F9' 
+                                                width: 52, height: 52, borderRadius: 16, background: live ? '#10B98110' : 'var(--muted)', 
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: live ? '#10B981' : 'var(--brand)', 
+                                                border: '1px solid var(--muted)' 
                                             }}>
                                                 <Cpu size={26} />
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}>{m.name}</div>
-                                                <div style={{ fontSize: 11, color: '#94A3B8', fontFamily: 'monospace', fontWeight: 600 }}>ID: {m.uuid.toUpperCase()}</div>
+                                                <div style={{ fontWeight: 800, color: 'var(--foreground)', fontSize: 16 }}>{m.name}</div>
+                                                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace', fontWeight: 600 }}>ID: {m.uuid.toUpperCase()}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
@@ -163,8 +163,8 @@ export default function AdminDevicesPage() {
                                                 <div style={{ fontSize: 18, fontWeight: 900, color: '#166534' }}>{live.profundidadMm.toFixed(1)}<span style={{ fontSize: 10, marginLeft: 2 }}>mm</span></div>
                                             </div>
                                             <div style={{ background: '#EFF6FF', padding: '14px 10px', borderRadius: 16, textAlign: 'center', border: '1px solid #DBEAFE' }}>
-                                                <div style={{ fontSize: 10, color: '#1D4ED8', fontWeight: 800, marginBottom: 4 }}>FREC.</div>
-                                                <div style={{ fontSize: 18, fontWeight: 900, color: '#1D4ED8' }}>{live.frecuenciaCpm.toFixed(0)}<span style={{ fontSize: 10, marginLeft: 2 }}>cpm</span></div>
+                                                <div style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 800, marginBottom: 4 }}>FREC.</div>
+                                                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--brand)' }}>{live.frecuenciaCpm.toFixed(0)}<span style={{ fontSize: 10, marginLeft: 2 }}>cpm</span></div>
                                             </div>
                                             <div style={{ background: '#F5F3FF', padding: '14px 10px', borderRadius: 16, textAlign: 'center', border: '1px solid #EDE9FE' }}>
                                                 <div style={{ fontSize: 10, color: '#7E22CE', fontWeight: 800, marginBottom: 4 }}>BAT.</div>
@@ -172,11 +172,11 @@ export default function AdminDevicesPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: 16, border: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', gap: 12 }}>
-                                            <Clock size={18} style={{ color: '#94A3B8' }} />
+                                        <div style={{ padding: '16px', background: 'var(--muted)', borderRadius: 16, border: '1px solid var(--muted)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <Clock size={18} style={{ color: 'var(--text-muted)' }} />
                                             <div>
-                                                <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>Última Actividad</div>
-                                                <div style={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+                                                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Última Actividad</div>
+                                                <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>
                                                     {m.lastConnection ? formatDate(m.lastConnection) : 'Sin registros de enlace'}
                                                 </div>
                                             </div>
@@ -185,7 +185,7 @@ export default function AdminDevicesPage() {
 
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
                                         <button style={{ 
-                                            background: '#FFFFFF', border: '1px solid #E2E8F0', color: '#64748B', 
+                                            background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text-secondary)', 
                                             padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700, 
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s'
                                         }}>

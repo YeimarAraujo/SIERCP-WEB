@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { COLOR_EXCELLENT, COLOR_FAIL, COLOR_PASS, EXCELLENT_SCORE, PASS_SCORE } from "@/shared/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -63,10 +64,7 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-/**
- * Formatea segundos en una cadena legible (mm:ss o hh:mm:ss).
- * Ejemplo: 3725 → "1h 02m 05s"
- */
+/** Formatea segundos en una cadena legible. Ejemplo: 3725 → "1h 02m 05s" */
 export function formatDuration(seconds: number): string {
   if (!seconds || seconds < 0) return '0s';
   const h = Math.floor(seconds / 3600);
@@ -77,10 +75,7 @@ export function formatDuration(seconds: number): string {
   return `${s}s`;
 }
 
-/**
- * Formatea una fecha pasada como tiempo relativo en español.
- * Ejemplo: "hace 3 días", "hace 2 horas"
- */
+/** Formatea una fecha pasada como tiempo relativo en español. */
 export function formatRelativeTime(date: string | Date): string {
   const diff = Date.now() - new Date(date).getTime();
   const mins = Math.floor(diff / 60_000);
@@ -94,21 +89,14 @@ export function formatRelativeTime(date: string | Date): string {
   return `hace ${months} mes${months !== 1 ? 'es' : ''}`;
 }
 
-/**
- * Devuelve el color CSS según un score de calidad RCP (0-100).
- * Verde ≥ 80 · Naranja ≥ 60 · Rojo < 60
- */
 export function getScoreColor(score: number): string {
-  if (score >= 80) return '#16A34A';
-  if (score >= 60) return '#D97706';
-  return '#DC2626';
+  if (score >= EXCELLENT_SCORE) return COLOR_EXCELLENT;
+  if (score >= PASS_SCORE) return COLOR_PASS;
+  return COLOR_FAIL;
 }
 
-/**
- * Devuelve la etiqueta textual según el score de calidad RCP.
- */
-export function getScoreLabel(score: number): string {
-  if (score >= 80) return 'Excelente';
-  if (score >= 60) return 'Aceptable';
-  return 'Mejorable';
+export function getScoreLabel(score: number): 'Excelente' | 'Aprobado' | 'Reprobado' {
+  if (score >= EXCELLENT_SCORE) return 'Excelente';
+  if (score >= PASS_SCORE) return 'Aprobado';
+  return 'Reprobado';
 }

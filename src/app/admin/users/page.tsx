@@ -15,8 +15,8 @@ import toast from 'react-hot-toast';
 
 const ROLE_STYLES: Record<string, { bg: string, color: string }> = {
     ADMIN: { bg: '#F3E8FF', color: '#7E22CE' },
-    INSTRUCTOR: { bg: '#E0E7FF', color: '#1D4ED8' },
-    ESTUDIANTE: { bg: '#F1F5F9', color: '#475569' },
+    INSTRUCTOR: { bg: 'var(--accent)', color: 'var(--brand)' },
+    ESTUDIANTE: { bg: 'var(--muted)', color: 'var(--text-secondary)' },
 };
 
 export default function AdminUsersPage() {
@@ -40,12 +40,12 @@ export default function AdminUsersPage() {
             label: 'Usuario',
             render: (_: any, u: UserModel) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontWeight: 700 }}>
                         {u.firstName?.charAt(0) || u.email.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 14 }}>{getFullName(u)}</div>
-                        <div style={{ fontSize: 12, color: '#64748B' }}>{u.email}</div>
+                        <div style={{ fontWeight: 800, color: 'var(--foreground)', fontSize: 14 }}>{getFullName(u)}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{u.email}</div>
                     </div>
                 </div>
             )
@@ -83,20 +83,20 @@ export default function AdminUsersPage() {
             label: 'Actividad',
             render: (_: any, u: UserModel) => (
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#0F172A' }}>{u.stats?.totalSessions ?? 0}</div>
-                    <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 700 }}>SESIONES</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--foreground)' }}>{u.stats?.totalSessions ?? 0}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700 }}>SESIONES</div>
                 </div>
             )
         },
         {
             key: 'actions',
             label: '',
-            render: () => <ChevronRight size={18} style={{ color: '#CBD5E1' }} />
+            render: () => <ChevronRight size={18} style={{ color: 'var(--border-strong)' }} />
         }
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Gestión de Usuarios" />
             
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -107,7 +107,7 @@ export default function AdminUsersPage() {
                     parentHref="/admin/dashboard"
                     actions={
                         <button onClick={() => router.push('/admin/users/new')} style={{
-                            padding: '10px 20px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
+                            padding: '10px 20px', borderRadius: 12, background: 'var(--brand)', color: 'var(--text-on-brand)',
                             border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
                             boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
                         }}>
@@ -116,17 +116,17 @@ export default function AdminUsersPage() {
                     }
                 />
 
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 20 }}>
                         <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
-                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Buscar por nombre, correo o rol..."
                                 style={{
-                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
-                                    fontSize: 14, outline: 'none', transition: 'all 0.2s', background: '#F8FAFC'
+                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid var(--border)',
+                                    fontSize: 14, outline: 'none', transition: 'all 0.2s', background: 'var(--muted)'
                                 }}
                             />
                         </div>
@@ -141,8 +141,8 @@ export default function AdminUsersPage() {
                             })), 'reporte-global-usuarios');
                             toast.success('Reporte exportado');
                         }} style={{
-                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF', 
-                            border: '1px solid #E2E8F0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#64748B', cursor: 'pointer'
+                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'var(--card)', 
+                            border: '1px solid var(--border)', borderRadius: 12, fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer'
                         }}>
                             <FileText size={16} /> Reporte Global
                         </button>

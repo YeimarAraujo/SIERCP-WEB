@@ -4,15 +4,15 @@ interface StatCardProps {
     color?: string;
 }
 
-export function StatCard({ label, value, color = '#1800AD' }: StatCardProps) {
+export function StatCard({ label, value, color = 'var(--brand)' }: StatCardProps) {
     return (
         <div style={{
-            background: '#FFFFFF',
-            border: '1px solid #E2E4F0',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
             borderRadius: 12,
             padding: '20px 24px',
         }}>
-            <p style={{ fontSize: 13, color: '#8892A4', margin: '0 0 8px' }}>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 8px' }}>
                 {label}
             </p>
             <p style={{ fontSize: 28, fontWeight: 600, color, margin: 0 }}>

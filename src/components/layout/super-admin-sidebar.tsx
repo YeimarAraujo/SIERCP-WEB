@@ -185,7 +185,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                 gap: 4,
                 alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
-                {user && !collapsed && (
+                {user && !isCollapsed && (
                     <div style={{ padding: '8px 12px' }}>
                         <p style={{
                             fontSize: 12,
@@ -209,7 +209,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                     </div>
                 )}
 
-                <Link href="/super-admin/profile" style={{ textDecoration: 'none' }}>
+                <Link href="/super-admin/settings" style={{ textDecoration: 'none' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -233,7 +233,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                         e.currentTarget.style.background = 'transparent';
                         e.currentTarget.style.color = 'var(--sidebar-text)';
                     }}
-                    title={isCollapsed ? 'Mi perfil' : undefined}
+                    title={isCollapsed ? 'Configuración' : undefined}
                     >
                         <User size={20} />
                         <span style={{
@@ -242,7 +242,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                             whiteSpace: 'nowrap',
                             maxWidth: isCollapsed ? 0 : '200px',
                             transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                        }}>Mi perfil</span>
+                        }}>Configuración</span>
                     </div>
                 </Link>
 

@@ -37,12 +37,12 @@ export default function AdminStudentsPage() {
             label: 'Estudiante',
             render: (_: any, row: UserModel) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD', fontWeight: 700 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', fontWeight: 700 }}>
                         {getFullName(row).charAt(0) || 'E'}
                     </div>
                     <div>
-                        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 14 }}>{getFullName(row)}</div>
-                        <div style={{ fontSize: 12, color: '#64748B' }}>ID: {row.identificacion || '—'}</div>
+                        <div style={{ fontWeight: 800, color: 'var(--foreground)', fontSize: 14 }}>{getFullName(row)}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ID: {row.identificacion || '—'}</div>
                     </div>
                 </div>
             )
@@ -52,7 +52,7 @@ export default function AdminStudentsPage() {
             key: 'coursesCount',
             label: 'Matrículas',
             render: (_: any, row: UserModel) => (
-                <div style={{ textAlign: 'center', fontWeight: 700, color: '#475569' }}>
+                <div style={{ textAlign: 'center', fontWeight: 700, color: 'var(--text-secondary)' }}>
                     {row.stats?.totalSessions || 0} cursos
                 </div>
             )
@@ -77,12 +77,12 @@ export default function AdminStudentsPage() {
         {
             key: 'actions',
             label: '',
-            render: () => <ChevronRight size={18} style={{ color: '#CBD5E1' }} />
+            render: () => <ChevronRight size={18} style={{ color: 'var(--border-strong)' }} />
         }
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Gestión Estudiantil" />
 
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -96,8 +96,8 @@ export default function AdminStudentsPage() {
                             <button
                                 onClick={() => router.push('/admin/students/import')}
                                 style={{
-                                    padding: '10px 18px', borderRadius: 12, background: '#FFFFFF', color: '#64748B',
-                                    border: '1px solid #E2E8F0', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                                    padding: '10px 18px', borderRadius: 12, background: 'var(--card)', color: 'var(--text-secondary)',
+                                    border: '1px solid var(--border)', fontWeight: 700, fontSize: 13, cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', gap: 8
                                 }}
                             >
@@ -106,7 +106,7 @@ export default function AdminStudentsPage() {
                             <button
                                 onClick={() => router.push('/admin/students/new')}
                                 style={{
-                                    padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
+                                    padding: '10px 18px', borderRadius: 12, background: 'var(--brand)', color: 'var(--text-on-brand)',
                                     border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
                                 }}
@@ -117,18 +117,18 @@ export default function AdminStudentsPage() {
                     }
                 />
 
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 20 }}>
                         <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
-                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Buscar por nombre, ID o correo..."
                                 style={{
-                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid #E2E8F0',
-                                    fontSize: 14, outline: 'none', transition: 'all 0.2s', background: '#F8FAFC'
+                                    width: '100%', height: 48, padding: '0 16px 0 48px', borderRadius: 14, border: '1px solid var(--border)',
+                                    fontSize: 14, outline: 'none', transition: 'all 0.2s', background: 'var(--muted)'
                                 }}
                             />
                         </div>
@@ -142,8 +142,8 @@ export default function AdminStudentsPage() {
                             })), 'reporte-matricula');
                             toast.success('Reporte exportado');
                         }} style={{
-                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFFFF',
-                            border: '1px solid #E2E8F0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#64748B', cursor: 'pointer'
+                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'var(--card)',
+                            border: '1px solid var(--border)', borderRadius: 12, fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer'
                         }}>
                             <FileText size={16} /> Reporte de Matrícula
                         </button>

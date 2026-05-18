@@ -63,12 +63,12 @@ export default function InstructorStudentsPage() {
             label: 'Nombre',
             render: (_: unknown, row: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 10, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 700, fontSize: 12 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontWeight: 700, fontSize: 12 }}>
                         {row.studentName?.charAt(0) ?? ''}
                     </div>
                     <div>
-                        <div style={{ fontWeight: 700, color: '#0F172A' }}>{row.studentName}</div>
-                        <div style={{ fontSize: 11, color: '#64748B' }}>{row.studentEmail}</div>
+                        <div style={{ fontWeight: 700, color: 'var(--foreground)' }}>{row.studentName}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{row.studentEmail}</div>
                     </div>
                 </div>
             )
@@ -77,7 +77,7 @@ export default function InstructorStudentsPage() {
             key: 'courseName',
             label: 'Curso',
             render: (_: unknown, row: any) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#1800AD' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--brand)' }}>
                     <BookOpen size={14} /> {row.courseName}
                 </div>
             )
@@ -97,7 +97,7 @@ export default function InstructorStudentsPage() {
             key: 'completedModules',
             label: 'Progreso',
             render: (_: unknown, row: any) => (
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#64748B' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>
                     {row.completedModules} módulos
                 </div>
             )
@@ -106,13 +106,13 @@ export default function InstructorStudentsPage() {
             key: 'enrolledAt',
             label: 'Fecha Registro',
             render: (_: unknown, row: any) => (
-                <div style={{ fontSize: 12, color: '#94A3B8' }}>{formatDate(row.enrolledAt)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDate(row.enrolledAt)}</div>
             )
         },
     ];
 
     return (
-        <div style={{ background: '#F8FAFC', minHeight: '100%', padding: '24px 32px' }}>
+        <div style={{ background: 'var(--muted)', minHeight: '100%', padding: '24px 32px' }}>
             <PageHero
                 title="Estudiantes"
                 subtitle="Administración de matrículas y rendimiento académico"
@@ -120,11 +120,11 @@ export default function InstructorStudentsPage() {
                 parentHref="/instructor/dashboard"
                 actions={
                     <>
-                        <button onClick={() => router.push('/admin/students/import')} style={{
-                            padding: '10px 18px', borderRadius: 12, background: '#1800AD', color: '#FFFFFF',
+                        <button onClick={() => router.push('/instructor/students/new')} style={{
+                            padding: '10px 18px', borderRadius: 12, background: 'var(--brand)', color: 'var(--text-on-brand)',
                             border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8
                         }}>
-                            <Download size={16} /> Importar CSV
+                            <Download size={16} /> Nuevo estudiante
                         </button>
                     </>
                 }
@@ -132,28 +132,28 @@ export default function InstructorStudentsPage() {
 
             <div style={{ display: 'flex', gap: 12, marginBottom: 24, justifyContent: 'flex-end' }}>
                 <button
-                    onClick={() => router.push('/admin/students/import')}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, fontSize: 13, fontWeight: 700, color: '#475569', cursor: 'pointer' }}
+                    onClick={() => router.push('/instructor/students/new')}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer' }}
                 >
-                    <Upload size={16} /> Importar CSV
+                    <Upload size={16} /> Nuevo estudiante
                 </button>
                 <button
                     onClick={() => router.push('/instructor/courses')}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: '#1800AD', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, color: '#FFFFFF', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(24, 0, 173, 0.3)' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: 'var(--brand)', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, color: 'var(--text-on-brand)', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(24, 0, 173, 0.3)' }}
                 >
                     <UserPlus size={16} /> Gestionar Cursos
                 </button>
             </div>
 
-            <div style={{ background: '#FFFFFF', border: '1px solid #E2E4F0', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                 <div style={{ marginBottom: 24, position: 'relative', maxWidth: 400 }}>
-                    <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                    <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                     <input
                         type="text"
                         placeholder="Buscar alumno, correo o curso..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none' }}
+                        style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid var(--border)', fontSize: 14, outline: 'none' }}
                     />
                 </div>
 
@@ -161,6 +161,7 @@ export default function InstructorStudentsPage() {
                     columns={columns}
                     data={filteredStudents}
                     loading={loading}
+                    onRowClick={(row) => router.push(`/instructor/students/${row.studentId}`)}
                     emptyMessage="No se encontraron estudiantes registrados."
                 />
             </div>

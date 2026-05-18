@@ -37,11 +37,11 @@ export default function AuthNavbar() {
         borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(24, 0, 173, 0.3)',
         background: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(24, 0, 173, 0.05)',
         cursor: 'pointer' as const,
-        color: theme === 'dark' ? '#FFFFFF' : '#1800AD',
+        color: theme === 'dark' ? 'var(--text-on-brand)' : 'var(--brand)',
     };
 
     const secondaryBtnStyle = {
-        color: theme === 'dark' ? '#FFFFFF' : '#3D4270',
+        color: theme === 'dark' ? 'var(--text-on-brand)' : '#3D4270',
         background: 'transparent',
         border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(24, 0, 173, 0.3)',
         borderRadius: '8px',
@@ -52,9 +52,9 @@ export default function AuthNavbar() {
     };
 
     const primaryBtnStyle = {
-        background: '#1800AD',
-        color: '#FFFFFF',
-        border: '1px solid #1800AD',
+        background: 'var(--brand)',
+        color: 'var(--text-on-brand)',
+        border: '1px solid var(--brand)',
         borderRadius: '8px',
         padding: '8px 18px',
         fontSize: '14px',
@@ -79,10 +79,10 @@ export default function AuthNavbar() {
                         />
                     </div>
                     <nav className="hidden md:flex gap-8">
-                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
-                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
-                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
-                        <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[var(--brand)] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[var(--brand)] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[var(--brand)] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
+                        <a className="text-sm font-medium transition-colors hover:text-[var(--brand)] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
                     </nav>
                     <div className="flex items-center gap-4">
                         <button
@@ -123,10 +123,10 @@ export default function AuthNavbar() {
                     />
                 </div>
                 <nav className="hidden md:flex gap-8">
-                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
-                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
-                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
-                    <a className="text-sm font-medium transition-colors hover:text-[#1800AD] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
+                    <a className="text-sm font-medium transition-colors hover:text-[var(--brand)] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Documentación</a>
+                    <a className="text-sm font-medium transition-colors hover:text-[var(--brand)] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Planes</a>
+                    <a className="text-sm font-medium transition-colors hover:text-[var(--brand)] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Contacto</a>
+                    <a className="text-sm font-medium transition-colors hover:text-[var(--brand)] dark:hover:text-white cursor-pointer" style={{ color: theme === 'dark' ? '#C7D2FE' : '#3D4270' }}>Sobre nosotros</a>
                 </nav>
                 <div className="flex items-center gap-4">
                     {/* Theme Toggle */}
@@ -148,7 +148,7 @@ export default function AuthNavbar() {
                         title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
                     >
                         <div style={{ transition: 'transform 0.4s ease', transform: theme === 'dark' ? 'rotate(0deg)' : 'rotate(180deg)' }}>
-                            {theme === 'dark' ? <Moon size={20} color="white" /> : <Sun size={20} color="#1800AD" />}
+                            {theme === 'dark' ? <Moon size={20} color="white" /> : <Sun size={20} color="var(--brand)" />}
                         </div>
                     </button>
 
@@ -198,8 +198,8 @@ export default function AuthNavbar() {
                                 e.currentTarget.style.transform = 'translateX(2px)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#1800AD';
-                                e.currentTarget.style.borderColor = '#1800AD';
+                                e.currentTarget.style.background = 'var(--brand)';
+                                e.currentTarget.style.borderColor = 'var(--brand)';
                                 e.currentTarget.style.transform = 'translateX(0)';
                             }}
                             onClick={() => router.push('/register')}
@@ -219,8 +219,8 @@ export default function AuthNavbar() {
                                 e.currentTarget.style.transform = 'translateX(2px)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#1800AD';
-                                e.currentTarget.style.borderColor = '#1800AD';
+                                e.currentTarget.style.background = 'var(--brand)';
+                                e.currentTarget.style.borderColor = 'var(--brand)';
                                 e.currentTarget.style.transform = 'translateX(0)';
                             }}
                             onClick={() => router.push('/')}

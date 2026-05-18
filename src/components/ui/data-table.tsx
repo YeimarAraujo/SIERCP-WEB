@@ -38,7 +38,7 @@ export function DataTable<T = any>({
 
     if (loading) {
         return (
-            <div style={{
+            <div className="surface-glass lighting-border" style={{
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-lg)',
@@ -76,7 +76,7 @@ export function DataTable<T = any>({
     }
 
     return (
-        <div style={{
+        <div className="surface-glass lighting-border" style={{
             background: 'var(--bg-surface)',
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-lg)',

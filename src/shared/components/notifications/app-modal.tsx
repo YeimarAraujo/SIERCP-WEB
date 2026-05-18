@@ -97,7 +97,7 @@ export function DesktopAppModal({ onInstall }: DesktopAppModalProps) {
                         onClick={handleInstall}
                         className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition-transform hover:scale-[1.02]"
                         style={{ 
-                            background: '#FFFFFF',
+                            background: 'var(--card)',
                             color: '#0E0080',
                         }}
                     >
@@ -157,7 +157,7 @@ export function FirstTimeUserBanner({ onDismiss }: FirstTimeUserBannerProps) {
                     className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ background: 'rgba(24, 0, 173, 0.1)' }}
                 >
-                    <Smartphone className="w-5 h-5" style={{ color: '#1800AD' }} />
+                    <Smartphone className="w-5 h-5" style={{ color: 'var(--brand)' }} />
                 </div>
 
                 <div className="flex-1">
@@ -172,7 +172,7 @@ export function FirstTimeUserBanner({ onDismiss }: FirstTimeUserBannerProps) {
                         className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                         style={{ 
                             background: 'rgba(24, 0, 173, 0.1)',
-                            color: '#1800AD',
+                            color: 'var(--brand)',
                         }}
                     >
                         Instalar app

@@ -7,12 +7,10 @@ export default function ThemeInitializer() {
     const theme = useThemeStore((state) => state.theme);
 
     useEffect(() => {
-        // Al cargar la app, aplicamos la clase correspondiente al documentElement
-        if (typeof document !== 'undefined') {
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-            // También podemos enviar este estado a otros sistemas si fuera necesario
-            console.log(`[THEME] Aplicando modo: ${theme}`);
-        }
+        if (typeof document === 'undefined') return;
+
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
 
     return null;

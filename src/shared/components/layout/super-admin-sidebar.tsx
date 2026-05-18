@@ -165,7 +165,7 @@ export function SuperAdminSidebar() {
                     </div>
                 )}
 
-                <Link href="/super-admin/profile" style={{ textDecoration: 'none' }}>
+                <Link href="/super-admin/settings" style={{ textDecoration: 'none' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -187,7 +187,7 @@ export function SuperAdminSidebar() {
                     }}
                     >
                         <User size={18} />
-                        <span>Mi perfil</span>
+                        <span>Configuración</span>
                     </div>
                 </Link>
 

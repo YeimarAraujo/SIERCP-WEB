@@ -58,7 +58,7 @@ export default function NewCoursePage() {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Gestión Académica" />
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
                 <div style={{ maxWidth: 800, margin: '0 auto' }}>
@@ -75,12 +75,12 @@ export default function NewCoursePage() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 32, padding: 40, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <form onSubmit={handleSubmit} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 32, padding: 40, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                         <div style={{ display: 'grid', gap: 32 }}>
 
                             <div>
-                                <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <BookOpen size={20} style={{ color: '#1800AD' }} /> Información del Programa
+                                <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: 'var(--foreground)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <BookOpen size={20} style={{ color: 'var(--brand)' }} /> Información del Programa
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Título del Curso" icon={Type} placeholder="Ej. RCP Básico para Adultos" required value={formData.title} onChange={(v: string) => setFormData({...formData, title: v})} />
@@ -93,18 +93,18 @@ export default function NewCoursePage() {
                                 </div>
                             </div>
 
-                            <div style={{ height: 1, background: '#F1F5F9' }} />
+                            <div style={{ height: 1, background: 'var(--muted)' }} />
 
                             <div>
-                                <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <FileText size={20} style={{ color: '#1800AD' }} /> Configuración
+                                <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: 'var(--foreground)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <FileText size={20} style={{ color: 'var(--brand)' }} /> Configuración
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Código de Invitación" icon={Hash} placeholder="Auto-generado si se deja vacío" value={formData.inviteCode} onChange={(v: string) => setFormData({...formData, inviteCode: v})} />
                                     <FormInput label="Nombre del Instructor" icon={Users} placeholder="Ej. Dr. Carlos Ruiz" value={formData.instructorName} onChange={(v: string) => setFormData({...formData, instructorName: v})} />
                                 </div>
                                 <div style={{ marginTop: 20 }}>
-                                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
                                         Estado
                                     </label>
                                     <button
@@ -112,8 +112,8 @@ export default function NewCoursePage() {
                                         onClick={() => setFormData({...formData, isActive: !formData.isActive})}
                                         style={{
                                             padding: '12px 20px', borderRadius: 14,
-                                            border: '1px solid #E2E8F0', background: formData.isActive ? '#DCFCE7' : '#F1F5F9',
-                                            color: formData.isActive ? '#166534' : '#64748B',
+                                            border: '1px solid var(--border)', background: formData.isActive ? '#DCFCE7' : 'var(--muted)',
+                                            color: formData.isActive ? '#166534' : 'var(--text-secondary)',
                                             fontWeight: 700, fontSize: 13, cursor: 'pointer',
                                             display: 'inline-flex', alignItems: 'center', gap: 8,
                                         }}
@@ -127,7 +127,7 @@ export default function NewCoursePage() {
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    style={{ flex: 1, padding: '16px', borderRadius: 16, background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#64748B', fontWeight: 700, cursor: 'pointer' }}
+                                    style={{ flex: 1, padding: '16px', borderRadius: 16, background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer' }}
                                 >
                                     Cancelar
                                 </button>
@@ -135,7 +135,7 @@ export default function NewCoursePage() {
                                     type="submit"
                                     disabled={loading}
                                     style={{
-                                        flex: 2, padding: '16px', borderRadius: 16, background: '#1800AD', color: '#FFFFFF',
+                                        flex: 2, padding: '16px', borderRadius: 16, background: 'var(--brand)', color: 'var(--text-on-brand)',
                                         border: 'none', fontWeight: 800, fontSize: 15, cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                                         boxShadow: '0 10px 15px -3px rgba(24, 0, 173, 0.3)',
@@ -157,11 +157,11 @@ export default function NewCoursePage() {
 function FormInput({ label, icon: Icon, placeholder, required = false, type = "text", value, onChange }: any) {
     return (
         <div>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
                 {label} {required && <span style={{ color: '#EF4444' }}>*</span>}
             </label>
             <div style={{ position: 'relative' }}>
-                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}>
+                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
                     <Icon size={18} />
                 </div>
                 <input
@@ -172,8 +172,8 @@ function FormInput({ label, icon: Icon, placeholder, required = false, type = "t
                     required={required}
                     style={{
                         width: '100%', height: 52, padding: '0 16px 0 46px', borderRadius: 14,
-                        border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 15,
-                        color: '#1E293B', fontWeight: 600, outline: 'none', transition: 'all 0.2s'
+                        border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 15,
+                        color: 'var(--foreground)', fontWeight: 600, outline: 'none', transition: 'all 0.2s'
                     }}
                 />
             </div>

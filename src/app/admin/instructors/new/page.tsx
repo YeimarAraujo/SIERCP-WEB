@@ -68,7 +68,7 @@ export default function NewInstructorPage() {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Gestión de Facultad" />
             
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
@@ -80,13 +80,13 @@ export default function NewInstructorPage() {
                         parentHref="/admin/instructors"
                     />
 
-                    <form onSubmit={handleSubmit} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 32, padding: 40, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <form onSubmit={handleSubmit} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 32, padding: 40, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                         <div style={{ display: 'grid', gap: 32 }}>
                             
                             {/* Sección: Perfil Profesional */}
                             <div>
-                                <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <GraduationCap size={20} style={{ color: '#1800AD' }} /> Perfil Profesional
+                                <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: 'var(--foreground)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <GraduationCap size={20} style={{ color: 'var(--brand)' }} /> Perfil Profesional
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Nombres" icon={User} placeholder="Ej. Carlos Mario" required value={formData.firstName} onChange={(v: string) => setFormData({...formData, firstName: v})} />
@@ -96,12 +96,12 @@ export default function NewInstructorPage() {
                                 </div>
                             </div>
 
-                            <div style={{ height: 1, background: '#F1F5F9' }} />
+                            <div style={{ height: 1, background: 'var(--muted)' }} />
 
                             {/* Sección: Identidad y Acceso */}
                             <div>
-                                <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <Key size={20} style={{ color: '#1800AD' }} /> Identidad Institucional
+                                <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, color: 'var(--foreground)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <Key size={20} style={{ color: 'var(--brand)' }} /> Identidad Institucional
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Correo Corporativo" icon={Mail} placeholder="instructor@siercp.edu.co" required type="email" value={formData.email} onChange={(v: string) => setFormData({...formData, email: v})} />
@@ -119,7 +119,7 @@ export default function NewInstructorPage() {
                                 <button 
                                     type="button" 
                                     onClick={() => router.back()}
-                                    style={{ flex: 1, padding: '16px', borderRadius: 16, background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#64748B', fontWeight: 700, cursor: 'pointer' }}
+                                    style={{ flex: 1, padding: '16px', borderRadius: 16, background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer' }}
                                 >
                                     Cancelar
                                 </button>
@@ -127,7 +127,7 @@ export default function NewInstructorPage() {
                                     type="submit" 
                                     disabled={loading}
                                     style={{ 
-                                        flex: 2, padding: '16px', borderRadius: 16, background: '#1800AD', color: '#FFFFFF', 
+                                        flex: 2, padding: '16px', borderRadius: 16, background: 'var(--brand)', color: 'var(--text-on-brand)', 
                                         border: 'none', fontWeight: 800, fontSize: 15, cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                                         boxShadow: '0 10px 15px -3px rgba(24, 0, 173, 0.3)',
@@ -149,11 +149,11 @@ export default function NewInstructorPage() {
 function FormInput({ label, icon: Icon, placeholder, required = false, type = "text", value, onChange }: any) {
     return (
         <div>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
                 {label} {required && <span style={{ color: '#EF4444' }}>*</span>}
             </label>
             <div style={{ position: 'relative' }}>
-                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}>
+                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
                     <Icon size={18} />
                 </div>
                 <input 
@@ -164,8 +164,8 @@ function FormInput({ label, icon: Icon, placeholder, required = false, type = "t
                     required={required}
                     style={{ 
                         width: '100%', height: 52, padding: '0 16px 0 46px', borderRadius: 14, 
-                        border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 15, 
-                        color: '#1E293B', fontWeight: 600, outline: 'none', transition: 'all 0.2s'
+                        border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 15, 
+                        color: 'var(--foreground)', fontWeight: 600, outline: 'none', transition: 'all 0.2s'
                     }} 
                 />
             </div>
