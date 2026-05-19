@@ -15,6 +15,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { rateLimiter, getClientIp } from '@/lib/rate-limiter';
+import {
+  getIdempotencyKey,
+  checkIdempotency,
+  markIdempotencyProcessing,
+  storeIdempotencyResult,
+} from '@/lib/idempotency';
 
 const WOMPI_API_BASE =
   process.env.WOMPI_ENV === 'production'
@@ -92,6 +98,16 @@ export async function POST(req: NextRequest) {
     const idToken = authHeader.slice(7);
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const userId = decodedToken.uid;
+
+    // 1b. Idempotency-Key header — prevents double-submits and retries
+    const idemKey = getIdempotencyKey(req);
+    if (idemKey) {
+      const cached = await checkIdempotency(idemKey, userId);
+      if (cached) {
+        return NextResponse.json(cached.body, { status: cached.status });
+      }
+      await markIdempotencyProcessing(idemKey, userId);
+    }
 
     // 2. Parsear y validar el cuerpo
     const body = await req.json();
@@ -200,13 +216,20 @@ export async function POST(req: NextRequest) {
     });
 
     // 8. Retornar la transacción al cliente (sin exponer datos sensibles)
-    return NextResponse.json({
+    const responseBody = {
       transaction_id: transaction.id,
       status: transaction.status,
       redirect_url: transaction.redirect_url ?? null,
       payment_method_type: methodType,
       reference,
-    });
+    };
+
+    // Store idempotency result so retries get the same response
+    if (idemKey) {
+      await storeIdempotencyResult(idemKey, userId, 200, responseBody);
+    }
+
+    return NextResponse.json(responseBody);
   } catch (err: unknown) {
     console.error('[wompi/create-transaction]', err);
     const message = err instanceof Error ? err.message : 'Error interno del servidor';

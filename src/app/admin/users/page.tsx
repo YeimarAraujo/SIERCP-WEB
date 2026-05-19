@@ -16,7 +16,9 @@ import toast from 'react-hot-toast';
 const ROLE_STYLES: Record<string, { bg: string, color: string }> = {
     ADMIN: { bg: '#F3E8FF', color: '#7E22CE' },
     INSTRUCTOR: { bg: 'var(--accent)', color: 'var(--brand)' },
-    ESTUDIANTE: { bg: 'var(--muted)', color: 'var(--text-secondary)' },
+    USUARIO: { bg: 'var(--muted)', color: 'var(--text-secondary)' },
+    USUARIO_SST: { bg: '#ECFDF5', color: '#059669' },
+    USUARIO_PROFESIONAL: { bg: '#EEF0FF', color: '#1800AD' },
 };
 
 export default function AdminUsersPage() {
@@ -54,7 +56,7 @@ export default function AdminUsersPage() {
             key: 'role',
             label: 'Rol',
             render: (val: any) => {
-                const style = ROLE_STYLES[val] || ROLE_STYLES.ESTUDIANTE;
+                const style = ROLE_STYLES[val] || ROLE_STYLES.USUARIO;
                 return (
                     <span style={{ 
                         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 20,

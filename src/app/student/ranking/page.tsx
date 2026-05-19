@@ -133,7 +133,7 @@ export default function StudentRankingPage() {
                 <PageHero
                     title="Cuadro de Honor"
                     subtitle="Liderazgo académico basado en desempeño clínico real"
-                    parentTitle="Estudiante"
+                    parentTitle="Inicio"
                     parentHref="/student/home"
                 />
 

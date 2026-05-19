@@ -19,11 +19,11 @@ const DAYS_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 function EventIcon({ type, size = 14 }: { type: CalendarEventType; size?: number }) {
     const color = EVENT_COLORS[type];
     switch (type) {
-        case 'quiz':        return <Brain size={size} color={color} />;
-        case 'session':     return <Heart size={size} color={color} />;
+        case 'quiz': return <Brain size={size} color={color} />;
+        case 'session': return <Heart size={size} color={color} />;
         case 'certificate': return <Award size={size} color={color} />;
         case 'plan_expiry': return <AlertTriangle size={size} color={color} />;
-        case 'course':      return <BookOpen size={size} color={color} />;
+        case 'course': return <BookOpen size={size} color={color} />;
     }
 }
 
@@ -85,41 +85,7 @@ export function CalendarView({ events, loading, error, title = 'Calendario', sub
         .slice(0, 8);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* ── Header ─────────────────────────────────────────────────── */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                    <h1 style={{
-                        fontSize: 22, fontWeight: 700,
-                        color: 'var(--text-primary)', margin: 0,
-                    }}>{title}</h1>
-                    {subtitle && (
-                        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-                            {subtitle}
-                        </p>
-                    )}
-                </div>
-                {onRefresh && (
-                    <button
-                        onClick={onRefresh}
-                        disabled={loading}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: 6,
-                            padding: '7px 14px',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--card-border)',
-                            background: 'var(--card-bg)',
-                            color: 'var(--text-secondary)',
-                            fontSize: 13, fontWeight: 500,
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            opacity: loading ? 0.6 : 1,
-                        }}
-                    >
-                        <RefreshCw size={14} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
-                        Actualizar
-                    </button>
-                )}
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, background: 'var(--bg-clr)' }}>
             {error && (
                 <div style={{
                     padding: '10px 14px',
@@ -141,7 +107,7 @@ export function CalendarView({ events, loading, error, title = 'Calendario', sub
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, alignItems: 'start', margin: 20 }}>
                 {/* ── Month grid ─────────────────────────────────────────── */}
                 <div style={{
                     background: 'var(--card-bg)',
@@ -265,6 +231,28 @@ export function CalendarView({ events, loading, error, title = 'Calendario', sub
 
                 {/* ── Right panel ────────────────────────────────────────── */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-start', margin: 20 }}>
+                        {onRefresh && (
+                            <button
+                                onClick={onRefresh}
+                                disabled={loading}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    padding: '7px 14px',
+                                    borderRadius: 'var(--radius-md)',
+                                    border: '1px solid var(--card-border)',
+                                    background: 'var(--card-bg)',
+                                    color: 'var(--text-secondary)',
+                                    fontSize: 13, fontWeight: 500,
+                                    cursor: loading ? 'not-allowed' : 'pointer',
+                                    opacity: loading ? 0.6 : 1,
+                                }}
+                            >
+                                <RefreshCw size={14} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+                                Actualizar
+                            </button>
+                        )}
+                    </div>
                     {/* Summary */}
                     <div style={panelStyle}>
                         <p style={panelTitleStyle}>Resumen del mes</p>

@@ -23,8 +23,13 @@ export default function Footer() {
               Liderando la formación en emergencias y la innovación tecnológica clínica en el Caribe colombiano desde 2004.
             </p>
             <div className="d-flex gap-3">
-              {["instagram", "facebook", "linkedin", "whatsapp"].map(social => (
-                <a key={social} href="#" style={{
+              {[
+                { icon: "instagram", href: "https://www.instagram.com/jomarsegurid/" },
+                { icon: "facebook", href: "https://www.facebook.com/jomarsegurid/" },
+                { icon: "linkedin", href: "https://www.linkedin.com/company/jomar-segurid/" },
+                { icon: "whatsapp", href: "https://wa.me/573153778892" },
+              ].map(({ icon: social, href }) => (
+                <a key={social} href={href} target="_blank" rel="noreferrer" style={{
                   width: "42px", height: "42px", borderRadius: "12px",
                   background: "rgba(255,255,255,0.03)", display: "flex",
                   alignItems: "center", justifyContent: "center",
@@ -35,14 +40,22 @@ export default function Footer() {
                   <i className={`bi bi-${social}`} style={{ fontSize: "1.2rem" }} />
                 </a>
               ))}
+
             </div>
           </Col>
 
           <Col md={4} lg={2}>
             <h6 style={{ color: "#fff", fontWeight: 800, marginBottom: "28px", textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "1.5px" }}>Navegación</h6>
             <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "14px" }}>
-              {["Inicio", "Servicios", "Formación", "Software SIERCP", "Contacto"].map(link => (
-                <li key={link}><a href={`/#${link.toLowerCase().replace(" ", "")}`} style={{ color: "inherit", textDecoration: "none", fontSize: "0.9rem", transition: "all 0.2s ease" }}>{link}</a></li>
+              {[
+                { label: "Inicio", href: "/" },
+                { label: "Programas", href: "/programas" },
+                { label: "Planes", href: "/planes" },
+                { label: "Software SIERCP", href: "/acerca" },
+                { label: "Nosotros", href: "/nosotros" },
+                { label: "Contacto", href: "/contacto" },
+              ].map(({ label, href }) => (
+                <li key={label}><a href={href} style={{ color: "inherit", textDecoration: "none", fontSize: "0.9rem", transition: "all 0.2s ease" }}>{label}</a></li>
               ))}
             </ul>
           </Col>
@@ -50,8 +63,13 @@ export default function Footer() {
           <Col md={4} lg={2}>
             <h6 style={{ color: "#fff", fontWeight: 800, marginBottom: "28px", textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "1.5px" }}>Legal</h6>
             <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "14px" }}>
-              {["Aviso de Privacidad", "Términos de Uso", "Cookies", "Certificaciones"].map(link => (
-                <li key={link}><a href="#" style={{ color: "inherit", textDecoration: "none", fontSize: "0.9rem", transition: "all 0.2s ease" }}>{link}</a></li>
+              {[
+                { label: "Aviso de Privacidad", href: "/privacidad" },
+                { label: "Términos de Uso", href: "/terminos" },
+                { label: "Cookies", href: "/cookies" },
+                { label: "Certificaciones", href: "/nosotros" },
+              ].map(({ label, href }) => (
+                <li key={label}><a href={href} style={{ color: "inherit", textDecoration: "none", fontSize: "0.9rem", transition: "all 0.2s ease" }}>{label}</a></li>
               ))}
             </ul>
           </Col>

@@ -36,7 +36,7 @@ export default function UserDetailPage() {
             const u = userData as UserModel;
             setUser(u);
             
-            if (u.role === 'ESTUDIANTE') {
+            if (['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(u.role)) {
                 Promise.all([
                     SessionService.getByStudent(uid, 10),
                     CourseService.getByStudent(uid)
@@ -70,14 +70,18 @@ export default function UserDetailPage() {
     }
 
     const roleColors: Record<string, string> = {
-        'ESTUDIANTE': '#10B981',
+        'USUARIO': '#10B981',
+        'USUARIO_SST': '#059669',
+        'USUARIO_PROFESIONAL': '#1800AD',
         'INSTRUCTOR': 'var(--clr-accent)',
         'ADMIN': '#F59E0B',
         'SUPER_ADMIN': '#EF4444',
     };
 
     const roleLabels: Record<string, string> = {
-        'ESTUDIANTE': 'Estudiante',
+        'USUARIO': 'Usuario',
+        'USUARIO_SST': 'Usuario SST',
+        'USUARIO_PROFESIONAL': 'Usuario Profesional',
         'INSTRUCTOR': 'Instructor',
         'ADMIN': 'Administrador',
         'SUPER_ADMIN': 'Super Admin',
@@ -206,7 +210,7 @@ export default function UserDetailPage() {
                     </div>
 
                     <div>
-                        {user.role === 'ESTUDIANTE' && (
+                        {['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(user.role) && (
                             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: 24 }}>
                                 <h3 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-secondary)', marginBottom: 20, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                     Sesiones Recientes ({sessions.length})
@@ -231,7 +235,7 @@ export default function UserDetailPage() {
                             </div>
                         )}
 
-                        {(user.role === 'ESTUDIANTE' || user.role === 'INSTRUCTOR') && (
+                        {(['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL', 'INSTRUCTOR'] as string[]).includes(user.role) && (
                             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: 24, marginTop: 24 }}>
                                 <h3 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-secondary)', marginBottom: 20, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                     Cursos ({courses.length})
@@ -239,7 +243,7 @@ export default function UserDetailPage() {
                                 <div style={{ display: 'grid', gap: 12 }}>
                                     {courses.length === 0 ? (
                                         <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
-                                            {user.role === 'ESTUDIANTE' ? 'No hay cursos matriculados' : 'No hay cursos asignados'}
+                                            {['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(user.role) ? 'No hay cursos matriculados' : 'No hay cursos asignados'}
                                         </div>
                                     ) : (
                                         courses.map((c) => (

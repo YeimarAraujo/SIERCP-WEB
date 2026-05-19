@@ -34,7 +34,7 @@ export default function AdminReportsPage() {
 
                 setStats({
                     avgScore: avg,
-                    totalStudents: allUsers.filter(u => u.role === 'ESTUDIANTE').length,
+                    totalStudents: allUsers.filter(u => ['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(u.role)).length,
                     totalCourses: allCourses.length
                 });
 

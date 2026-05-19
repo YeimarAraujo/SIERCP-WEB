@@ -14,9 +14,7 @@ export default function HistoryPage() {
 
     useEffect(() => {
         if (!user) return;
-        const fetchFn = user.role === 'ESTUDIANTE'
-            ? () => SessionService.getByStudent(user.uid, 50)
-            : () => SessionService.getByStudent(user.uid, 50); // instructors see own; extend later
+        const fetchFn = () => SessionService.getByStudent(user.uid, 50);
         fetchFn().then(setSessions).finally(() => setLoading(false));
     }, [user]);
 

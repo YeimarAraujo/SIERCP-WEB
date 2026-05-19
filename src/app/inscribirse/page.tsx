@@ -54,7 +54,7 @@ function EnrollmentContent() {
       });
       
       setSuccess(true);
-      setTimeout(() => router.push('/dashboard'), 2000);
+      setTimeout(() => router.push('/student/home'), 2000);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Error al procesar la inscripción');

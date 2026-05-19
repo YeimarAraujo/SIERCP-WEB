@@ -32,7 +32,7 @@ export default function InstructorEditStudentPage() {
         
         UserService.get(uid)
             .then((user) => {
-                if (!user || user.role !== 'ESTUDIANTE') {
+                if (!user || !['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(user.role)) {
                     router.push('/instructor/students');
                     return;
                 }

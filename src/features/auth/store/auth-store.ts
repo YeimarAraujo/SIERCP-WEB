@@ -52,6 +52,8 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
                 isActive: true,
                 institutionId: uid,
                 status: 'ACTIVE',
+                certVerification: 'NONE',
+                coursesCreated: 0,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             };
@@ -68,6 +70,8 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             isActive: d.isActive ?? true,
             institutionId: d.institutionId ?? uid,
             status: d.status ?? 'ACTIVE',
+            certVerification: d.certVerification ?? 'NONE',
+            coursesCreated: d.coursesCreated ?? 0,
             stats: d.stats,
             createdAt: d.createdAt?.toDate?.() ?? new Date(),
             updatedAt: d.updatedAt?.toDate?.() ?? new Date(),
@@ -190,6 +194,8 @@ export const useAuthStore = create<AuthStore>()(
                         isActive: true,
                         institutionId: finalInstitutionId,
                         status: finalStatus,
+                        certVerification: 'NONE',
+                        coursesCreated: 0,
                         stats: {
                             totalSessions: 0,
                             sessionsToday: 0,

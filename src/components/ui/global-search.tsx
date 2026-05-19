@@ -50,7 +50,7 @@ export function GlobalSearch({ isOpen, onClose }: { isOpen: boolean, onClose: ()
     const getIcon = (type: string) => {
         switch(type) {
             case 'Curso': return BookOpen;
-            case 'Estudiante': return User;
+            case 'Usuario': return User;
             default: return FileText;
         }
     };

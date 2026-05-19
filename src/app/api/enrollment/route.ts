@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
         firstName: nombre.split(' ')[0] || nombre,
         lastName: nombre.split(' ').slice(1).join(' ') || '',
         phone: telefono || '',
-        role: 'ESTUDIANTE',
+        role: 'USUARIO',
         institutionId: institutionId || '',
         isActive: true,
         status: 'ACTIVE',

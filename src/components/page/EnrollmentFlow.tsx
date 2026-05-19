@@ -238,7 +238,7 @@ function AuthStep({ onSuccess }: { onSuccess: () => void; onSwitchToLogin: () =>
       if (mode === 'login') {
         await login(formData.email, formData.password);
       } else {
-        await register({ ...formData, role: 'ESTUDIANTE' });
+        await register({ ...formData, role: 'USUARIO' });
       }
       onSuccess();
     } catch (err: any) {

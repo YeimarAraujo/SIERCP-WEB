@@ -24,7 +24,7 @@ const NAV_ITEMS: Record<string, { label: string; href: string; icon: string }[]>
         { label: 'Mis cursos', href: '/instructor/courses', icon: '📚' },
         { label: 'Historial del grupo', href: '/instructor/history', icon: '📋' },
     ],
-    ESTUDIANTE: [
+    USUARIO: [
         { label: 'Inicio', href: '/home', icon: '⌂' },
         { label: 'Mis sesiones', href: '/history', icon: '📋' },
         { label: 'Cursos', href: '/courses', icon: '📚' },

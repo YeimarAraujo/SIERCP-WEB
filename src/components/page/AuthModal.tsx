@@ -40,7 +40,7 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
           firstName,
           lastName,
           identificacion,
-          role: 'ESTUDIANTE'
+          role: 'USUARIO'
         });
         toast.success('Cuenta creada exitosamente');
       }

@@ -26,7 +26,7 @@ export default function NewStudentPage() {
         identificacion: '',
         phone: '',
         institutionId: 'SIERCP-GENERAL',
-        role: 'ESTUDIANTE' as const,
+        role: 'USUARIO' as const,
         isActive: true,
     });
 
@@ -43,7 +43,7 @@ export default function NewStudentPage() {
                 email: formData.email,
                 firstName: formData.firstName,
                 lastName: formData.lastName,
-                role: 'ESTUDIANTE',
+                role: 'USUARIO',
                 identificacion: formData.identificacion,
                 isActive: formData.isActive,
                 institutionId: formData.institutionId,

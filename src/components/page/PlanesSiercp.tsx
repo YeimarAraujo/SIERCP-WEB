@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Container, Row, Col } from "react-bootstrap";
 import {
   maniquiPackages, corporatePlans, sstConLicenciaPlans, sstSinLicenciaPlans,
@@ -18,6 +19,7 @@ type TabId = typeof TABS[number]["id"];
 
 // ── Sub-componente: card de paquete de maniquí ────────────────────────────
 function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; isVisible: boolean }) {
+  const router = useRouter();
   const isContact = pkg.totalPriceCOP === null;
   return (
     <div className={`fade-up ${isVisible ? "visible" : ""} h-100`} style={{ transitionDelay: `${i * 0.1}s` }}>
@@ -86,13 +88,16 @@ function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; is
           </div>
         )}
 
-        <button style={{
-          width: "100%", padding: "13px", borderRadius: "14px", fontWeight: 800, fontSize: "0.95rem",
-          cursor: "pointer", marginBottom: "24px", border: "none",
-          background: pkg.highlight ? "#fff" : "#1800ad",
-          color: pkg.highlight ? "#1800ad" : "#fff",
-          transition: "all 0.2s ease",
-        }}>
+        <button
+          onClick={() => router.push("/contacto")}
+          style={{
+            width: "100%", padding: "13px", borderRadius: "14px", fontWeight: 800, fontSize: "0.95rem",
+            cursor: "pointer", marginBottom: "24px", border: "none",
+            background: pkg.highlight ? "#fff" : "#1800ad",
+            color: pkg.highlight ? "#1800ad" : "#fff",
+            transition: "all 0.2s ease",
+          }}
+        >
           {isContact ? "Solicitar cotización" : "Adquirir ahora"}
         </button>
 
@@ -114,6 +119,7 @@ function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; is
 
 // ── Sub-componente: card de plan de suscripción / créditos ────────────────
 function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: boolean }) {
+  const router = useRouter();
   const annualMonthly = Math.round(plan.monthlyCOP * 0.7);
   const annualTotal = annualMonthly * 12;
 
@@ -184,13 +190,16 @@ function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: bo
           </>
         )}
 
-        <button style={{
-          width: "100%", padding: "13px", borderRadius: "14px", fontWeight: 800, fontSize: "0.95rem",
-          cursor: "pointer", marginBottom: "24px", border: "none",
-          background: plan.highlight ? "#fff" : "#1800ad",
-          color: plan.highlight ? "#1800ad" : "#fff",
-          transition: "all 0.2s ease",
-        }}>
+        <button
+          onClick={() => router.push(plan.isContact ? "/contacto" : "/planes")}
+          style={{
+            width: "100%", padding: "13px", borderRadius: "14px", fontWeight: 800, fontSize: "0.95rem",
+            cursor: "pointer", marginBottom: "24px", border: "none",
+            background: plan.highlight ? "#fff" : "#1800ad",
+            color: plan.highlight ? "#1800ad" : "#fff",
+            transition: "all 0.2s ease",
+          }}
+        >
           {plan.isContact ? "Contactar ventas" : plan.isOneTime ? "Comprar créditos" : "Comenzar ahora"}
         </button>
 

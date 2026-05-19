@@ -46,10 +46,6 @@ function StatCounter({ value, suffix, label, active }: { value: number; suffix: 
     </div>
   );
 }
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENTE HERO PRINCIPAL
-═══════════════════════════════════════════════════════════════════════════ */
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -78,6 +74,7 @@ export default function Hero() {
   useEffect(() => {
     const onScroll = () => {
       const scrollY = window.scrollY;
+
       if (videoRef.current) {
         videoRef.current.style.transform = `scale(1.08) translateY(${scrollY * 0.25}px)`;
       }
@@ -152,32 +149,32 @@ export default function Hero() {
             </div>
             <div className="hero-badge-sep" />
             <span className="hero-badge-text">
-              <i className="bi bi-shield-check" /> 20 Años Protegiendo el Caribe Colombiano
+              <i className="bi bi-shield-check" /> Protegiendo el Caribe Colombiano
             </span>
           </div>
 
           {/* Título principal con efecto de revelación */}
           <h1 className={`hero-h1 ${entered ? "hero-anim--title" : ""}`}>
             <span className="hero-h1-line" style={{ animationDelay: "0.1s" }}>
-              Líderes en{" "}
+              Aprende a{" "}
               <span className="hero-highlight">
-                Simulación
+                Salvar Vidas{" "}
                 <svg className="hero-underline-svg" viewBox="0 0 300 12" preserveAspectRatio="none">
                   <path d="M0,8 Q75,0 150,8 Q225,16 300,8" strokeWidth="3" fill="none" />
                 </svg>
               </span>
             </span>
             <span className="hero-h1-line" style={{ animationDelay: "0.22s" }}>
-              de Grado{" "}
-              <span className="hero-highlight-box">Clínico</span>
+              con nuestros{" "}
+              <span className="hero-highlight-box"> Cursos de Emergencias</span>
             </span>
           </h1>
 
           {/* Subtítulo */}
           <p className={`hero-subtitle ${entered ? "hero-anim--subtitle" : ""}`}>
-            Transformamos la formación en emergencias mediante tecnología SIERCP
-            de última generación y los más altos estándares <strong>AHA 2025</strong>.
-            Certificación real, impacto real.
+            {/*En Jomar Segurid ofrecemos formación en primeros auxilios, RCP y atención de emergencias con enfoque práctico y certificación.*/}
+            {/*Integramos el sistema de simulación clínica SIERCP y tecnología avanzada bajo estándares AHA 2025
+             para una experiencia de aprendizaje realista, moderna y efectiva.*/}
           </p>
 
           {/* CTAs */}

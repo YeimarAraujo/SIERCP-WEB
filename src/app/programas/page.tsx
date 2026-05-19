@@ -33,18 +33,60 @@ export default function ProgramasPage() {
   return (
     <div className="page-body">
       <Navbar forceScrolled={true} />
-      <main style={{ paddingTop: '120px', paddingBottom: '100px', minHeight: '100vh', background: 'var(--clr-bg)' }}>
-        <Container>
-          <div className="text-center mb-5">
-            <span className="badge-pill mb-3">Catálogo Académico</span>
-            <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.8rem)", fontWeight: 900, color: "var(--clr-text-head)" }}>
-              Nuestros <span style={{ color: "var(--clr-primary)" }}>Programas</span>
-            </h1>
-            <p className="mx-auto mt-3" style={{ maxWidth: "600px", fontSize: "1.15rem", lineHeight: 1.7, color: "var(--clr-text)", opacity: 0.8 }}>
-              Capacitación de alto nivel con tecnología SIERCP-IoT integrada para un aprendizaje basado en datos y simulación real.
-            </p>
-          </div>
 
+      {/* ── Page Hero ───────────────────────────────────────────────────── */}
+      <section style={{
+        background: "var(--clr-bg-hero)",
+        padding: "120px 0 80px",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* Grid overlay */}
+        <div aria-hidden style={{
+          position: "absolute", inset: 0,
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: "48px 48px",
+          pointerEvents: "none",
+        }} />
+        {/* Ambient glow */}
+        <div aria-hidden style={{
+          position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)",
+          width: "700px", height: "350px",
+          background: "radial-gradient(ellipse, rgba(37,99,235,0.18) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+
+        <Container style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+          <span className="badge-pill-white mb-4 d-inline-flex">
+            <i className="bi bi-mortarboard-fill" style={{ fontSize: "0.8rem" }} /> Catálogo Académico
+          </span>
+          <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.8rem)", fontWeight: 900, color: "#fff", lineHeight: 1.08, marginBottom: "20px" }}>
+            Nuestros <span style={{ color: "#a5f3fc" }}>Programas</span>
+          </h1>
+          <p style={{ maxWidth: "580px", margin: "0 auto", fontSize: "1.08rem", lineHeight: 1.75, color: "rgba(255,255,255,0.72)" }}>
+            Capacitación de alto nivel con tecnología SIERCP-IoT integrada para
+            un aprendizaje basado en datos y simulación real.
+          </p>
+
+          {/* Quick stats */}
+          <div style={{ display: "flex", justifyContent: "center", gap: "40px", flexWrap: "wrap", marginTop: "40px" }}>
+            {[
+              { value: "+12", label: "Programas activos" },
+              { value: "AHA 2025", label: "Guías actualizadas" },
+              { value: "100%", label: "Aval nacional" },
+            ].map((s) => (
+              <div key={s.label} style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "1.6rem", fontWeight: 900, color: "#fff" }}>{s.value}</div>
+                <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.55)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <main style={{ paddingBottom: '100px', minHeight: '60vh', background: 'var(--clr-bg)' }}>
+        <Container style={{ paddingTop: '56px' }}>
           {/* Filters */}
           <div className="card-brand mb-5" style={{ padding: '28px', border: '1px solid var(--clr-border)', boxShadow: 'var(--shadow-lg)' }}>
             <Row className="g-4">

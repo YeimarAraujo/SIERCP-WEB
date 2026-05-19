@@ -11,7 +11,7 @@ function RegisterContent() {
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
         identificacion: '', password: '', confirm: '',
-        role: 'ESTUDIANTE', institutionCode: '',
+        role: 'USUARIO', institutionCode: '',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -127,7 +127,7 @@ function RegisterContent() {
                             <div className="d-flex justify-content-between align-items-center mb-4">
                                 <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--clr-text-head)", margin: 0 }}>Información Personal</h3>
                                 <div className="d-flex gap-1 p-1" style={{ background: 'var(--clr-bg-light)', borderRadius: '12px', border: '1px solid var(--clr-border)' }}>
-                                    <button type="button" onClick={() => setForm(f => ({...f, role: 'ESTUDIANTE'}))} style={{ padding: '6px 12px', borderRadius: '9px', border: 'none', fontSize: '0.75rem', fontWeight: 700, transition: 'all 0.3s ease', background: form.role === 'ESTUDIANTE' ? 'var(--clr-primary)' : 'transparent', color: form.role === 'ESTUDIANTE' ? '#fff' : 'var(--clr-muted)' }}>Estudiante</button>
+                                    <button type="button" onClick={() => setForm(f => ({...f, role: 'USUARIO'}))} style={{ padding: '6px 12px', borderRadius: '9px', border: 'none', fontSize: '0.75rem', fontWeight: 700, transition: 'all 0.3s ease', background: form.role === 'USUARIO' ? 'var(--clr-primary)' : 'transparent', color: form.role === 'USUARIO' ? '#fff' : 'var(--clr-muted)' }}>Usuario</button>
                                     <button type="button" onClick={() => setForm(f => ({...f, role: 'INSTRUCTOR'}))} style={{ padding: '6px 12px', borderRadius: '9px', border: 'none', fontSize: '0.75rem', fontWeight: 700, transition: 'all 0.3s ease', background: form.role === 'INSTRUCTOR' ? 'var(--clr-primary)' : 'transparent', color: form.role === 'INSTRUCTOR' ? '#fff' : 'var(--clr-muted)' }}>Instructor</button>
                                 </div>
                             </div>
@@ -202,7 +202,7 @@ function RegisterContent() {
                                     </div>
                                 </div>
 
-                                {form.role === 'ESTUDIANTE' && (
+                                {form.role === 'USUARIO' && (
                                     <div className="col-12 mt-2">
                                         <div style={{ background: 'var(--clr-primary-alpha)', padding: '16px', borderRadius: '16px', border: '1px solid var(--clr-primary-alpha)' }}>
                                             <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--clr-primary)', marginBottom: '6px' }}>¿Tienes un Código?</h4>

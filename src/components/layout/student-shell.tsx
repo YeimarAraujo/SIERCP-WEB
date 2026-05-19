@@ -15,14 +15,15 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
             const state = useAuthStore.getState();
 
             if (state.user) {
-                if (state.user.role !== 'ESTUDIANTE') {
-                    if (state.user.role === 'ADMIN' || state.user.role === 'SUPER_ADMIN') {
-                        router.replace('/admin/dashboard');
-                    } else if (state.user.role === 'INSTRUCTOR') {
-                        router.replace('/instructor/dashboard');
-                    }
+                if (state.user.role === 'ADMIN' || state.user.role === 'SUPER_ADMIN') {
+                    router.replace('/admin/dashboard');
                     return;
                 }
+                if (state.user.role === 'INSTRUCTOR') {
+                    router.replace('/instructor/dashboard');
+                    return;
+                }
+                // USUARIO, USUARIO_SST, USUARIO_PROFESIONAL → allowed
                 setReady(true);
                 return;
             }

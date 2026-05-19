@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       uid: decodedClaims.uid,
       email: decodedClaims.email,
       name: decodedClaims.name || '',
-      role: decodedClaims.role || 'ESTUDIANTE', // Asumimos un claim personalizado de rol
+      role: decodedClaims.role || 'USUARIO',
     });
   } catch (error) {
     return NextResponse.json({ error: 'Sesión inválida o expirada' }, { status: 401 });

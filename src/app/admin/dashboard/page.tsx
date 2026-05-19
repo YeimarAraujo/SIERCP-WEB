@@ -56,7 +56,7 @@ export default function AdminDashboardPage() {
                 const avg = scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : 0;
 
                 const instructors = users.filter(u => u.role === 'INSTRUCTOR');
-                const students = users.filter(u => u.role === 'ESTUDIANTE');
+                const students = users.filter(u => ['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(u.role));
 
                 setStats({
                     activeSessions: active,

@@ -13,9 +13,9 @@ const links: Array<{ href: string; label: string; type: 'link' | 'mega' }> = [
   { href: "/", label: "Inicio", type: "link" },
   { href: "/programas", label: "Programas", type: "mega" },
   { href: "/planes", label: "Planes", type: "link" },
+  { href: "/acerca", label: "Software", type: "link" },
   { href: "/nosotros", label: "Nosotros", type: "link" },
   { href: "/contacto", label: "Contacto", type: "link" },
-  { href: "/faq", label: "FAQ", type: "link" },
 ];
 
 const logoLight = "/assets/JOMAR/logoTextov2.png";

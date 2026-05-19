@@ -72,53 +72,8 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
-            <div style={{
-                padding: isCollapsed ? '16px 12px' : '20px 20px 16px',
-                borderBottom: '1px solid var(--sidebar-border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: isCollapsed ? 'center' : 'flex-start',
-                gap: isCollapsed ? 0 : '10px',
-                position: 'relative',
-            }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 32, height: 32,
-                    borderRadius: 'var(--radius-md)',
-                    background: 'var(--brand)',
-                    color: 'var(--text-on-brand)',
-                    fontSize: 14, fontWeight: 700,
-                    cursor: 'pointer',
-                }}
-                    onClick={onToggle}
-                    title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
-                >S</div>
-                <span style={{
-                    fontSize: '16px',
-                    fontWeight: '700',
-                    color: 'var(--text-primary)',
-                    letterSpacing: '-0.3px',
-                    opacity: isCollapsed ? 0 : 1,
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    transition: 'opacity 0.2s ease',
-                }}>
-                    SIERCP
-                </span>
-                {collapsed && (
-                    <div style={{
-                        position: 'absolute', bottom: -8, left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: 24, height: 2, borderRadius: 1,
-                        background: 'var(--brand)',
-                        opacity: 0.3,
-                    }} />
-                )}
-            </div>
 
-            <nav style={{ flex: 1, padding: isCollapsed ? '8px 6px' : '12px 12px' }}>
+            <nav style={{ flex: 1, padding: isCollapsed ? '8px 6px' : '12px 12px', marginTop: 50 }}>
                 {navItems.map((item) => {
                     const active = isActive(item.href);
                     const Icon = item.icon;
@@ -141,9 +96,6 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                                     : 'var(--sidebar-text)',
                                 fontWeight: active ? '600' : '500',
                                 fontSize: '14px',
-                                borderLeft: active
-                                    ? '3px solid var(--brand)'
-                                    : '3px solid transparent',
                                 transition: 'all 0.15s ease',
                                 cursor: 'pointer',
                                 width: isCollapsed ? 44 : 'auto',
@@ -188,30 +140,6 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                 gap: 4,
                 alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
-                {user && !isCollapsed && (
-                    <div style={{ padding: '8px 12px' }}>
-                        <p style={{
-                            fontSize: 12,
-                            fontWeight: 500,
-                            color: 'var(--text-primary)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}>
-                            {user.firstName} {user.lastName}
-                        </p>
-                        <p style={{
-                            fontSize: 11,
-                            color: 'var(--text-muted)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}>
-                            {user.role}
-                        </p>
-                    </div>
-                )}
-
                 <Link href="/" style={{ textDecoration: 'none' }}>
                     <div style={{
                         display: 'flex',
@@ -339,7 +267,7 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                         background: 'transparent',
                         border: 'none',
                         cursor: 'pointer',
-                        color: 'var(--danger-text)',
+                        color: 'var(--sidebar-text)',
                         fontSize: '14px',
                         fontWeight: '500',
                         marginLeft: isCollapsed ? 'auto' : 0,
