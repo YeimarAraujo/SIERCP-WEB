@@ -19,6 +19,7 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [identificacion, setIdentificacion] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +41,7 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
           firstName,
           lastName,
           identificacion,
+          phoneNumber: phoneNumber || undefined,
           role: 'USUARIO'
         });
         toast.success('Cuenta creada exitosamente');
@@ -90,9 +92,18 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
               <div className="col-12">
                 <Form.Group>
                   <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Identificación</Form.Label>
-                  <Form.Control 
+                  <Form.Control
                     type="text" required value={identificacion} onChange={e => setIdentificacion(e.target.value)}
-                    className="form-control-custom" placeholder="Cédula / DNI" 
+                    className="form-control-custom" placeholder="Cédula / DNI"
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-12">
+                <Form.Group>
+                  <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Teléfono <span style={{ fontWeight: 400, color: '#94a3b8' }}>(opcional)</span></Form.Label>
+                  <Form.Control
+                    type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
+                    className="form-control-custom" placeholder="+57 300 000 0000"
                   />
                 </Form.Group>
               </div>

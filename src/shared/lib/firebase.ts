@@ -3,6 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getDatabase } from 'firebase/database';
 import { getStorage } from 'firebase/storage';
+import { getFunctions } from 'firebase/functions';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -19,6 +20,16 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const rtdb = getDatabase(app);
 const storage = getStorage(app);
+const functions = getFunctions(app);
 
-export { app, auth, db, rtdb, storage };
+// Secondary app used to create Firebase Auth users without switching the
+// admin's primary session (createUserWithEmailAndPassword switches currentUser).
+export function getSecondaryAuth() {
+    if (typeof window === 'undefined') return null;
+    const existing = getApps().find((a) => a.name === 'secondary');
+    const secondaryApp = existing ?? initializeApp(firebaseConfig, 'secondary');
+    return getAuth(secondaryApp);
+}
+
+export { app, auth, db, rtdb, storage, functions };
 export default app;

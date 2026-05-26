@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
-import { cursos } from '@/data/cursos';
+import { cursos, type Curso } from '@/data/cursos';
+import { JomarCourseService } from '@/features/super-admin/services/jomar-course.service';
 import Link from 'next/link';
 
 /* ── Hook de scroll reveal reutilizable ──────────────────────────────────── */
@@ -32,11 +33,8 @@ const CARD_GRADIENTS = [
   'linear-gradient(145deg, #0F172A 0%, #334155 100%)',
 ];
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   TARJETA DE CURSO INDIVIDUAL
-═══════════════════════════════════════════════════════════════════════════ */
 function CursoCard({ curso: c, index, visible }: {
-  curso: typeof cursos[0];
+  curso: Curso;
   index: number;
   visible: boolean;
 }) {
@@ -61,7 +59,7 @@ function CursoCard({ curso: c, index, visible }: {
       <div
         className="curso-card h-100"
         style={{
-          transform: hovered ? 'translateY(-8px)' : 'translateY(0)',
+          transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
           boxShadow: hovered
             ? '0 32px 64px -16px rgba(24,0,173,0.18), 0 0 0 1px rgba(24,0,173,0.12)'
             : '0 2px 8px rgba(0,0,0,0.06)',
@@ -161,14 +159,20 @@ function CursoCard({ curso: c, index, visible }: {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SECCIÓN PRINCIPAL
-═══════════════════════════════════════════════════════════════════════════ */
 export default function CursosPreview() {
   const { ref, visible } = useReveal(0.08);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPos, setScrollPos] = useState(0);
   const [maxScroll, setMaxScroll] = useState(1);
+  const [fsCursos, setFsCursos] = useState<Curso[] | null>(null);
+
+  useEffect(() => {
+    const unsub = JomarCourseService.subscribePublic(
+      docs => setFsCursos(docs),
+      () => setFsCursos(null),
+    );
+    return () => unsub();
+  }, []);
 
   /* ── Actualiza la posición de scroll para los indicadores ─────────────── */
   useEffect(() => {
@@ -291,7 +295,7 @@ export default function CursosPreview() {
           }}
           className="hide-scrollbar"
         >
-          {cursos.slice(0, 8).map((c, i) => (
+          {(fsCursos ?? cursos).slice(0, 8).map((c, i) => (
             <CursoCard key={c.slug} curso={c} index={i} visible={visible} />
           ))}
         </div>
@@ -384,7 +388,6 @@ export default function CursosPreview() {
         </div>
       </Container>
 
-      {/* Ocultar scrollbar WebKit */}
       <style dangerouslySetInnerHTML={{ __html: `.hide-scrollbar::-webkit-scrollbar { display: none; }` }} />
     </section>
   );

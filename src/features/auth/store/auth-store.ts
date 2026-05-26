@@ -31,6 +31,7 @@ interface AuthStore {
         firstName: string;
         lastName: string;
         identificacion?: string;
+        phoneNumber?: string;
         role?: string;
         institutionCode?: string;
     }) => Promise<void>;
@@ -67,6 +68,7 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             role: d.role ?? ROLE_STUDENT,
             avatarUrl: d.avatarUrl,
             identificacion: d.identificacion,
+            phoneNumber: d.phoneNumber,
             isActive: d.isActive ?? true,
             institutionId: d.institutionId ?? uid,
             status: d.status ?? 'ACTIVE',
@@ -99,52 +101,52 @@ export const useAuthStore = create<AuthStore>()(
                 const alreadyHasUser = !!get().user;
                 set({ loading: !alreadyHasUser });
                 _unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        try {
-            if (firebaseUser) {
-                const user = await fetchUserModel(firebaseUser.uid);
-                set({ user, firebaseUser, loading: false, initialized: true, error: null });
-            } else {
-                set({ user: null, firebaseUser: null, loading: false, initialized: true });
-            }
-        } catch (error) {
-            set({ initialized: true, loading: false, error: String(error) });
-        }
-    });
+                    try {
+                        if (firebaseUser) {
+                            const user = await fetchUserModel(firebaseUser.uid);
+                            set({ user, firebaseUser, loading: false, initialized: true, error: null });
+                        } else {
+                            set({ user: null, firebaseUser: null, loading: false, initialized: true });
+                        }
+                    } catch (error) {
+                        set({ initialized: true, loading: false, error: String(error) });
+                    }
+                });
 
-    return _unsubscribe;
-},
+                return _unsubscribe;
+            },
 
             login: async (email, password) => {
-               set({ loading: true, error: null });
-    try {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
+                set({ loading: true, error: null });
+                try {
+                    const cred = await signInWithEmailAndPassword(auth, email, password);
 
-        const idToken = await cred.user.getIdToken();
-        const res = await fetch('/api/auth/session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken }),
-        });
-        if (!res.ok) throw new Error('Error al crear sesión en servidor');
+                    const idToken = await cred.user.getIdToken();
+                    const res = await fetch('/api/auth/session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idToken }),
+                    });
+                    if (!res.ok) throw new Error('Error al crear sesión en servidor');
 
-        const user = await fetchUserModel(cred.user.uid);
-        set({ user, firebaseUser: cred.user, loading: false, initialized: true });
-        if (user) {
-            AuditService.record({
-                actor: {
-                    uid: user.uid,
-                    email: user.email,
-                    name: `${user.firstName} ${user.lastName}`.trim(),
-                    role: user.role,
-                },
-                action: 'auth.login',
-                resource: 'auth',
-                resourceId: user.uid,
-                institutionId: user.institutionId,
-                metadata: { provider: 'firebase-auth' },
-            });
-        }
-    } catch (err: unknown) {
+                    const user = await fetchUserModel(cred.user.uid);
+                    set({ user, firebaseUser: cred.user, loading: false, initialized: true });
+                    if (user) {
+                        AuditService.record({
+                            actor: {
+                                uid: user.uid,
+                                email: user.email,
+                                name: `${user.firstName} ${user.lastName}`.trim(),
+                                role: user.role,
+                            },
+                            action: 'auth.login',
+                            resource: 'auth',
+                            resourceId: user.uid,
+                            institutionId: user.institutionId,
+                            metadata: { provider: 'firebase-auth' },
+                        });
+                    }
+                } catch (err: unknown) {
                     let msg = 'Error al iniciar sesión';
                     if (err && typeof err === 'object' && 'code' in err) {
                         const code = String((err as { code?: unknown }).code);
@@ -161,7 +163,7 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-            register: async ({ email, password, firstName, lastName, identificacion, role, institutionCode }) => {
+            register: async ({ email, password, firstName, lastName, identificacion, phoneNumber, role, institutionCode }) => {
                 set({ loading: true, error: null });
                 try {
                     const roleValue = (role as UserModel['role']) ?? ROLE_STUDENT;
@@ -184,17 +186,17 @@ export const useAuthStore = create<AuthStore>()(
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
                     if (!finalInstitutionId) finalInstitutionId = cred.user.uid;
 
-                    const userModel: Omit<UserModel, 'createdAt' | 'updatedAt'> = {
+                    const userModel: Omit<UserModel, 'createdAt' | 'updatedAt' | 'certVerification'> = {
                         uid: cred.user.uid,
                         email,
                         firstName,
                         lastName,
                         role: roleValue,
                         identificacion,
+                        ...(phoneNumber ? { phoneNumber } : {}),
                         isActive: true,
                         institutionId: finalInstitutionId,
                         status: finalStatus,
-                        certVerification: 'NONE',
                         coursesCreated: 0,
                         stats: {
                             totalSessions: 0,
@@ -235,32 +237,32 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             logout: async () => {
-    const currentUser = get().user;
-    if (currentUser) {
-        AuditService.record({
-            actor: {
-                uid: currentUser.uid,
-                email: currentUser.email,
-                name: `${currentUser.firstName} ${currentUser.lastName}`.trim(),
-                role: currentUser.role,
+                const currentUser = get().user;
+                if (currentUser) {
+                    AuditService.record({
+                        actor: {
+                            uid: currentUser.uid,
+                            email: currentUser.email,
+                            name: `${currentUser.firstName} ${currentUser.lastName}`.trim(),
+                            role: currentUser.role,
+                        },
+                        action: 'auth.logout',
+                        resource: 'auth',
+                        resourceId: currentUser.uid,
+                        institutionId: currentUser.institutionId,
+                    });
+                }
+                await fetch('/api/auth/session', { method: 'DELETE' });
+
+                if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
+                try {
+                    await firebaseSignOut(auth);
+                } catch (error) {
+                    console.error('Firebase signOut error:', error);
+                } finally {
+                    set({ user: null, firebaseUser: null, error: null, initialized: true, loading: false });
+                }
             },
-            action: 'auth.logout',
-            resource: 'auth',
-            resourceId: currentUser.uid,
-            institutionId: currentUser.institutionId,
-        });
-    }
-    await fetch('/api/auth/session', { method: 'DELETE' });
-    
-    if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
-    try {
-        await firebaseSignOut(auth);
-    } catch (error) {
-        console.error('Firebase signOut error:', error);
-    } finally {
-        set({ user: null, firebaseUser: null, error: null, initialized: true, loading: false });
-    }
-},
 
             clearError: () => set({ error: null }),
 

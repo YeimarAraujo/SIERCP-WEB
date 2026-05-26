@@ -8,7 +8,7 @@ import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Monitor, GraduationCap, Users, Cpu,
     BookOpen, BarChart2, FileText, Settings, Shield, User, LogOut,
-    Sun, Moon, Globe, Award, Zap, CalendarDays
+    Sun, Moon, Globe, Award, Zap, CalendarDays, ShoppingBag, Building2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -21,15 +21,16 @@ interface NavItem {
 const navItems: NavItem[] = [
     { label: 'Panel de control', href: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Sesiones en vivo', href: '/admin/sessions', icon: Monitor },
+    { label: 'Sedes', href: '/admin/sedes', icon: Building2 },
     { label: 'Instructores', href: '/admin/instructors', icon: GraduationCap },
     { label: 'Estudiantes', href: '/admin/students', icon: Users },
     { label: 'Dispositivos', href: '/admin/devices', icon: Cpu },
     { label: 'Cursos', href: '/admin/courses', icon: BookOpen },
-    // { label: 'Oferta LMS',        href: '/admin/platform-courses', icon: Zap },
     { label: 'Reportes', href: '/admin/reports', icon: BarChart2 },
     { label: 'Certificados', href: '/admin/certificates', icon: Award },
     { label: 'Calendario', href: '/admin/calendar', icon: CalendarDays },
-    { label: 'Configuración', href: '/admin/settings', icon: Settings },
+    { label: 'Mi Plan / Tienda', href: '/admin/tienda', icon: ShoppingBag },
+    // { label: 'Configuración', href: '/admin/settings', icon: Settings },
 ];
 
 export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
@@ -75,7 +76,7 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
             onMouseLeave={() => setHovered(false)}
         >
             <div style={{
-                padding: isCollapsed ? '16px 12px' : '20px 20px 16px',
+                padding: '20px 20px 16px',
                 borderBottom: '1px solid var(--sidebar-border)',
                 display: 'flex',
                 alignItems: 'center',
@@ -100,7 +101,7 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                 <span style={{
                     fontSize: '16px',
                     fontWeight: '700',
-                    color: 'var(--text-primary)',
+                    color: 'var(--sidebar-text)',
                     letterSpacing: '-0.3px',
                     opacity: isCollapsed ? 0 : 1,
                     overflow: 'hidden',
@@ -120,7 +121,7 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                 )}
             </div>
 
-            <nav style={{ flex: 1, padding: isCollapsed ? '8px 6px' : '12px 12px' }}>
+            <nav style={{ flex: 1, padding: '12px 12px' }}>
                 {navItems.map((item) => {
                     const active = isActive(item.href);
                     const Icon = item.icon;
@@ -143,9 +144,9 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                                     : 'var(--sidebar-text)',
                                 fontWeight: active ? '600' : '500',
                                 fontSize: '14px',
-                                borderLeft: active
-                                    ? '3px solid var(--brand)'
-                                    : '3px solid transparent',
+                                // borderLeft: active
+                                //     ? '3px solid var(--brand)'
+                                //     : '3px solid transparent',
                                 transition: 'all 0.15s ease',
                                 cursor: 'pointer',
                                 width: isCollapsed ? 44 : 'auto',
@@ -190,29 +191,6 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                 gap: 4,
                 alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
-                {user && !isCollapsed && (
-                    <div style={{ padding: '8px 12px' }}>
-                        <p style={{
-                            fontSize: 12,
-                            fontWeight: 500,
-                            color: 'var(--text-primary)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}>
-                            {user.firstName} {user.lastName}
-                        </p>
-                        <p style={{
-                            fontSize: 11,
-                            color: 'var(--text-muted)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}>
-                            {user.role}
-                        </p>
-                    </div>
-                )}
 
                 <Link href="/" style={{ textDecoration: 'none' }}>
                     <div style={{
@@ -252,7 +230,7 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                     </div>
                 </Link>
 
-                <Link href="/admin/profile" style={{ textDecoration: 'none' }}>
+                {/* <Link href="/admin/profile" style={{ textDecoration: 'none' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -287,7 +265,7 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                             transition: 'opacity 0.2s ease, max-width 0.2s ease',
                         }}>Mi perfil</span>
                     </div>
-                </Link>
+                </Link> */}
 
                 <button
                     onClick={toggleTheme}
@@ -341,7 +319,7 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                         background: 'transparent',
                         border: 'none',
                         cursor: 'pointer',
-                        color: 'var(--danger-text)',
+                        color: 'var(--sidebar-text)',
                         fontSize: '14px',
                         fontWeight: '500',
                         marginLeft: isCollapsed ? 'auto' : 0,

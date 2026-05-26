@@ -58,6 +58,7 @@ export interface SuperAdminAnalytics {
         sessions: number;
         certificates: number;
         activeCourses: number;
+        jomarCourses: number;
     };
     growth: {
         usersMonthlyPct: number;
@@ -86,6 +87,7 @@ const emptyAnalytics: SuperAdminAnalytics = {
         sessions: 0,
         certificates: 0,
         activeCourses: 0,
+        jomarCourses: 0,
     },
     growth: {
         usersMonthlyPct: 0,
@@ -185,6 +187,7 @@ export const SuperAdminAnalyticsService = {
             sessions,
             certificates,
             activeCourses,
+            jomarCourses,
             pendingInstitutions,
             suspendedInstitutions,
         ] = await Promise.all([
@@ -197,6 +200,7 @@ export const SuperAdminAnalyticsService = {
             safeCount('sessions'),
             safeCount('certificates'),
             safeCount('courses', where('isActive', '==', true)),
+            safeCount('jomarCourses', where('isPublished', '==', true)),
             safeCount('institutions', where('status', '==', 'pending')),
             safeCount('institutions', where('status', '==', 'suspended')),
         ]);
@@ -294,6 +298,7 @@ export const SuperAdminAnalyticsService = {
                 sessions,
                 certificates,
                 activeCourses,
+                jomarCourses,
             },
             growth: {
                 ...emptyAnalytics.growth,

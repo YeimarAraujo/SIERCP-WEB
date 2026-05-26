@@ -11,15 +11,27 @@ import {
   comparisons, faqs, testimonials,
   type ManiquiPackage, type Plan,
 } from "../../data/planes";
+import {
+  PricingPlanService,
+  type PricingDoc,
+} from "@/features/super-admin/services/plan.service";
 
 const TABS = [
-  { id: "corporativo", label: "Corporativo",    icon: "bi-building-fill",    subtitle: "Empresas · Hospitales · Instituciones" },
-  { id: "maniquies",   label: "Maniquíes",      icon: "bi-heart-pulse-fill", subtitle: "Compra de hardware IoT inteligente" },
-  { id: "sst-con",     label: "SST con Licencia", icon: "bi-patch-check-fill", subtitle: "Profesionales con licencia SST vigente" },
-  { id: "sst-sin",     label: "SST sin Licencia", icon: "bi-wallet2",          subtitle: "Sin licencia SST — pago por certificado" },
+  { id: "corporativo", label: "Corporativo", icon: "bi-building-fill", subtitle: "Empresas · Hospitales · Instituciones" },
+  { id: "maniquies", label: "Maniquíes", icon: "bi-heart-pulse-fill", subtitle: "Compra de hardware IoT inteligente" },
+  { id: "sst-con", label: "SST con Licencia", icon: "bi-patch-check-fill", subtitle: "Profesionales con licencia SST vigente" },
+  { id: "sst-sin", label: "SST sin Licencia", icon: "bi-wallet2", subtitle: "Sin licencia SST — pago por certificado" },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
+
+function getPlanRoute(plan: Plan): string {
+  if (plan.isContact) return `/contacto?tipo=${plan.planCategory}&plan=${plan.slug}`;
+  if (plan.planCategory === 'corporativo') return `/checkout/plan?plan=${plan.slug}`;
+  if (plan.planCategory === 'sst-con') return `/checkout/licencia-sst?plan=${plan.slug}`;
+  if (plan.planCategory === 'sst-sin') return `/checkout/pack?pack=${plan.slug}`;
+  return '/contacto';
+}
 
 // ── ManiquiCard ───────────────────────────────────────────────────────────
 function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; isVisible: boolean }) {
@@ -93,7 +105,11 @@ function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; is
         )}
 
         <button
-          onClick={() => router.push("/contacto")}
+          onClick={() => router.push(
+            isContact
+              ? `/contacto?tipo=maniqui&pack=${pkg.slug}`
+              : `/checkout/manikin?pack=${pkg.slug}`
+          )}
           style={{
             width: "100%", padding: "13px", borderRadius: "14px", fontWeight: 800, fontSize: "0.95rem",
             cursor: "pointer", marginBottom: "24px", border: "none",
@@ -123,8 +139,11 @@ function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; is
 // ── PlanCard ─────────────────────────────────────────────────────────────
 function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: boolean }) {
   const router = useRouter();
-  const annualMonthly = Math.round(plan.monthlyCOP * 0.7);
-  const annualTotal = annualMonthly * 12;
+  const ANNUAL_MONTHS = 12;
+  const fullSubtotal = plan.monthlyCOP * ANNUAL_MONTHS;
+  const discountPct = plan.annualDiscountPercent ?? 0;
+  const discountAmount = Math.round(fullSubtotal * (discountPct / 100));
+  const total = fullSubtotal - discountAmount;
 
   return (
     <div className={`fade-up ${isVisible ? "visible" : ""} h-100`} style={{ transitionDelay: `${i * 0.1}s` }}>
@@ -187,14 +206,14 @@ function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: bo
                 padding: "5px 12px", borderRadius: "8px", display: "inline-block",
               }}>
                 <i className="bi bi-tag-fill me-1" />
-                Anual: ${annualTotal.toLocaleString("es-CO")} COP (30% OFF)
+                Anual: ${total.toLocaleString("es-CO")} COP ({discountPct}% OFF)
               </div>
             )}
           </>
         )}
 
         <button
-          onClick={() => router.push(plan.isContact ? "/contacto" : "/inscribirse")}
+          onClick={() => router.push(getPlanRoute(plan))}
           style={{
             width: "100%", padding: "13px", borderRadius: "14px", fontWeight: 800, fontSize: "0.95rem",
             cursor: "pointer", marginBottom: "24px", border: "none",
@@ -202,7 +221,7 @@ function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: bo
             transition: "all 0.2s ease",
           }}
         >
-          {plan.isContact ? "Contactar ventas" : plan.isOneTime ? "Comprar créditos" : "Comenzar ahora"}
+          {plan.isContact ? "Contactar ventas" : plan.planCategory === 'corporativo' ? "Contratar ahora" : plan.planCategory === 'sst-con' ? "Contratar ahora" : plan.isOneTime ? "Comprar créditos" : "Comenzar ahora"}
         </button>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -232,6 +251,8 @@ export default function PlanesPage() {
   const [tab, setTab] = useState<TabId>("corporativo");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  // null = loading (use static fallback); PricingDoc[] = live Firestore data
+  const [fsPlans, setFsPlans] = useState<PricingDoc[] | null>(null);
 
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => {
@@ -241,12 +262,27 @@ export default function PlanesPage() {
     return () => obs.disconnect();
   }, []);
 
+  useEffect(() => {
+    // Subscribe to active pricing plans in realtime
+    const unsub = PricingPlanService.subscribe(
+      docs => setFsPlans(docs.filter(d => d.active)),
+      () => setFsPlans(null), // on error, fall back to static data
+    );
+    return () => unsub();
+  }, []);
+
   const activeTab = TABS.find(t => t.id === tab)!;
 
+  // While Firestore loads (fsPlans === null), use static data as fallback so the page isn't empty
+  const activeCorp = fsPlans ? (fsPlans.filter(p => p.category === 'corporativo') as unknown as Plan[]) : corporatePlans;
+  const activeSstCon = fsPlans ? (fsPlans.filter(p => p.category === 'sst-con') as unknown as Plan[]) : sstConLicenciaPlans;
+  const activeSstSin = fsPlans ? (fsPlans.filter(p => p.category === 'sst-sin') as unknown as Plan[]) : sstSinLicenciaPlans;
+  const activeManikins = fsPlans ? (fsPlans.filter(p => p.category === 'manikin') as unknown as ManiquiPackage[]) : maniquiPackages;
+
   const tabPlans: Record<TabId, Plan[]> = {
-    corporativo: corporatePlans,
-    "sst-con": sstConLicenciaPlans,
-    "sst-sin": sstSinLicenciaPlans,
+    corporativo: activeCorp,
+    "sst-con": activeSstCon,
+    "sst-sin": activeSstSin,
     maniquies: [],
   };
 
@@ -311,16 +347,16 @@ export default function PlanesPage() {
         <Container>
           <Row className="g-4 justify-content-center">
             {tab === "maniquies"
-              ? maniquiPackages.map((pkg, i) => (
-                  <Col key={pkg.name} md={6} lg={3}>
-                    <ManiquiCard pkg={pkg} i={i} isVisible={isVisible} />
-                  </Col>
-                ))
+              ? activeManikins.map((pkg, i) => (
+                <Col key={pkg.name} md={6} lg={3}>
+                  <ManiquiCard pkg={pkg} i={i} isVisible={isVisible} />
+                </Col>
+              ))
               : tabPlans[tab].map((plan, i) => (
-                  <Col key={plan.name} md={6} lg={tab === "corporativo" ? 3 : 4}>
-                    <PlanCard plan={plan} i={i} isVisible={isVisible} />
-                  </Col>
-                ))
+                <Col key={plan.name} md={6} lg={tab === "corporativo" ? 3 : 4}>
+                  <PlanCard plan={plan} i={i} isVisible={isVisible} />
+                </Col>
+              ))
             }
           </Row>
 

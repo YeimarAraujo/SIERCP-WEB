@@ -1,88 +1,115 @@
 /**
- * Rate limiter en memoria para proteger los endpoints críticos.
+ * Distributed rate limiter — fixed-window counter backed by Firestore.
  *
- * Usa un sliding-window simple: por cada IP se lleva un array de timestamps.
- * Entradas mayores a `windowMs` se descartan antes de cada verificación.
+ * Unlike an in-memory Map, this implementation is shared across all serverless
+ * function instances, preventing per-instance bypass in multi-replica deploys.
  *
- * Uso:
- *   const { allowed, remaining } = rateLimiter.check(ip, { max: 5, windowMs: 60_000 });
- *   if (!allowed) return NextResponse.json({ error: '...' }, { status: 429 });
+ * Design: fixed window keyed as `{action}:{ip}:{windowNumber}` where
+ * windowNumber = Math.floor(Date.now() / windowMs).
+ * A Firestore transaction reads the current count and increments atomically.
+ * On Firestore failure, the limiter fails-open (allows the request) and logs
+ * an error — a payment gateway outage should not block legitimate users.
+ *
+ * Documents expire after 2× windowMs (via `expiresAt` field; TTL policy
+ * can be configured in Firebase Console → Firestore → TTL).
  */
 
-interface Window {
-  hits: number[];
-}
+import { adminDb } from '@/lib/firebase-admin';
 
-/* Map global: sobrevive entre hot-reloads en desarrollo (módulo cacheado) */
-const store = new Map<string, Window>();
+// Fallback en memoria para cuando Firestore no está disponible.
+// No es distribuido (cada instancia tiene su propio contador), pero es
+// fail-closed: bloquea en lugar de abrir cuando Firestore falla.
+const _memoryCounters = new Map<string, { count: number; resetAt: number }>();
 
-/* Limpieza periódica para evitar fugas de memoria */
-if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, win] of store.entries()) {
-      /* Conserva sólo si hay hits recientes en la última hora */
-      win.hits = win.hits.filter(t => now - t < 3_600_000);
-      if (win.hits.length === 0) store.delete(key);
-    }
-  }, 300_000); // cada 5 minutos
+function _memoryFallback(
+  key: string,
+  max: number,
+  windowMs: number,
+  now: number,
+  windowEnd: number,
+): RateLimitResult {
+  const entry = _memoryCounters.get(key);
+  if (!entry || entry.resetAt <= now) {
+    _memoryCounters.set(key, { count: 1, resetAt: windowEnd });
+    return { allowed: true, remaining: max - 1, retryAfterMs: 0 };
+  }
+  if (entry.count >= max) {
+    return { allowed: false, remaining: 0, retryAfterMs: Math.max(0, entry.resetAt - now) };
+  }
+  entry.count++;
+  return { allowed: true, remaining: max - entry.count, retryAfterMs: 0 };
 }
 
 export interface RateLimitOptions {
-  /** Número máximo de peticiones permitidas en la ventana */
+  /** Maximum requests allowed in the window */
   max: number;
-  /** Tamaño de la ventana en milisegundos */
+  /** Window size in milliseconds */
   windowMs: number;
 }
 
 export interface RateLimitResult {
   allowed: boolean;
   remaining: number;
-  /** Milisegundos hasta que el cliente pueda intentarlo de nuevo */
+  /** Milliseconds until the client may retry (0 when allowed) */
   retryAfterMs: number;
 }
 
 export const rateLimiter = {
-  /**
-   * Comprueba y registra una petición de `key` (normalmente la IP del cliente).
-   * Retorna si la petición está permitida y cuántas quedan en la ventana.
-   */
-  check(key: string, opts: RateLimitOptions): RateLimitResult {
+  async check(key: string, opts: RateLimitOptions): Promise<RateLimitResult> {
+    const { max, windowMs } = opts;
     const now = Date.now();
-    const windowStart = now - opts.windowMs;
+    const windowKey = Math.floor(now / windowMs);
+    const windowEnd = (windowKey + 1) * windowMs;
 
-    let win = store.get(key);
-    if (!win) {
-      win = { hits: [] };
-      store.set(key, win);
+    // Sanitize the key so it is safe as a Firestore document ID
+    const safeKey = key.replace(/[^a-zA-Z0-9_\-:.]/g, '_');
+    const docId = `${safeKey}:${windowKey}`;
+    const docRef = adminDb.collection('rate_limits').doc(docId);
+
+    try {
+      const result = await adminDb.runTransaction(async (tx) => {
+        const snap = await tx.get(docRef);
+        const current: number = snap.exists ? (snap.data()!.count ?? 0) : 0;
+
+        if (current >= max) {
+          return {
+            allowed: false,
+            remaining: 0,
+            retryAfterMs: Math.max(0, windowEnd - now),
+          };
+        }
+
+        const newCount = current + 1;
+        tx.set(docRef, {
+          count: newCount,
+          key,
+          windowKey,
+          // TTL field — configure a Firestore TTL policy on this collection
+          expiresAt: new Date(windowEnd + windowMs),
+        });
+
+        return {
+          allowed: true,
+          remaining: max - newCount,
+          retryAfterMs: 0,
+        };
+      });
+
+      return result;
+    } catch (err) {
+      // Firestore falló (outage, timeout, etc.).
+      // Fallback en memoria: fail-CLOSED para endpoints sensibles.
+      // No distribuido (por instancia), pero evita que una caída de Firestore
+      // deje las APIs completamente sin protección.
+      console.error('[rate-limiter] Firestore error, using in-memory fallback:', err);
+      return _memoryFallback(key, max, windowMs, now, windowEnd);
     }
-
-    /* Descarta hits fuera de la ventana deslizante */
-    win.hits = win.hits.filter(t => t > windowStart);
-
-    if (win.hits.length >= opts.max) {
-      const oldest = win.hits[0];
-      const retryAfterMs = oldest + opts.windowMs - now;
-      return { allowed: false, remaining: 0, retryAfterMs: Math.max(0, retryAfterMs) };
-    }
-
-    win.hits.push(now);
-    return {
-      allowed: true,
-      remaining: opts.max - win.hits.length,
-      retryAfterMs: 0,
-    };
-  },
-
-  /** Elimina todos los registros de una clave (útil en tests) */
-  reset(key: string) {
-    store.delete(key);
   },
 };
 
-/* ── Extrae la IP real del cliente considerando proxies ──────────────────── */
+/* ── Extracts the real client IP considering reverse proxies ────────────── */
 export function getClientIp(req: Request): string {
-  const headers = (req as any).headers as Headers;
+  const headers = (req as unknown as { headers: Headers }).headers;
   return (
     headers.get('x-real-ip') ??
     headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??

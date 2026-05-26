@@ -1,13 +1,32 @@
 /**
  * GET /api/debug/all-platform
- * 
- * TEMPORAL — Muestra TODOS los platform_enrollments y cohorts que existen.
- * ELIMINAR antes de producción.
+ *
+ * Diagnostic endpoint: shows all platform_enrollments, cohorts, templates, transactions.
+ * PROTECTED: SUPER_ADMIN only in development. Returns 404 in production (enforced by middleware.ts).
  */
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { withAuth } from '@/lib/withAuth';
+import { auditLog } from '@/lib/audit-logger';
+import { getClientIp } from '@/lib/rate-limiter';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Double-fence: middleware blocks in production, this guard blocks non-SUPER_ADMIN in dev
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  const auth = await withAuth(req, ['SUPER_ADMIN']);
+  if (auth instanceof NextResponse) {
+    await auditLog({
+      type: 'debug_access_blocked',
+      severity: 'WARN',
+      ip: getClientIp(req),
+      metadata: { endpoint: '/api/debug/all-platform', reason: 'unauthorized' },
+    });
+    return auth;
+  }
+
   const results: Record<string, unknown> = {};
 
   // 1. ALL platform_enrollments
@@ -33,8 +52,8 @@ export async function GET() {
         };
       }),
     };
-  } catch (e: any) {
-    results.platform_enrollments_error = e.message;
+  } catch (e: unknown) {
+    results.platform_enrollments_error = e instanceof Error ? e.message : String(e);
   }
 
   // 2. ALL cohorts
@@ -56,8 +75,8 @@ export async function GET() {
         };
       }),
     };
-  } catch (e: any) {
-    results.cohorts_error = e.message;
+  } catch (e: unknown) {
+    results.cohorts_error = e instanceof Error ? e.message : String(e);
   }
 
   // 3. ALL course_templates
@@ -73,8 +92,8 @@ export async function GET() {
         isActive: d.data().isActive,
       })),
     };
-  } catch (e: any) {
-    results.course_templates_error = e.message;
+  } catch (e: unknown) {
+    results.course_templates_error = e instanceof Error ? e.message : String(e);
   }
 
   // 4. ALL transactions
@@ -95,8 +114,8 @@ export async function GET() {
         };
       }),
     };
-  } catch (e: any) {
-    results.transactions_error = e.message;
+  } catch (e: unknown) {
+    results.transactions_error = e instanceof Error ? e.message : String(e);
   }
 
   // 5. ALL legacy courses
@@ -110,8 +129,8 @@ export async function GET() {
         slug: d.data().slug,
       })),
     };
-  } catch (e: any) {
-    results.legacy_courses_error = e.message;
+  } catch (e: unknown) {
+    results.legacy_courses_error = e instanceof Error ? e.message : String(e);
   }
 
   return NextResponse.json(results, { status: 200 });

@@ -30,7 +30,7 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
   const [scrolled, setScrolled] = useState(forceScrolled);
   const [open, setOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false); // ← faltaba este
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const megaRef = useRef<HTMLDivElement>(null);

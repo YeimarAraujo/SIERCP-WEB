@@ -36,11 +36,6 @@ function toDate(v: unknown): Date | null {
     return null;
 }
 
-// ─── Hook usuario / instructor ────────────────────────────────────────────────
-// Uses getDocs (one-time fetch) instead of onSnapshot to avoid Firestore
-// watch-stream assertion errors caused by React StrictMode's double-invoke of
-// useEffect (rapid subscribe → unsubscribe → subscribe trips the "ca9" assertion
-// inside TargetState.We in watch_change.ts).
 export function useCalendar(userId: string | null | undefined) {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(true);
@@ -59,7 +54,7 @@ export function useCalendar(userId: string | null | undefined) {
                 )),
                 getDocs(query(
                     collection(db, 'sessions'),
-                    where('userId', '==', uid),
+                    where('studentId', '==', uid),
                     orderBy('startedAt', 'desc'),
                     limit(60)
                 )),
@@ -278,9 +273,9 @@ export function dateKey(date: Date): string {
 }
 
 export const EVENT_COLORS: Record<CalendarEventType, string> = {
-    quiz:        'var(--brand)',
-    session:     '#ef4444',
+    quiz: 'var(--brand)',
+    session: '#ef4444',
     certificate: '#10b981',
     plan_expiry: '#f59e0b',
-    course:      '#8b5cf6',
+    course: '#8b5cf6',
 };

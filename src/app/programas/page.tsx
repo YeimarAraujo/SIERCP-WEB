@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import Navbar from '@/components/page/Navbar';
 import Footer from '@/components/page/Footer';
 import WhatsAppFab from '@/components/page/WhatsAppFab';
-import { useCatalog } from '@/hooks/useCatalog';
-import { cursos as staticCursos } from '@/data/cursos';
+import { cursos as staticCursos, type Curso } from '@/data/cursos';
+import { JomarCourseService } from '@/features/super-admin/services/jomar-course.service';
 import Link from 'next/link';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -15,13 +15,20 @@ import '../landing.css';
 import { servicios } from '@/data/servicios';
 
 export default function ProgramasPage() {
-  const { cursos: dynamicCursos, loading } = useCatalog();
+  const [fsCursos, setFsCursos] = useState<Curso[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterModalidad, setFilterModalidad] = useState('todas');
   const [filterNivel, setFilterNivel] = useState('todos');
 
-  // Use dynamic catalog when available, fall back to static data
-  const cursos = dynamicCursos.length > 0 ? dynamicCursos : staticCursos;
+  useEffect(() => {
+    const unsub = JomarCourseService.subscribePublic(
+      docs => setFsCursos(docs),
+      () => setFsCursos(null),
+    );
+    return () => unsub();
+  }, []);
+
+  const cursos = fsCursos ?? staticCursos;
 
   const filteredCursos = cursos.filter(c => {
     const matchSearch = c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || c.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
@@ -133,7 +140,7 @@ export default function ProgramasPage() {
           </div>
 
           {/* Loading state */}
-          {loading && (
+          {fsCursos === null && (
             <div className="text-center mb-4">
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,

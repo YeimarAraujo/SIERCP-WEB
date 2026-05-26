@@ -87,17 +87,15 @@ export default function AuthNavbar() {
                     />
                 </div>
 
-                {/* Nav Links (Desktop) */}
+                {/* Nav Links (Desktop)
                 <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="d-none d-lg-flex">
                     {['Documentación', 'Planes', 'Contacto', 'Sobre nosotros'].map((item) => (
                         <a key={item} style={linkStyle} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--clr-primary)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--clr-text)'}>
                             {item}
                         </a>
                     ))}
-                </div>
-
-                {/* Action Buttons */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                </div> */}
+                {/* <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <button
                         onClick={toggleTheme}
                         style={{
@@ -155,7 +153,7 @@ export default function AuthNavbar() {
                         {isLogin ? 'Registrarse' : 'Crear Cuenta'}
                         <i className="bi bi-chevron-right" style={{ fontSize: '0.75rem' }} />
                     </button>
-                </div>
+                </div> */}
             </div>
         </header>
     );

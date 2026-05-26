@@ -14,6 +14,7 @@ import {
     Monitor, Layout, Calendar
 } from 'lucide-react';
 import { DashboardHero } from '@/components/ui/dashboard-hero';
+import { XpStrip } from '@/components/ui/xp-strip';
 import Link from 'next/link';
 
 export default function StudentHomePage() {
@@ -89,6 +90,13 @@ export default function StudentHomePage() {
             
             <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
                 <DashboardHero subtitle="TU PROGRESO ACADÉMICO" />
+
+                {/* XP Level Bar */}
+                {user && (
+                    <div style={{ marginBottom: 28 }}>
+                        <XpStrip userId={user.uid} />
+                    </div>
+                )}
 
                 {/* Resumen de Impacto */}
                 <div style={{ 

@@ -5,6 +5,8 @@ import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useThemeStore } from '@/stores/theme-store';
 import toast from 'react-hot-toast';
+import { usePasswordStrength } from '@/hooks/usePasswordStrength';
+import PasswordStrength from '@/components/ui/PasswordStrength';
 
 function RegisterContent() {
     const [step, setStep] = useState(1);
@@ -12,6 +14,7 @@ function RegisterContent() {
         firstName: '', lastName: '', email: '',
         identificacion: '', password: '', confirm: '',
         role: 'USUARIO', institutionCode: '',
+        phoneNumber: '',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -19,7 +22,11 @@ function RegisterContent() {
     const searchParams = useSearchParams();
     const nextParam = searchParams.get('next');
     const { theme } = useThemeStore();
-    const isDark = theme === 'dark';
+
+    const passwordStrength = usePasswordStrength(form.password, {
+        email: form.email,
+        name: `${form.firstName} ${form.lastName}`,
+    });
 
     useEffect(() => {
         let unsubscribe: (() => void) | undefined;
@@ -32,15 +39,11 @@ function RegisterContent() {
             }
         }
         init();
-        return () => {
-            if (typeof unsubscribe === 'function') {
-                unsubscribe();
-            }
-        };
+        return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
     }, []);
 
     function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+        setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
     }
 
     const validateStep1 = () => {
@@ -55,16 +58,16 @@ function RegisterContent() {
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
         setError(null);
-        
+
         if (form.password !== form.confirm) {
             setError('Las contraseñas no coinciden');
             return;
         }
-        if (form.password.length < 6) {
-            setError('La contraseña debe tener al menos 6 caracteres');
+        if (!passwordStrength.valid) {
+            setError('La contraseña no cumple todos los requisitos de seguridad');
             return;
         }
-        
+
         setLoading(true);
         try {
             const { useAuthStore } = await import('@/stores/auth-store');
@@ -74,6 +77,7 @@ function RegisterContent() {
                 firstName: form.firstName,
                 lastName: form.lastName,
                 identificacion: form.identificacion,
+                phoneNumber: form.phoneNumber || undefined,
                 role: form.role,
                 institutionCode: form.institutionCode || undefined,
             });
@@ -92,15 +96,23 @@ function RegisterContent() {
     }
 
     const inputStyle = {
-        width: "100%", padding: "14px 16px", borderRadius: "12px", border: "1px solid var(--clr-border)",
-        background: "var(--clr-bg)", color: "var(--clr-text)", fontSize: "0.95rem", transition: "all 0.2s ease"
+        width: '100%', padding: '14px 16px', borderRadius: '12px',
+        border: '1px solid var(--clr-border)',
+        background: 'var(--clr-bg)', color: 'var(--clr-text)',
+        fontSize: '0.95rem', transition: 'all 0.2s ease',
     };
+
+    const canSubmit = passwordStrength.valid && form.password === form.confirm && !loading;
 
     return (
         <div className="w-full" style={{ maxWidth: '580px', margin: '0 auto' }}>
             <div className="text-center mb-6">
-                <h1 style={{ fontSize: "2.2rem", fontWeight: 900, marginBottom: "8px", color: "var(--clr-text-head)", letterSpacing: "-1px" }}>Únete a SIERCP</h1>
-                <p style={{ color: "var(--clr-muted)", fontSize: "0.95rem" }}>{step === 1 ? 'Cuéntanos un poco sobre ti.' : 'Configura tu acceso.'}</p>
+                <h1 style={{ fontSize: '2.2rem', fontWeight: 900, marginBottom: '8px', color: 'var(--clr-text-head)', letterSpacing: '-1px' }}>
+                    Únete a SIERCP
+                </h1>
+                <p style={{ color: 'var(--clr-muted)', fontSize: '0.95rem' }}>
+                    {step === 1 ? 'Cuéntanos un poco sobre ti.' : 'Configura tu acceso.'}
+                </p>
             </div>
 
             {/* Progress Bar */}
@@ -111,47 +123,55 @@ function RegisterContent() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                    <div className="px-4 py-2 rounded-xl text-sm d-flex align-items-center gap-3 mb-3" style={{ 
-                        background: 'rgba(239, 68, 68, 0.1)', 
-                        color: '#ef4444', 
-                        border: '1px solid rgba(239, 68, 68, 0.2)' 
+                    <div className="px-4 py-2 rounded-xl text-sm d-flex align-items-center gap-3 mb-3" style={{
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: '#ef4444',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
                     }}>
                         <i className="bi bi-exclamation-circle-fill" />
                         {error}
                     </div>
                 )}
 
+                {/* ── Step 1: Personal info ─────────────────────────────────────── */}
                 {step === 1 && (
                     <div className="animate__animated animate__fadeIn">
                         <div style={{ background: 'var(--clr-bg)', padding: '24px', borderRadius: '24px', border: '1px solid var(--clr-border)', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
                             <div className="d-flex justify-content-between align-items-center mb-4">
-                                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--clr-text-head)", margin: 0 }}>Información Personal</h3>
-                                <div className="d-flex gap-1 p-1" style={{ background: 'var(--clr-bg-light)', borderRadius: '12px', border: '1px solid var(--clr-border)' }}>
-                                    <button type="button" onClick={() => setForm(f => ({...f, role: 'USUARIO'}))} style={{ padding: '6px 12px', borderRadius: '9px', border: 'none', fontSize: '0.75rem', fontWeight: 700, transition: 'all 0.3s ease', background: form.role === 'USUARIO' ? 'var(--clr-primary)' : 'transparent', color: form.role === 'USUARIO' ? '#fff' : 'var(--clr-muted)' }}>Usuario</button>
-                                    <button type="button" onClick={() => setForm(f => ({...f, role: 'INSTRUCTOR'}))} style={{ padding: '6px 12px', borderRadius: '9px', border: 'none', fontSize: '0.75rem', fontWeight: 700, transition: 'all 0.3s ease', background: form.role === 'INSTRUCTOR' ? 'var(--clr-primary)' : 'transparent', color: form.role === 'INSTRUCTOR' ? '#fff' : 'var(--clr-muted)' }}>Instructor</button>
-                                </div>
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--clr-text-head)', margin: 0 }}>
+                                    Información Personal
+                                </h3>
                             </div>
 
                             <div className="row g-3">
                                 <div className="col-md-6">
-                                    <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--clr-text-head)", marginBottom: "6px", display: "block" }}>Nombre(s)</label>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Nombre(s)</label>
                                     <div className="position-relative">
                                         <i className="bi bi-person position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
                                         <input name="firstName" required value={form.firstName} onChange={handleChange} placeholder="Ej: Juan" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
                                     </div>
                                 </div>
                                 <div className="col-md-6">
-                                    <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--clr-text-head)", marginBottom: "6px", display: "block" }}>Apellido(s)</label>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Apellido(s)</label>
                                     <div className="position-relative">
                                         <i className="bi bi-person position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
                                         <input name="lastName" required value={form.lastName} onChange={handleChange} placeholder="Ej: Pérez" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
                                     </div>
                                 </div>
                                 <div className="col-12">
-                                    <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--clr-text-head)", marginBottom: "6px", display: "block" }}>Documento de Identidad</label>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Documento de Identidad</label>
                                     <div className="position-relative">
                                         <i className="bi bi-card-heading position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
                                         <input name="identificacion" required value={form.identificacion} onChange={handleChange} placeholder="DNI / Cédula" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
+                                    </div>
+                                </div>
+                                <div className="col-12">
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>
+                                        Teléfono / WhatsApp <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span>
+                                    </label>
+                                    <div className="position-relative">
+                                        <i className="bi bi-telephone position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
+                                        <input name="phoneNumber" type="tel" value={form.phoneNumber} onChange={handleChange} placeholder="+57 300 000 0000" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
                                     </div>
                                 </div>
                             </div>
@@ -169,6 +189,7 @@ function RegisterContent() {
                     </div>
                 )}
 
+                {/* ── Step 2: Security & access ─────────────────────────────────── */}
                 {step === 2 && (
                     <div className="animate__animated animate__fadeIn">
                         <div style={{ background: 'var(--clr-bg)', padding: '24px', borderRadius: '24px', border: '1px solid var(--clr-border)', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
@@ -176,29 +197,52 @@ function RegisterContent() {
                                 <button type="button" onClick={() => setStep(1)} style={{ background: 'var(--clr-bg-light)', border: 'none', width: '32px', height: '32px', borderRadius: '10px', color: 'var(--clr-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <i className="bi bi-chevron-left" style={{ fontSize: '0.8rem' }} />
                                 </button>
-                                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--clr-text-head)", margin: 0 }}>Seguridad y Acceso</h3>
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--clr-text-head)', margin: 0 }}>
+                                    Seguridad y Acceso
+                                </h3>
                             </div>
 
                             <div className="row g-3">
                                 <div className="col-12">
-                                    <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--clr-text-head)", marginBottom: "6px", display: "block" }}>Email Institucional</label>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Email Institucional</label>
                                     <div className="position-relative">
                                         <i className="bi bi-envelope position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
                                         <input name="email" type="email" required value={form.email} onChange={handleChange} placeholder="juan@ejemplo.com" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
                                     </div>
                                 </div>
-                                <div className="col-md-6">
-                                    <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--clr-text-head)", marginBottom: "6px", display: "block" }}>Contraseña</label>
+
+                                <div className="col-12">
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Contraseña</label>
                                     <div className="position-relative">
                                         <i className="bi bi-lock position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
-                                        <input name="password" type="password" required value={form.password} onChange={handleChange} placeholder="••••••••" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
+                                        <input
+                                            name="password" type="password" required
+                                            value={form.password} onChange={handleChange}
+                                            placeholder="••••••••"
+                                            style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }}
+                                        />
                                     </div>
+                                    <PasswordStrength
+                                        result={passwordStrength}
+                                        password={form.password}
+                                        confirmPassword={form.confirm}
+                                    />
                                 </div>
-                                <div className="col-md-6">
-                                    <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--clr-text-head)", marginBottom: "6px", display: "block" }}>Confirmar</label>
+
+                                <div className="col-12">
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Confirmar contraseña</label>
                                     <div className="position-relative">
                                         <i className="bi bi-shield-lock position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
-                                        <input name="confirm" type="password" required value={form.confirm} onChange={handleChange} placeholder="••••••••" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
+                                        <input
+                                            name="confirm" type="password" required
+                                            value={form.confirm} onChange={handleChange}
+                                            placeholder="••••••••"
+                                            style={{
+                                                ...inputStyle,
+                                                paddingLeft: '45px', height: '46px', fontSize: '0.9rem',
+                                                borderColor: form.confirm && form.confirm !== form.password ? '#DC2626' : undefined,
+                                            }}
+                                        />
                                     </div>
                                 </div>
 
@@ -213,20 +257,37 @@ function RegisterContent() {
                             </div>
 
                             <button
-                                type="submit" disabled={loading}
+                                type="submit"
+                                disabled={!canSubmit}
                                 className="btn-brand w-100 mt-4"
-                                style={{ padding: "14px", borderRadius: "14px", fontSize: "0.95rem", fontWeight: 800, justifyContent: "center" }}
+                                style={{
+                                    padding: '14px', borderRadius: '14px',
+                                    fontSize: '0.95rem', fontWeight: 800,
+                                    justifyContent: 'center',
+                                    opacity: canSubmit ? 1 : 0.5,
+                                    cursor: canSubmit ? 'pointer' : 'not-allowed',
+                                }}
                             >
-                                {loading ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="bi bi-person-plus-fill me-2" />}
-                                {loading ? 'Procesando...' : 'Finalizar Registro'}
+                                {loading
+                                    ? <><span className="spinner-border spinner-border-sm me-2" /> Procesando...</>
+                                    : <><i className="bi bi-person-plus-fill me-2" />Finalizar Registro</>
+                                }
                             </button>
+
+                            {!passwordStrength.valid && form.password.length > 0 && (
+                                <p style={{ fontSize: 12, color: '#94A3B8', textAlign: 'center', marginTop: 8, marginBottom: 0 }}>
+                                    Completa todos los requisitos de contraseña para continuar
+                                </p>
+                            )}
                         </div>
                     </div>
                 )}
 
-                <p className="text-center mt-5" style={{ fontSize: "0.95rem", color: "var(--clr-muted)" }}>
+                <p className="text-center mt-5" style={{ fontSize: '0.95rem', color: 'var(--clr-muted)' }}>
                     ¿Ya tienes cuenta?{' '}
-                    <button type="button" onClick={() => router.push('/login')} style={{ color: "var(--clr-primary)", fontWeight: 800, background: "none", border: "none", padding: 0 }}>Inicia sesión aquí</button>
+                    <button type="button" onClick={() => router.push('/login')} style={{ color: 'var(--clr-primary)', fontWeight: 800, background: 'none', border: 'none', padding: 0 }}>
+                        Inicia sesión aquí
+                    </button>
                 </p>
             </form>
         </div>

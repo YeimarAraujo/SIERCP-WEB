@@ -97,19 +97,7 @@ const ROLES = [
       "Configuración de cursos y grupos de la plataforma",
       "Gestión de certificados emitidos y pendientes",
     ],
-  },
-  {
-    icon: "bi-stars",
-    color: "#f59e0b",
-    title: "Super Admin",
-    perks: [
-      "Gestión de múltiples instituciones y planes",
-      "Aprobación de nuevos administradores",
-      "Logs de actividad y auditoría completa",
-      "Configuración global de la plataforma",
-      "Gestión de licencias y facturación por institución",
-    ],
-  },
+  }
 ];
 
 const METRICS = [
@@ -216,12 +204,11 @@ export default function AcercaPage() {
       <section className="section-py" style={{ background: "var(--clr-bg-light)" }}>
         <Container>
           <div className="text-center mb-5">
-            <span className="badge-pill mb-3">Diseñado para todos</span>
             <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "var(--clr-text-head)" }}>
               Una experiencia pensada para <span style={{ color: "var(--clr-primary)" }}>cada rol</span>
             </h2>
           </div>
-          <Row className="g-4">
+          <Row className="g-4 justify-content-center">
             {ROLES.map((r, i) => (
               <Col key={i} md={6} lg={3}>
                 <div style={{ background: "var(--clr-bg-surface)", border: "1px solid var(--clr-border)", borderRadius: "24px", padding: "32px 28px", height: "100%" }}>

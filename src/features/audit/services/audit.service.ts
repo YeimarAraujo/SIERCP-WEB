@@ -115,6 +115,10 @@ export function getPersistedAuditActor(): { actor?: AuditActor; institutionId?: 
         return {};
     }
 }
+const removeUndefined = (obj: any) =>
+    Object.fromEntries(
+        Object.entries(obj || {}).filter(([_, v]) => v !== undefined)
+    );
 
 export const AuditService = {
     async record(input: AuditLogInput): Promise<void> {
@@ -128,7 +132,7 @@ export const AuditService = {
                 resource: input.resource,
                 resourceId: input.resourceId || null,
                 institutionId: input.institutionId || persisted.institutionId || null,
-                metadata: input.metadata || {},
+                metadata: removeUndefined(input.metadata),
                 ip: input.ip || null,
                 severity: input.severity || 'info',
                 timestamp: serverTimestamp(),

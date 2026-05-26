@@ -6,25 +6,58 @@ import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import { Upload, UserPlus, Search, FileText, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { UserService } from '@/services/firestore.service';
+import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
+import { useAuth } from '@/hooks/use-auth';
 import { downloadCsv } from '@/shared/lib/export-utils';
 import toast from 'react-hot-toast';
 import { getFullName } from '@/models/user';
-import { ROLE_STUDENT } from '@/shared/lib/constants';
 import type { UserModel } from '@/models/user';
+
+const STUDENT_ROLES = ['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL', 'STUDENT'];
 
 export default function AdminStudentsPage() {
     const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
     const [students, setStudents] = useState<UserModel[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const institutionId: string | null = user?.institutionId ?? null;
+
     useEffect(() => {
-        UserService.getAll()
-            .then(users => users.filter(u => u.role === ROLE_STUDENT))
-            .then(setStudents)
-            .finally(() => setLoading(false));
-    }, []);
+        if (authLoading) return;
+        if (!institutionId) { setLoading(false); return; }
+
+        const fetchStudents = async () => {
+            try {
+                // Obtener memberships activas con rol de estudiante en esta institución
+                const memSnap = await getDocs(query(
+                    collection(db, 'memberships'),
+                    where('institutionId', '==', institutionId),
+                    where('isActive', '==', true),
+                ));
+                const studentMemberships = memSnap.docs
+                    .map(d => d.data())
+                    .filter(m => STUDENT_ROLES.includes(m.role));
+
+                // Fetch user docs en paralelo
+                const userDocs = await Promise.all(
+                    studentMemberships.map(m => getDoc(doc(db, 'users', m.userId)))
+                );
+                const users = userDocs
+                    .filter(s => s.exists())
+                    .map(s => ({ ...s.data(), uid: s.id } as UserModel));
+                setStudents(users);
+            } catch (err) {
+                console.error('Error fetching students:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStudents();
+    }, [institutionId, authLoading]);
 
     const filtered = students.filter(u =>
         getFullName(u).toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -1,16 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════════════════════════
- * SIERCP — StudentEnrollmentService
- * ═══════════════════════════════════════════════════════════════════════════════
- *
- * Unified service that merges:
- *   1. Legacy courses (courses/{id}/enrollments/{studentId})
- *   2. Platform enrollments (platform_enrollments collection)
- *
- * Returns a single, clean array of `StudentCourseCard` objects that are
- * presentation-ready.  ALL business logic (cohort lock, date comparison,
- * de-duplication) lives here — the UI receives pre-computed flags.
- */
 
 import {
   collection, query, where, getDocs, doc, getDoc, orderBy, Timestamp, limit,
@@ -277,7 +264,7 @@ export const StudentEnrollmentService = {
 
     if (!pSnaps.empty) {
       const enrollment = pSnaps.docs[0].data() as PlatformEnrollment;
-      
+
       let tData: any = null;
       // Get the template to load the course details and modules
       if (enrollment.templateId) {
@@ -311,42 +298,42 @@ export const StudentEnrollmentService = {
           id: courseIdOrSlug,
           title: tData.title || enrollment.courseTitle,
           description: tData.description || '',
-            instructorId: tData.institutionId || 'jomar-seguridad',
-            instructorName: tData.institutionId === 'jomar-seguridad' ? 'Jomar Seguridad' : tData.institutionName || 'Institución',
-            certification: 'SIERCP / JOMAR',
-            minScore: 80,
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            moduleCount: tData.modules?.length || 0,
-            studentCount: 0,
-            inviteCode: '',
-            completedModules: 0,
-            guideIds: [],
-            requiredGuideCount: 0,
-            scenarioMode: 'completo',
-          };
+          instructorId: tData.institutionId || 'jomar-seguridad',
+          instructorName: tData.institutionId === 'jomar-seguridad' ? 'Jomar Seguridad' : tData.institutionName || 'Institución',
+          certification: 'SIERCP / JOMAR',
+          minScore: 80,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          moduleCount: tData.modules?.length || 0,
+          studentCount: 0,
+          inviteCode: '',
+          completedModules: 0,
+          guideIds: [],
+          requiredGuideCount: 0,
+          scenarioMode: 'completo',
+        };
 
-          const mockModules = (tData.modules || []).map((m: any, i: number) => ({
-            id: m.id || `plat-mod-${i}`,
-            title: m.title || m.nombre,
-            description: m.topics?.join(', ') || m.description || '',
-            type: m.type || 'teoria', // Use DB type, fallback to teoria
-            order: m.order ?? i,
-            estimatedMinutes: parseInt(m.duration) || 0,
-            isRequired: m.isRequired ?? true,
-          }));
+        const mockModules = (tData.modules || []).map((m: any, i: number) => ({
+          id: m.id || `plat-mod-${i}`,
+          title: m.title || m.nombre,
+          description: m.topics?.join(', ') || m.description || '',
+          type: m.type || 'teoria', // Use DB type, fallback to teoria
+          order: m.order ?? i,
+          estimatedMinutes: parseInt(m.duration) || 0,
+          isRequired: m.isRequired ?? true,
+        }));
 
-          const lockState = await computeLockState(enrollment.cohortId);
+        const lockState = await computeLockState(enrollment.cohortId);
 
-          // Return with empty progress (can be wired to platform progress later)
-          return {
-            course: mockCourse,
-            modules: mockModules,
-            progress: new Set(),
-            isLocked: lockState.isLocked,
-            lockedReason: lockState.lockedReason,
-          };
+        // Return with empty progress (can be wired to platform progress later)
+        return {
+          course: mockCourse,
+          modules: mockModules,
+          progress: new Set(),
+          isLocked: lockState.isLocked,
+          lockedReason: lockState.lockedReason,
+        };
       }
     }
 

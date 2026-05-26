@@ -72,6 +72,8 @@ export default function StudentCreateCoursePage() {
         guideIds: [],
         requiredGuideCount: 0,
         scenarioMode: 'completo',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       setSuccess({ courseId, inviteCode });
       toast.success('¡Curso creado exitosamente!');

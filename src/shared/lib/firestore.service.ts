@@ -213,7 +213,8 @@ export const CourseService = {
 
     async create(course: Omit<CourseModel, 'id'>): Promise<string> {
         const ref = doc(collection(db, 'courses'));
-        await setDoc(ref, { ...course, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        const createdBy = course.createdBy || course.instructorId;
+        await setDoc(ref, { ...course, createdBy, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
         if (course.instructorId) {
             await updateDoc(doc(db, 'users', course.instructorId), { coursesCreated: increment(1) });
         }

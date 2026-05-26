@@ -8,7 +8,7 @@ import { useThemeStore } from '@/stores/theme-store';
 import {
     Home, BookOpen, Clock, BarChart2, Award, Trophy,
     Radio, Smartphone, Cpu, User, LogOut,
-    Sun, Moon, Globe, ClipboardList, CalendarDays
+    Sun, Moon, Globe, ClipboardList, CalendarDays, GraduationCap, ShoppingBag,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -22,12 +22,11 @@ const navItems: NavItem[] = [
     { label: 'Inicio', href: '/student/home', icon: Home },
     { label: 'Mis cursos', href: '/student/courses', icon: BookOpen },
     { label: 'Calendario', href: '/student/calendar', icon: CalendarDays },
-    // { label: 'Inscripciones',  href: '/student/enrollments',  icon: ClipboardList },
     { label: 'Historial', href: '/student/history', icon: Clock },
     { label: 'Mis reportes', href: '/student/reports', icon: BarChart2 },
     { label: 'Certificados', href: '/student/certificates', icon: Award },
     { label: 'Ranking', href: '/student/ranking', icon: Trophy },
-
+    { label: 'Tienda', href: '/student/tienda', icon: ShoppingBag },
 ];
 
 export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
@@ -73,7 +72,43 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
             onMouseLeave={() => setHovered(false)}
         >
 
-            <nav style={{ flex: 1, padding: isCollapsed ? '8px 6px' : '12px 12px', marginTop: 50 }}>
+            {/* Branding header */}
+            <div style={{
+                padding: '20px 20px 16px',
+                borderBottom: '1px solid var(--sidebar-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: isCollapsed ? 'center' : 'flex-start',
+                gap: isCollapsed ? 0 : '10px',
+            }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 32, height: 32,
+                    borderRadius: 'var(--radius-md)',
+                    background: 'rgba(255,255,255,0.15)',
+                    color: 'var(--sidebar-text)',
+                    flexShrink: 0,
+                }}>
+                    <GraduationCap size={18} />
+                </div>
+                <span style={{
+                    fontSize: '15px',
+                    fontWeight: '700',
+                    color: 'var(--sidebar-text)',
+                    letterSpacing: '-0.3px',
+                    opacity: isCollapsed ? 0 : 1,
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    maxWidth: isCollapsed ? 0 : '160px',
+                    transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                }}>
+                    SIERCP
+                </span>
+            </div>
+
+            <nav style={{ flex: 1, padding: '12px 12px' }}>
                 {navItems.map((item) => {
                     const active = isActive(item.href);
                     const Icon = item.icon;

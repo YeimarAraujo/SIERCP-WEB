@@ -147,7 +147,6 @@ export default function VideoTutorial() {
         {/* Header */}
         <Row className="mb-5">
           <Col lg={7} className="mx-auto text-center">
-            <span className="badge-pill-white mb-3">Centro de Aprendizaje</span>
             <h2 className="on-dark-title" style={{
               fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
               fontWeight: 900, lineHeight: 1.1, marginBottom: 16,

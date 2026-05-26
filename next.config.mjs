@@ -9,12 +9,14 @@ const CSP = [
   /* Solo documentos del mismo origen */
   `default-src 'self'`,
 
-  /* Scripts: mismo origen + Firebase SDK + Wompi widget */
+  /* Scripts: mismo origen + Firebase SDK + Wompi widget + reCAPTCHA Enterprise */
   `script-src 'self' 'unsafe-inline' 'unsafe-eval'
      https://www.gstatic.com
      https://www.googleapis.com
      https://cdn.wompi.co
-     https://js.wompi.co`,
+     https://js.wompi.co
+     https://www.recaptcha.net
+     https://recaptcha.google.com`,
 
   /* Estilos: mismo origen + Google Fonts + Bootstrap CDN */
   `style-src 'self' 'unsafe-inline'
@@ -26,10 +28,11 @@ const CSP = [
      https://fonts.gstatic.com
      https://cdn.jsdelivr.net`,
 
-  /* Imágenes: mismo origen + Firebase Storage + data URIs */
+  /* Imágenes: mismo origen + Firebase Storage + data URIs + miniaturas YouTube */
   `img-src 'self' data: blob:
      https://firebasestorage.googleapis.com
-     https://lh3.googleusercontent.com`,
+     https://lh3.googleusercontent.com
+     https://img.youtube.com`,
 
   /* Conexiones a APIs externas */
   `connect-src 'self'
@@ -38,6 +41,10 @@ const CSP = [
      https://firestore.googleapis.com
      https://identitytoolkit.googleapis.com
      https://securetoken.googleapis.com
+     https://us-central1-siercp.cloudfunctions.net
+     https://*.cloudfunctions.net
+     https://www.recaptcha.net
+     https://recaptcha.google.com
      https://sandbox.wompi.co
      https://production.wompi.co
      wss://*.firebaseio.com`,
@@ -45,8 +52,8 @@ const CSP = [
   /* Media: videos locales (RCP_Hero.mp4) */
   `media-src 'self' blob:`,
 
-  /* Frames: solo Wompi (widget de pago PSE) */
-  `frame-src https://checkout.wompi.co`,
+  /* Frames: Wompi (widget de pago PSE) + YouTube embeds sin cookies + reCAPTCHA */
+  `frame-src https://checkout.wompi.co https://www.youtube-nocookie.com https://www.recaptcha.net https://recaptcha.google.com`,
 
   /* Workers (Service Worker de PWA) */
   `worker-src 'self' blob:`,

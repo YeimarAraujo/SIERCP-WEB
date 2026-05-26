@@ -18,6 +18,9 @@ export interface CourseModel {
     instructorId: string;
     instructorName: string;
     instructorEmail?: string;
+    institutionId?: string;
+    institutionName?: string;
+    createdBy?: string;
     inviteCode: string;
     certification: string;
     minScore: number;

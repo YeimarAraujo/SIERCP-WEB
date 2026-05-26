@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Download, FileText, RefreshCcw, Search, ShieldAlert } from 'lucide-react';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import { AuditService, type AuditLog } from '@/features/audit/services/audit.service';
 import { downloadCsvReport, downloadPdfReport, formatReportFilename } from '@/shared/lib/export-utils';
+import { Header } from '@/components/layout/header';
 
 const actionOptions = [
     { value: '', label: 'Todas las acciones' },
@@ -131,9 +132,12 @@ export default function SuperAdminLogsPage() {
 
     return (
         <div style={{ display: 'grid', gap: 22 }}>
-            <PageHeader
-                title="Auditoría y observabilidad"
-                subtitle={`Eventos reales desde auditLogs (${logs.length} visibles)`}
+            <Header />
+            <PageHero
+                title="Auditoría y Observabilidad"
+                subtitle={`Eventos registrados desde auditLogs — ${logs.length} visibles`}
+                parentTitle="Super Admin"
+                parentHref="/super-admin/dashboard"
                 actions={
                     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                         <button onClick={loadLogs} className="btn-secondary" disabled={loading}>

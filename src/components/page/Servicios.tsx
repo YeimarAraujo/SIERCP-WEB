@@ -2,7 +2,9 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { servicios, getWhatsAppLink } from "@/data/servicios";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/shared/lib/firebase";
+import { servicios as serviciosEstaticos, getWhatsAppLink, type Servicio } from "@/data/servicios";
 
 const statsBar = [
   { value: "+50", label: "Empresas asesoradas", icon: "bi-building-fill" },
@@ -14,6 +16,7 @@ const statsBar = [
 export default function Servicios() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeCard, setActiveCard] = useState<number | null>(null);
+  const [servicios, setServicios] = useState<Servicio[]>(serviciosEstaticos);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,6 +25,19 @@ export default function Servicios() {
     }, { threshold: 0.1 });
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!db) return;
+    const unsub = onSnapshot(
+      collection(db, 'jomarServices'),
+      snap => {
+        const all = snap.docs.map(d => d.data() as Servicio & { isPublished?: boolean });
+        const published = all.filter(s => s.isPublished !== false) as Servicio[];
+        if (published.length > 0) setServicios(published);
+      },
+    );
+    return unsub;
   }, []);
 
   return (
@@ -117,11 +133,13 @@ export default function Servicios() {
                 className={`fade-up ${isVisible ? "visible" : ""}`}
                 style={{
                   transitionDelay: `${0.1 + i * 0.08}s`,
+                  transitionProperty: "all",
+                  transitionDuration: "0.3s",
+                  transitionTimingFunction: "ease",
                   background: "var(--clr-bg-surface)",
                   border: `1px solid ${activeCard === i ? "var(--clr-primary)" : "var(--clr-border)"}`,
                   borderRadius: "20px",
                   display: "flex", flexDirection: "column",
-                  transition: "all 0.3s ease",
                   boxShadow: activeCard === i ? "0 12px 40px rgba(0,0,0,0.09)" : "var(--shadow-sm)",
                   overflow: "hidden", height: "100%", cursor: "pointer",
                 }}

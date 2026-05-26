@@ -60,8 +60,8 @@ function detectBrand(pan: string): 'VISA' | 'MASTERCARD' | 'AMEX' | 'DINERS' | n
 }
 
 const BRAND_ICONS: Record<string, string> = {
-    VISA: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg',
-    MASTERCARD: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg',
+    VISA: '/banks/visa.svg',
+    MASTERCARD: '/banks/mastercard.svg',
 };
 
 export default function CardForm({ totalCOP, onChange }: CardFormProps) {
@@ -143,7 +143,7 @@ export default function CardForm({ totalCOP, onChange }: CardFormProps) {
                     />
                     <div className="position-absolute end-0 top-50 translate-middle-y me-3">
                         {brand && BRAND_ICONS[brand] ? (
-                            <img src={BRAND_ICONS[brand]} alt={brand} height={20} style={{ opacity: 0.8 }} />
+                            <img src={BRAND_ICONS[brand]} alt={brand} height={20} width={40} style={{ opacity: 0.8 }} />
                         ) : (
                             <i className="bi bi-credit-card text-muted fs-5" />
                         )}

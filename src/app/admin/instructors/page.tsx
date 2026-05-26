@@ -4,44 +4,54 @@ import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
-import { UserPlus, Search, ShieldCheck, Mail, BookOpen, ChevronRight, UserCheck } from 'lucide-react';
+import { UserPlus, Search, Mail, ChevronRight, UserCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { UserService, CourseService } from '@/services/firestore.service';
+import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
+import { useAuth } from '@/hooks/use-auth';
 import type { UserModel } from '@/models/user';
 
 export default function AdminInstructorsPage() {
     const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
     const [instructors, setInstructors] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const institutionId: string | null = user?.institutionId ?? null;
+
     useEffect(() => {
+        if (authLoading) return;
+        if (!institutionId) { setLoading(false); return; }
+
         const fetchInstructors = async () => {
             try {
-                setLoading(true);
-                const allUsers = await UserService.getAll();
-                const instructorUsers = allUsers.filter(u => u.role === 'INSTRUCTOR');
-                
-                // Enriquecer con conteo de cursos
-                const enriched = await Promise.all(instructorUsers.map(async (u) => {
-                    const courses = await CourseService.getByInstructor(u.uid);
-                    return {
-                        ...u,
-                        coursesCount: courses.length,
-                        studentsCount: courses.reduce((acc, c) => acc + (c.studentCount || 0), 0)
-                    };
-                }));
+                // Obtener memberships con rol INSTRUCTOR en esta institución
+                const memSnap = await getDocs(query(
+                    collection(db, 'memberships'),
+                    where('institutionId', '==', institutionId),
+                    where('role', '==', 'INSTRUCTOR'),
+                    where('isActive', '==', true),
+                ));
+
+                // Fetch user docs en paralelo
+                const userDocs = await Promise.all(
+                    memSnap.docs.map(m => getDoc(doc(db, 'users', m.data().userId)))
+                );
+                const enriched = userDocs
+                    .filter(s => s.exists())
+                    .map(s => ({ ...s.data(), uid: s.id, coursesCount: 0, studentsCount: 0 }));
 
                 setInstructors(enriched);
-            } catch (error) {
-                console.error('Error fetching instructors:', error);
+            } catch (err) {
+                console.error('Error fetching instructors:', err);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchInstructors();
-    }, []);
+    }, [institutionId, authLoading]);
 
     const filteredInstructors = instructors.filter(i => 
         i.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||

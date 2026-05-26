@@ -5,6 +5,8 @@ export interface PlanFeature {
 }
 
 export interface Plan {
+  slug: string;
+  planCategory: 'corporativo' | 'sst-con' | 'sst-sin';
   name: string;
   desc: string;
   monthlyCOP: number;
@@ -13,10 +15,12 @@ export interface Plan {
   highlight: boolean;
   badge: string | null;
   maniquiesIncluidos?: number;
+  annualDiscountPercent?: number;
   features: PlanFeature[];
 }
 
 export interface ManiquiPackage {
+  slug: string;
   name: string;
   desc: string;
   quantity: number | null;
@@ -52,6 +56,7 @@ export interface Testimonial {
 // NOTA: Precios propuestos. Confirmar con el equipo antes de publicar.
 export const maniquiPackages: ManiquiPackage[] = [
   {
+    slug: "unidad",
     name: "Unidad",
     desc: "Ideal para centros de formación que inician con simulación inteligente",
     quantity: 1,
@@ -71,6 +76,7 @@ export const maniquiPackages: ManiquiPackage[] = [
     ],
   },
   {
+    slug: "pack-4",
     name: "Pack 4",
     desc: "La opción más popular para instituciones y centros de formación SST",
     quantity: 4,
@@ -91,6 +97,7 @@ export const maniquiPackages: ManiquiPackage[] = [
     ],
   },
   {
+    slug: "pack-8",
     name: "Pack 8",
     desc: "Para hospitales, universidades y centros de simulación avanzada",
     quantity: 8,
@@ -112,6 +119,7 @@ export const maniquiPackages: ManiquiPackage[] = [
     ],
   },
   {
+    slug: "pack-12",
     name: "Pack 12+",
     desc: "Grandes organizaciones con múltiples sedes y alta demanda de formación",
     quantity: null,
@@ -136,12 +144,15 @@ export const maniquiPackages: ManiquiPackage[] = [
 // ── PLANES CORPORATIVOS (suscripción + maniquíes incluidos) ──────────────
 export const corporatePlans: Plan[] = [
   {
+    slug: "pyme",
+    planCategory: "corporativo",
     name: "PYME",
     desc: "Empresas, clínicas y centros en crecimiento",
     monthlyCOP: 380000,
     highlight: false,
     badge: null,
     maniquiesIncluidos: 1,
+    annualDiscountPercent: 10,
     features: [
       { text: "1 maniquí SIERCP incluido", included: true },
       { text: "Hasta 15 usuarios", included: true },
@@ -158,12 +169,15 @@ export const corporatePlans: Plan[] = [
     ],
   },
   {
+    slug: "business",
+    planCategory: "corporativo",
     name: "Business",
     desc: "La opción ideal para centros de formación SST",
     monthlyCOP: 790000,
     highlight: true,
-    badge: "Más popular",
+    badge: "Popular",
     maniquiesIncluidos: 2,
+    annualDiscountPercent: 15,
     features: [
       { text: "2 maniquíes SIERCP incluidos", included: true },
       { text: "Hasta 50 usuarios", included: true },
@@ -180,12 +194,15 @@ export const corporatePlans: Plan[] = [
     ],
   },
   {
+    slug: "corporate",
+    planCategory: "corporativo",
     name: "Corporate",
     desc: "Hospitales e instituciones con múltiples sedes",
     monthlyCOP: 1580000,
     highlight: false,
     badge: "Multi-sede",
     maniquiesIncluidos: 4,
+    annualDiscountPercent: 25,
     features: [
       { text: "4 maniquíes SIERCP incluidos", included: true },
       { text: "Hasta 200 usuarios", included: true },
@@ -202,6 +219,8 @@ export const corporatePlans: Plan[] = [
     ],
   },
   {
+    slug: "enterprise",
+    planCategory: "corporativo",
     name: "Enterprise",
     desc: "Grandes organizaciones — precio a medida",
     monthlyCOP: 0,
@@ -229,6 +248,8 @@ export const corporatePlans: Plan[] = [
 // ── SST CON LICENCIA (suscripción mensual) ───────────────────────────────
 export const sstConLicenciaPlans: Plan[] = [
   {
+    slug: "sst-basico",
+    planCategory: "sst-con",
     name: "SST Básico",
     desc: "Para profesionales SST que inician la digitalización",
     monthlyCOP: 150000,
@@ -248,6 +269,8 @@ export const sstConLicenciaPlans: Plan[] = [
     ],
   },
   {
+    slug: "sst-pro",
+    planCategory: "sst-con",
     name: "SST Pro",
     desc: "La herramienta preferida de los profesionales SST",
     monthlyCOP: 320000,
@@ -267,6 +290,8 @@ export const sstConLicenciaPlans: Plan[] = [
     ],
   },
   {
+    slug: "sst-expert",
+    planCategory: "sst-con",
     name: "SST Expert",
     desc: "Para consultoras y equipos SST de alto volumen",
     monthlyCOP: 580000,
@@ -290,6 +315,8 @@ export const sstConLicenciaPlans: Plan[] = [
 // ── SST SIN LICENCIA — PAQUETES DE CRÉDITOS (pago único por certificado) ─
 export const sstSinLicenciaPlans: Plan[] = [
   {
+    slug: "pack-5",
+    planCategory: "sst-sin",
     name: "Pack 5",
     desc: "Para explorar la plataforma y generar tus primeros certificados",
     monthlyCOP: 45000,
@@ -308,6 +335,8 @@ export const sstSinLicenciaPlans: Plan[] = [
     ],
   },
   {
+    slug: "pack-15",
+    planCategory: "sst-sin",
     name: "Pack 15",
     desc: "El balance ideal entre precio y volumen para profesionales",
     monthlyCOP: 120000,
@@ -326,6 +355,8 @@ export const sstSinLicenciaPlans: Plan[] = [
     ],
   },
   {
+    slug: "pack-40",
+    planCategory: "sst-sin",
     name: "Pack 40",
     desc: "Para profesionales con alta frecuencia de certificación",
     monthlyCOP: 280000,
@@ -350,20 +381,20 @@ export const plans = corporatePlans;
 
 // ── TABLA COMPARATIVA — PLANES CORPORATIVOS ──────────────────────────────
 export const comparisons: Comparison[] = [
-  { feature: "Maniquíes incluidos",   pyme: "1",       business: "2",          corporate: "4",              enterprise: "A medida" },
-  { feature: "Usuarios",              pyme: "15",      business: "50",         corporate: "200",             enterprise: "Ilimitados" },
-  { feature: "Sedes",                 pyme: "1",       business: "2",          corporate: "5",              enterprise: "Ilimitadas" },
-  { feature: "Cursos activos",        pyme: "3",       business: "10",         corporate: "Ilimitados",     enterprise: "Ilimitados" },
-  { feature: "Certificados/mes",      pyme: "50",      business: "200",        corporate: "Ilimitados",     enterprise: "Ilimitados" },
-  { feature: "Historial sesiones",    pyme: "6 meses", business: "2 años",     corporate: "Ilimitado",      enterprise: "Ilimitado" },
-  { feature: "Reportes",              pyme: "PDF",     business: "PDF+Excel",  corporate: "Personalizados", enterprise: "BI Completo" },
-  { feature: "Sesiones en vivo",      pyme: "—",       business: "✓",          corporate: "✓ + grabación",  enterprise: "✓ + grabación" },
-  { feature: "Chat grupal cursos",    pyme: "✓",       business: "✓",          corporate: "✓",              enterprise: "✓" },
-  { feature: "Calendario entregas",   pyme: "✓",       business: "✓",          corporate: "✓",              enterprise: "✓" },
-  { feature: "API",                   pyme: "—",       business: "—",          corporate: "Básica",         enterprise: "Completa + webhooks" },
-  { feature: "White-label",           pyme: "—",       business: "—",          corporate: "—",              enterprise: "✓" },
-  { feature: "SSO / SAML",            pyme: "—",       business: "—",          corporate: "—",              enterprise: "✓" },
-  { feature: "Soporte",               pyme: "Email",   business: "< 8h",       corporate: "< 2h",           enterprise: "Dedicado 24/7" },
+  { feature: "Maniquíes incluidos", pyme: "1", business: "2", corporate: "4", enterprise: "A medida" },
+  { feature: "Usuarios", pyme: "15", business: "50", corporate: "200", enterprise: "Ilimitados" },
+  { feature: "Sedes", pyme: "1", business: "2", corporate: "5", enterprise: "Ilimitadas" },
+  { feature: "Cursos activos", pyme: "3", business: "10", corporate: "Ilimitados", enterprise: "Ilimitados" },
+  { feature: "Certificados/mes", pyme: "50", business: "200", corporate: "Ilimitados", enterprise: "Ilimitados" },
+  { feature: "Historial sesiones", pyme: "6 meses", business: "2 años", corporate: "Ilimitado", enterprise: "Ilimitado" },
+  { feature: "Reportes", pyme: "PDF", business: "PDF+Excel", corporate: "Personalizados", enterprise: "BI Completo" },
+  { feature: "Sesiones en vivo", pyme: "—", business: "✓", corporate: "✓ + grabación", enterprise: "✓ + grabación" },
+  { feature: "Chat grupal cursos", pyme: "✓", business: "✓", corporate: "✓", enterprise: "✓" },
+  { feature: "Calendario entregas", pyme: "✓", business: "✓", corporate: "✓", enterprise: "✓" },
+  { feature: "API", pyme: "—", business: "—", corporate: "Básica", enterprise: "Completa + webhooks" },
+  { feature: "White-label", pyme: "—", business: "—", corporate: "—", enterprise: "✓" },
+  { feature: "SSO / SAML", pyme: "—", business: "—", corporate: "—", enterprise: "✓" },
+  { feature: "Soporte", pyme: "Email", business: "< 8h", corporate: "< 2h", enterprise: "Dedicado 24/7" },
 ];
 
 // ── FAQs ─────────────────────────────────────────────────────────────────

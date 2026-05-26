@@ -6,51 +6,35 @@ import { PageHero } from '@/components/ui/page-hero';
 import { Header } from '@/components/layout/header';
 import { DataTable } from '@/components/ui/data-table';
 import { useAuth } from '@/hooks/use-auth';
-import { UserService } from '@/services/firestore.service';
-import { getFullName } from '@/models/user';
-import { ROLE_STUDENT } from '@/shared/lib/constants';
-import type { UserModel } from '@/models/user';
+import { LeaderboardService } from '@/shared/lib/leaderboard.service';
+import type { LeaderboardEntry } from '@/shared/types/leaderboard';
 
-interface RankingEntry {
+interface RankedEntry extends LeaderboardEntry {
     rank: number;
-    student: string;
-    averageScore: number;
-    sessions: number;
-    trend: string;
-    uid: string;
 }
 
 export default function StudentRankingPage() {
     const { user } = useAuth();
-    const [ranking, setRanking] = useState<RankingEntry[]>([]);
+    const [ranking, setRanking] = useState<RankedEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        if (!user) return;
-        UserService.getAll()
-            .then(users => {
-                const sameInstitution = users.filter(
-                    u => u.role === ROLE_STUDENT && u.institutionId === user.institutionId
-                );
-                const ranked = sameInstitution
-                    .sort((a, b) => (b.stats?.averageScore ?? 0) - (a.stats?.averageScore ?? 0))
-                    .map((u, i) => ({
-                        rank: i + 1,
-                        student: getFullName(u),
-                        averageScore: Math.round(u.stats?.averageScore ?? 0),
-                        sessions: u.stats?.totalSessions ?? 0,
-                        uid: u.uid,
-                        trend: (u.stats?.averageScore ?? 0) >= 85 ? 'up' : (u.stats?.averageScore ?? 0) >= 70 ? 'minus' : 'down',
-                    }));
-                setRanking(ranked);
+        if (!user?.institutionId) return;
+        setLoading(true);
+        LeaderboardService.getForInstitution(user.institutionId)
+            .then(entries => {
+                setRanking(entries.map((e, i) => ({ ...e, rank: i + 1 })));
+            })
+            .catch(err => {
+                console.error('Leaderboard error:', err);
             })
             .finally(() => setLoading(false));
-    }, [user]);
+    }, [user?.institutionId]);
 
     const userRank = ranking.find(e => e.uid === user?.uid);
     const filtered = ranking.filter(e =>
-        e.student.toLowerCase().includes(searchTerm.toLowerCase())
+        e.displayName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const podiumStyles = [
@@ -61,8 +45,9 @@ export default function StudentRankingPage() {
 
     const columns = [
         {
-            key: 'rank', label: 'Posición',
-            render: (_: unknown, row: RankingEntry) => {
+            key: 'rank',
+            label: 'Posición',
+            render: (_: unknown, row: RankedEntry) => {
                 const rank = Number(row.rank);
                 const style = podiumStyles[rank - 1];
                 if (rank <= 3 && style) {
@@ -74,7 +59,7 @@ export default function StudentRankingPage() {
                                 width: '32px', height: '32px', borderRadius: '10px',
                                 background: style.bg, color: style.color,
                                 fontSize: '14px', fontWeight: '900',
-                                boxShadow: `0 4px 10px ${style.bg}40`
+                                boxShadow: `0 4px 10px ${style.bg}40`,
                             }}>
                                 {rank}
                             </span>
@@ -90,33 +75,38 @@ export default function StudentRankingPage() {
             },
         },
         {
-            key: 'student',
+            key: 'displayName',
             label: 'Estudiante',
-            render: (val: any, row: RankingEntry) => (
+            render: (val: unknown, row: RankedEntry) => (
                 <div style={{
                     fontWeight: 800, color: 'var(--foreground)',
                     ...(row.uid === user?.uid ? { color: 'var(--brand)' } : {}),
                 }}>
-                    {val} {row.uid === user?.uid ? '(Tú)' : ''}
+                    {String(val)} {row.uid === user?.uid ? '(Tú)' : ''}
                 </div>
-            )
+            ),
         },
         {
             key: 'averageScore',
             label: 'Puntaje AHA',
-            render: (val: any) => (
-                <div style={{ fontWeight: 900, color: 'var(--brand)', fontSize: 16 }}>{val}%</div>
-            )
+            render: (val: unknown) => (
+                <div style={{ fontWeight: 900, color: 'var(--brand)', fontSize: 16 }}>
+                    {Math.round(Number(val))}%
+                </div>
+            ),
         },
         {
-            key: 'sessions',
+            key: 'totalSessions',
             label: 'Sesiones',
-            render: (val: any) => (
-                <div style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{val} prácticas</div>
-            )
+            render: (val: unknown) => (
+                <div style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
+                    {Number(val)} prácticas
+                </div>
+            ),
         },
         {
-            key: 'trend', label: 'Tendencia',
+            key: 'trend',
+            label: 'Tendencia',
             render: (val: unknown) => {
                 if (val === 'up') return <TrendingUp size={18} style={{ color: '#10B981' }} />;
                 if (val === 'down') return <TrendingDown size={18} style={{ color: '#EF4444' }} />;
@@ -139,49 +129,81 @@ export default function StudentRankingPage() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
                     <div style={{
-                        background: 'var(--brand)', borderRadius: 24, padding: 32, color: 'var(--text-on-brand)',
-                        display: 'flex', alignItems: 'center', gap: 24, boxShadow: '0 10px 15px -3px rgba(24, 0, 173, 0.3)'
+                        background: 'var(--brand)', borderRadius: 24, padding: 32,
+                        color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', gap: 24,
+                        boxShadow: '0 10px 15px -3px rgba(24, 0, 173, 0.3)',
                     }}>
-                        <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{
+                            width: 64, height: 64, borderRadius: 20,
+                            background: 'rgba(255,255,255,0.1)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
                             <Trophy size={32} />
                         </div>
                         <div>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 4 }}>Tu Posición Actual</div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 4 }}>
+                                Tu Posición Actual
+                            </div>
                             <div style={{ fontSize: 32, fontWeight: 900 }}>
                                 {userRank ? `#${userRank.rank} — ${userRank.averageScore}%` : 'No Clasificado'}
                             </div>
                             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>
-                                {userRank ? `${ranking.length} estudiantes en tu institución` : 'Completa sesiones para entrar al top'}
+                                {userRank
+                                    ? `${ranking.length} estudiantes en tu institución`
+                                    : 'Completa sesiones para entrar al ranking'}
                             </div>
                         </div>
                     </div>
 
                     <div style={{
-                        background: 'var(--card)', borderRadius: 24, padding: 32, border: '1px solid var(--border)',
-                        display: 'flex', alignItems: 'center', gap: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                        background: 'var(--card)', borderRadius: 24, padding: 32,
+                        border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 24,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                     }}>
-                        <div style={{ width: 64, height: 64, borderRadius: 20, background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+                        <div style={{
+                            width: 64, height: 64, borderRadius: 20, background: 'var(--muted)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981',
+                        }}>
                             <Target size={32} />
                         </div>
                         <div>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Meta de Excelencia</div>
-                            <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--foreground)' }}>95% de Calidad</div>
-                            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Sigue practicando para alcanzar el top 3</div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>
+                                Meta de Excelencia
+                            </div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--foreground)' }}>
+                                95% de Calidad
+                            </div>
+                            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+                                Sigue practicando para alcanzar el top 3
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{
+                    background: 'var(--card)', border: '1px solid var(--border)',
+                    borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 20 }}>
                         <div style={{ position: 'relative', maxWidth: 400, flex: 1 }}>
-                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                            <Search size={18} style={{
+                                position: 'absolute', left: 16, top: '50%',
+                                transform: 'translateY(-50%)', color: 'var(--text-muted)',
+                            }} />
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Filtrar por estudiante..."
-                                style={{ width: '100%', padding: '12px 16px 12px 48px', borderRadius: 12, border: '1px solid var(--border)', fontSize: 14, outline: 'none', background: 'var(--muted)' }}
+                                style={{
+                                    width: '100%', padding: '12px 16px 12px 48px',
+                                    borderRadius: 12, border: '1px solid var(--border)',
+                                    fontSize: 14, outline: 'none', background: 'var(--muted)',
+                                }}
                             />
+                        </div>
+                        <div style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                            {ranking.length} participantes
                         </div>
                     </div>
 
@@ -189,7 +211,7 @@ export default function StudentRankingPage() {
                         columns={columns}
                         data={filtered}
                         loading={loading}
-                        emptyMessage="Completa al menos una sesión para ver el ranking global de tu institución."
+                        emptyMessage="Completa al menos una sesión de práctica para aparecer en el ranking institucional."
                     />
                 </div>
             </div>

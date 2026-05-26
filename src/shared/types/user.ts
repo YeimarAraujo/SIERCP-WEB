@@ -73,11 +73,8 @@ export interface UserModel {
   isActive: boolean;
   institutionId: string;
   phoneNumber?: string;
-  /** PENDING → waiting for approval. ACTIVE → can log in normally. */
   status: 'PENDING' | 'ACTIVE';
-  /** Certificate verification tier derived from approved UserCertificate documents. */
   certVerification: CertVerificationStatus;
-  /** Number of courses this user has created (enforced against COURSE_LIMITS). */
   coursesCreated: number;
   stats?: UserStats;
   fcmTokens?: string[];

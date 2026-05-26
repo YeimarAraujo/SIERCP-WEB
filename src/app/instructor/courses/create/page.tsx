@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
@@ -11,16 +11,23 @@ import { Save, X, BookOpen, Key, Award, Info, Upload, Users, CheckCircle2, QrCod
 import { QRCodeSVG } from 'qrcode.react';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
+import { isAdmin } from '@/models/user';
 
 export default function CreateCoursePage() {
     const { user } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [csvStudents, setCsvStudents] = useState<any[]>([]);
+    const [memberships, setMemberships] = useState<any[]>([]);
+    const [instructors, setInstructors] = useState<any[]>([]);
     
     const [formData, setFormData] = useState<any>({
         title: '',
         description: '',
+        institutionId: user?.institutionId || '',
+        institutionName: '',
         instructorId: user?.uid || '',
         instructorName: user ? `${user.firstName} ${user.lastName}` : '',
         inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
@@ -37,12 +44,72 @@ export default function CreateCoursePage() {
         updatedAt: new Date(),
     });
 
+    useEffect(() => {
+        if (user) {
+            const fetchMemberships = async () => {
+                try {
+                    const q = query(collection(db, 'memberships'), where('userId', '==', user.uid), where('status', '==', 'approved'));
+                    const snaps = await getDocs(q);
+                    const mems = snaps.docs.map(d => d.data());
+                    setMemberships(mems);
+                    if (mems.length === 1) {
+                        setFormData((prev: any) => ({ ...prev, institutionId: mems[0].institutionId, institutionName: mems[0].institutionName || '' }));
+                    } else if (mems.length === 0 && user.institutionId) {
+                        setFormData((prev: any) => ({ ...prev, institutionId: user.institutionId }));
+                    }
+                } catch (e) {
+                    console.error('Error fetching memberships', e);
+                }
+            };
+            fetchMemberships();
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (isAdmin(user) && formData.institutionId) {
+            const fetchInstructors = async () => {
+                try {
+                    const q = query(collection(db, 'memberships'), where('institutionId', '==', formData.institutionId), where('role', '==', 'INSTRUCTOR'), where('isActive', '==', true));
+                    const snaps = await getDocs(q);
+                    const insts = snaps.docs.map(d => ({
+                        id: d.data().userId,
+                        name: d.data().userName || d.data().userEmail || 'Instructor'
+                    }));
+                    // Also add the admin themselves if they want to be the instructor
+                    if (!insts.find(i => i.id === user?.uid)) {
+                        insts.unshift({ id: user?.uid, name: `${user?.firstName} ${user?.lastName}` });
+                    }
+                    setInstructors(insts);
+                } catch (e) {
+                    console.error('Error fetching instructors', e);
+                }
+            };
+            fetchInstructors();
+        }
+    }, [formData.institutionId, user]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target as any;
-        setFormData((prev: any) => ({
-            ...prev,
-            [name]: type === 'number' ? Number(value) : value
-        }));
+        if (name === 'institutionId') {
+            const mem = memberships.find(m => m.institutionId === value);
+            setFormData((prev: any) => ({
+                ...prev,
+                institutionId: value,
+                institutionName: mem?.institutionName || ''
+            }));
+        } else if (name === 'instructorId') {
+            const inst = instructors.find(i => i.id === value);
+            setFormData((prev: any) => ({
+                ...prev,
+                instructorId: value,
+                instructorName: inst?.name || ''
+            }));
+        } else {
+            setFormData((prev: any) => ({
+                ...prev,
+                [name]: type === 'number' ? Number(value) : value
+            }));
+        }
     };
 
     const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,8 +139,7 @@ export default function CreateCoursePage() {
             setLoading(true);
             const courseId = await CourseService.create({
                 ...formData,
-                instructorId: user.uid,
-                instructorName: `${user.firstName} ${user.lastName}`,
+                createdBy: user.uid,
                 studentCount: csvStudents.length
             });
 
@@ -123,6 +189,47 @@ export default function CreateCoursePage() {
                                 </div>
 
                                 <div style={{ display: 'grid', gap: 20 }}>
+                                    <div style={{ display: 'grid', gap: 8 }}>
+                                        <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Institución *</label>
+                                        <select
+                                            name="institutionId"
+                                            value={formData.institutionId}
+                                            onChange={handleChange}
+                                            required
+                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15, background: 'var(--card)' }}
+                                        >
+                                            <option value="">Seleccione una institución...</option>
+                                            {memberships.map(m => (
+                                                <option key={m.institutionId} value={m.institutionId}>
+                                                    {m.institutionName || m.institutionId}
+                                                </option>
+                                            ))}
+                                            {memberships.length === 0 && user?.institutionId && (
+                                                <option value={user.institutionId}>Mi Institución Principal</option>
+                                            )}
+                                        </select>
+                                    </div>
+
+                                    {isAdmin(user) && formData.institutionId && (
+                                        <div style={{ display: 'grid', gap: 8 }}>
+                                            <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Instructor Asignado *</label>
+                                            <select
+                                                name="instructorId"
+                                                value={formData.instructorId}
+                                                onChange={handleChange}
+                                                required
+                                                style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15, background: 'var(--card)' }}
+                                            >
+                                                <option value="">Seleccione un instructor...</option>
+                                                {instructors.map(i => (
+                                                    <option key={i.id} value={i.id}>
+                                                        {i.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+
                                     <div style={{ display: 'grid', gap: 8 }}>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Título del Programa</label>
                                         <input

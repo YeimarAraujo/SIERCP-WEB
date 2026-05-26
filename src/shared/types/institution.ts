@@ -2,7 +2,14 @@ import { Timestamp } from 'firebase/firestore';
 
 export type InstitutionStatus = 'active' | 'suspended' | 'pending';
 
-export type InstitutionPlan = 'basic' | 'pro' | 'enterprise';
+export type InstitutionPlan =
+    | 'pyme'
+    | 'business'
+    | 'corporate'
+    | 'enterprise'
+    | 'sstSinLicencia'
+    | 'sstConLicencia'
+    | string;
 
 /**
  * Institution operation mode:

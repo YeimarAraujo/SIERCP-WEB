@@ -5,9 +5,9 @@ import "../../app/landing.css";
 
 /* ── Estadísticas animadas del hero ──────────────────────────────────────── */
 const stats = [
-  { value: 20, suffix: "+", label: "Años de experiencia" },
+  { value: 2, suffix: "+", label: "Años de experiencia" },
   { value: 40, suffix: "", label: "Est. máx por grupo" },
-  { value: 500, suffix: "+", label: "Profesionales formados" },
+  { value: 50, suffix: "+", label: "Profesionales formados" },
   { value: 98, suffix: "%", label: "Tasa de satisfacción" },
 ];
 
@@ -102,7 +102,6 @@ export default function Hero() {
       id="inicio"
       className="hero-section"
     >
-      {/* ── VIDEO DE FONDO ──────────────────────────────────────────────── */}
       <div className="hero-video-wrapper">
         <video
           ref={videoRef}
@@ -143,11 +142,11 @@ export default function Hero() {
 
           {/* Badge animado */}
           <div className={`hero-badge-wrapper ${entered ? "hero-anim--badge" : ""}`}>
-            <div className="hero-badge-live">
+            {/* <div className="hero-badge-live">
               <span className="hero-badge-dot" />
               <span>En vivo · AHA 2025</span>
             </div>
-            <div className="hero-badge-sep" />
+            <div className="hero-badge-sep" /> */}
             <span className="hero-badge-text">
               <i className="bi bi-shield-check" /> Protegiendo el Caribe Colombiano
             </span>

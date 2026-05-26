@@ -15,8 +15,10 @@ export default function HomeRedirect() {
         }
         switch (state.user.role) {
             case 'ADMIN':
-            case 'SUPER_ADMIN':
                 router.replace('/admin/dashboard');
+                break;
+            case 'SUPER_ADMIN':
+                router.replace('/super-admin/dashboard');
                 break;
             case 'INSTRUCTOR':
                 router.replace('/instructor/dashboard');

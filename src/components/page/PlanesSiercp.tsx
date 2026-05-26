@@ -9,10 +9,10 @@ import {
 } from "../../data/planes";
 
 const TABS = [
-  { id: "corporativo", label: "Corporativo",      icon: "bi-building-fill",     subtitle: "Empresas · Hospitales · Instituciones" },
-  { id: "maniquies",   label: "Maniquíes",         icon: "bi-heart-pulse-fill",  subtitle: "Compra de hardware IoT inteligente" },
-  { id: "sst-con",     label: "SST Profesional",   icon: "bi-patch-check-fill",  subtitle: "Profesionales con licencia SST vigente" },
-  { id: "sst-sin",     label: "Créditos",           icon: "bi-wallet2",           subtitle: "Sin licencia SST — pago por certificado" },
+  { id: "corporativo", label: "Corporativo", icon: "bi-building-fill", subtitle: "Empresas · Hospitales · Instituciones" },
+  { id: "maniquies", label: "Maniquíes", icon: "bi-heart-pulse-fill", subtitle: "Compra de hardware IoT inteligente" },
+  { id: "sst-con", label: "SST Profesional", icon: "bi-patch-check-fill", subtitle: "Profesionales con licencia SST vigente" },
+  { id: "sst-sin", label: "Créditos", icon: "bi-wallet2", subtitle: "Sin licencia SST — pago por certificado" },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
@@ -120,8 +120,11 @@ function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; is
 // ── Sub-componente: card de plan de suscripción / créditos ────────────────
 function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: boolean }) {
   const router = useRouter();
-  const annualMonthly = Math.round(plan.monthlyCOP * 0.7);
-  const annualTotal = annualMonthly * 12;
+  const ANNUAL_MONTHS = 12;
+  const fullSubtotal = plan.monthlyCOP * ANNUAL_MONTHS;
+  const discountPct = plan.annualDiscountPercent ?? 0;
+  const discountAmount = Math.round(fullSubtotal * (discountPct / 100));
+  const annualTotal = Math.round(fullSubtotal - discountAmount);
 
   return (
     <div className={`fade-up ${isVisible ? "visible" : ""} h-100`} style={{ transitionDelay: `${i * 0.1}s` }}>
@@ -184,7 +187,7 @@ function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: bo
                 padding: "5px 12px", borderRadius: "8px", display: "inline-block",
               }}>
                 <i className="bi bi-tag-fill me-1" />
-                Anual: ${annualTotal.toLocaleString("es-CO")} COP (30% OFF)
+                Anual: ${annualTotal.toLocaleString("es-CO")} COP ({plan.annualDiscountPercent} % OFF)
               </div>
             )}
           </>
@@ -240,15 +243,15 @@ export default function PlanesSiercp() {
 
   const activeTab = TABS.find(t => t.id === tab)!;
 
-  const visibleManiquis  = maniquiPackages.slice(0, 3);
-  const visibleCorp      = corporatePlans.slice(0, 3);
-  const visibleSstCon    = sstConLicenciaPlans;
-  const visibleSstSin    = sstSinLicenciaPlans;
+  const visibleManiquis = maniquiPackages.slice(0, 3);
+  const visibleCorp = corporatePlans.slice(0, 3);
+  const visibleSstCon = sstConLicenciaPlans;
+  const visibleSstSin = sstSinLicenciaPlans;
 
   const currentPlans: Plan[] =
     tab === "corporativo" ? visibleCorp :
-    tab === "sst-con"     ? visibleSstCon :
-                            visibleSstSin;
+      tab === "sst-con" ? visibleSstCon :
+        visibleSstSin;
 
   return (
     <section id="planes" ref={ref} className="section-py" style={{ background: "var(--clr-bg-light)" }}>
@@ -297,15 +300,15 @@ export default function PlanesSiercp() {
         <Row className="g-4 justify-content-center">
           {tab === "maniquies"
             ? visibleManiquis.map((pkg, i) => (
-                <Col key={pkg.name} md={6} lg={4}>
-                  <ManiquiCard pkg={pkg} i={i} isVisible={isVisible} />
-                </Col>
-              ))
+              <Col key={pkg.name} md={6} lg={4}>
+                <ManiquiCard pkg={pkg} i={i} isVisible={isVisible} />
+              </Col>
+            ))
             : currentPlans.map((plan, i) => (
-                <Col key={plan.name} md={6} lg={4}>
-                  <PlanCard plan={plan} i={i} isVisible={isVisible} />
-                </Col>
-              ))
+              <Col key={plan.name} md={6} lg={4}>
+                <PlanCard plan={plan} i={i} isVisible={isVisible} />
+              </Col>
+            ))
           }
         </Row>
 
