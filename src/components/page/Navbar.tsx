@@ -13,9 +13,9 @@ const links: Array<{ href: string; label: string; type: 'link' | 'mega' }> = [
   { href: "/", label: "Inicio", type: "link" },
   { href: "/programas", label: "Programas", type: "mega" },
   { href: "/planes", label: "Planes", type: "link" },
+  { href: "/acerca", label: "Software", type: "link" },
   { href: "/nosotros", label: "Nosotros", type: "link" },
   { href: "/contacto", label: "Contacto", type: "link" },
-  { href: "/faq", label: "FAQ", type: "link" },
 ];
 
 const logoLight = "/assets/JOMAR/logoTextov2.png";
@@ -30,7 +30,7 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
   const [scrolled, setScrolled] = useState(forceScrolled);
   const [open, setOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false); // ← faltaba este
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const megaRef = useRef<HTMLDivElement>(null);

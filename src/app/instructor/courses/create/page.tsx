@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
@@ -11,16 +11,23 @@ import { Save, X, BookOpen, Key, Award, Info, Upload, Users, CheckCircle2, QrCod
 import { QRCodeSVG } from 'qrcode.react';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
+import { isAdmin } from '@/models/user';
 
 export default function CreateCoursePage() {
     const { user } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [csvStudents, setCsvStudents] = useState<any[]>([]);
+    const [memberships, setMemberships] = useState<any[]>([]);
+    const [instructors, setInstructors] = useState<any[]>([]);
     
     const [formData, setFormData] = useState<any>({
         title: '',
         description: '',
+        institutionId: user?.institutionId || '',
+        institutionName: '',
         instructorId: user?.uid || '',
         instructorName: user ? `${user.firstName} ${user.lastName}` : '',
         inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
@@ -37,12 +44,72 @@ export default function CreateCoursePage() {
         updatedAt: new Date(),
     });
 
+    useEffect(() => {
+        if (user) {
+            const fetchMemberships = async () => {
+                try {
+                    const q = query(collection(db, 'memberships'), where('userId', '==', user.uid), where('status', '==', 'approved'));
+                    const snaps = await getDocs(q);
+                    const mems = snaps.docs.map(d => d.data());
+                    setMemberships(mems);
+                    if (mems.length === 1) {
+                        setFormData((prev: any) => ({ ...prev, institutionId: mems[0].institutionId, institutionName: mems[0].institutionName || '' }));
+                    } else if (mems.length === 0 && user.institutionId) {
+                        setFormData((prev: any) => ({ ...prev, institutionId: user.institutionId }));
+                    }
+                } catch (e) {
+                    console.error('Error fetching memberships', e);
+                }
+            };
+            fetchMemberships();
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (isAdmin(user) && formData.institutionId) {
+            const fetchInstructors = async () => {
+                try {
+                    const q = query(collection(db, 'memberships'), where('institutionId', '==', formData.institutionId), where('role', '==', 'INSTRUCTOR'), where('isActive', '==', true));
+                    const snaps = await getDocs(q);
+                    const insts = snaps.docs.map(d => ({
+                        id: d.data().userId,
+                        name: d.data().userName || d.data().userEmail || 'Instructor'
+                    }));
+                    // Also add the admin themselves if they want to be the instructor
+                    if (!insts.find(i => i.id === user?.uid)) {
+                        insts.unshift({ id: user?.uid, name: `${user?.firstName} ${user?.lastName}` });
+                    }
+                    setInstructors(insts);
+                } catch (e) {
+                    console.error('Error fetching instructors', e);
+                }
+            };
+            fetchInstructors();
+        }
+    }, [formData.institutionId, user]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target as any;
-        setFormData((prev: any) => ({
-            ...prev,
-            [name]: type === 'number' ? Number(value) : value
-        }));
+        if (name === 'institutionId') {
+            const mem = memberships.find(m => m.institutionId === value);
+            setFormData((prev: any) => ({
+                ...prev,
+                institutionId: value,
+                institutionName: mem?.institutionName || ''
+            }));
+        } else if (name === 'instructorId') {
+            const inst = instructors.find(i => i.id === value);
+            setFormData((prev: any) => ({
+                ...prev,
+                instructorId: value,
+                instructorName: inst?.name || ''
+            }));
+        } else {
+            setFormData((prev: any) => ({
+                ...prev,
+                [name]: type === 'number' ? Number(value) : value
+            }));
+        }
     };
 
     const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,8 +139,7 @@ export default function CreateCoursePage() {
             setLoading(true);
             const courseId = await CourseService.create({
                 ...formData,
-                instructorId: user.uid,
-                instructorName: `${user.firstName} ${user.lastName}`,
+                createdBy: user.uid,
                 studentCount: csvStudents.length
             });
 
@@ -101,42 +167,83 @@ export default function CreateCoursePage() {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Crear Nuevo Curso" />
             <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
                 <div style={{ maxWidth: 1000, margin: '0 auto' }}>
                     <div style={{ marginBottom: 32 }}>
-                        <div style={{ fontSize: 11, fontWeight: 800, color: '#1800AD', letterSpacing: '0.1em', marginBottom: 6 }}>NUEVO PROGRAMA</div>
-                        <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0F172A', margin: 0 }}>Configurar Capacitación</h1>
+                        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--brand)', letterSpacing: '0.1em', marginBottom: 6 }}>NUEVO PROGRAMA</div>
+                        <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--foreground)', margin: 0 }}>Configurar Capacitación</h1>
                     </div>
 
                     <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32, alignItems: 'start' }}>
                         
                         <div style={{ display: 'grid', gap: 24 }}>
                             {/* Información General */}
-                            <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                                    <div style={{ width: 40, height: 40, borderRadius: 12, background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366F1' }}>
+                                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--clr-accent)' }}>
                                         <Info size={20} />
                                     </div>
-                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0F172A' }}>Detalles del Curso</h3>
+                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--foreground)' }}>Detalles del Curso</h3>
                                 </div>
 
                                 <div style={{ display: 'grid', gap: 20 }}>
                                     <div style={{ display: 'grid', gap: 8 }}>
-                                        <label style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>Título del Programa</label>
+                                        <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Institución *</label>
+                                        <select
+                                            name="institutionId"
+                                            value={formData.institutionId}
+                                            onChange={handleChange}
+                                            required
+                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15, background: 'var(--card)' }}
+                                        >
+                                            <option value="">Seleccione una institución...</option>
+                                            {memberships.map(m => (
+                                                <option key={m.institutionId} value={m.institutionId}>
+                                                    {m.institutionName || m.institutionId}
+                                                </option>
+                                            ))}
+                                            {memberships.length === 0 && user?.institutionId && (
+                                                <option value={user.institutionId}>Mi Institución Principal</option>
+                                            )}
+                                        </select>
+                                    </div>
+
+                                    {isAdmin(user) && formData.institutionId && (
+                                        <div style={{ display: 'grid', gap: 8 }}>
+                                            <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Instructor Asignado *</label>
+                                            <select
+                                                name="instructorId"
+                                                value={formData.instructorId}
+                                                onChange={handleChange}
+                                                required
+                                                style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15, background: 'var(--card)' }}
+                                            >
+                                                <option value="">Seleccione un instructor...</option>
+                                                {instructors.map(i => (
+                                                    <option key={i.id} value={i.id}>
+                                                        {i.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <div style={{ display: 'grid', gap: 8 }}>
+                                        <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Título del Programa</label>
                                         <input
                                             name="title"
                                             value={formData.title}
                                             onChange={handleChange}
                                             required
                                             placeholder="Ej. Soporte Vital Avanzado 2026"
-                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid #E2E8F0', outline: 'none', fontSize: 15 }}
+                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15 }}
                                         />
                                     </div>
 
                                     <div style={{ display: 'grid', gap: 8 }}>
-                                        <label style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>Descripción Pedagógica</label>
+                                        <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Descripción Pedagógica</label>
                                         <textarea
                                             name="description"
                                             value={formData.description}
@@ -144,33 +251,33 @@ export default function CreateCoursePage() {
                                             required
                                             rows={5}
                                             placeholder="Define los objetivos y competencias a desarrollar..."
-                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid #E2E8F0', outline: 'none', fontSize: 15, resize: 'none' }}
+                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15, resize: 'none' }}
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Carga Masiva de Estudiantes */}
-                            <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                                     <div style={{ width: 40, height: 40, borderRadius: 12, background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
                                         <Users size={20} />
                                     </div>
-                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0F172A' }}>Inscripción de Alumnos</h3>
+                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--foreground)' }}>Inscripción de Alumnos</h3>
                                 </div>
 
-                                <div style={{ border: '2px dashed #E2E8F0', borderRadius: 20, padding: 32, textAlign: 'center', cursor: 'pointer', position: 'relative' }}>
+                                <div style={{ border: '2px dashed var(--border)', borderRadius: 20, padding: 32, textAlign: 'center', cursor: 'pointer', position: 'relative' }}>
                                     <input 
                                         type="file" 
                                         accept=".csv" 
                                         onChange={handleCsvUpload}
                                         style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
                                     />
-                                    <div style={{ color: '#6366F1', marginBottom: 12 }}>
+                                    <div style={{ color: 'var(--clr-accent)', marginBottom: 12 }}>
                                         <Upload size={40} style={{ margin: '0 auto' }} />
                                     </div>
-                                    <div style={{ fontWeight: 700, color: '#1E293B', marginBottom: 4 }}>Cargar archivo CSV</div>
-                                    <div style={{ fontSize: 13, color: '#64748B' }}>Arrastra un archivo con columnas 'nombre' y 'email'</div>
+                                    <div style={{ fontWeight: 700, color: 'var(--foreground)', marginBottom: 4 }}>Cargar archivo CSV</div>
+                                    <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Arrastra un archivo con columnas 'nombre' y 'email'</div>
                                 </div>
 
                                 {csvStudents.length > 0 && (
@@ -183,36 +290,36 @@ export default function CreateCoursePage() {
 
                         <div style={{ display: 'grid', gap: 24 }}>
                             {/* Invite Code & QR */}
-                            <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', textAlign: 'center' }}>
+                            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', textAlign: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, textAlign: 'left' }}>
                                     <div style={{ width: 40, height: 40, borderRadius: 12, background: '#FFF7ED', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B' }}>
                                         <Key size={20} />
                                     </div>
-                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0F172A' }}>Código de Acceso</h3>
+                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--foreground)' }}>Código de Acceso</h3>
                                 </div>
 
-                                <div style={{ background: '#F8FAFC', borderRadius: 20, padding: 24, border: '1px solid #E2E8F0', marginBottom: 20 }}>
-                                    <div style={{ fontSize: 28, fontWeight: 900, color: '#1800AD', letterSpacing: '0.2em', marginBottom: 20 }}>{formData.inviteCode}</div>
-                                    <div style={{ display: 'flex', justifyContent: 'center', padding: 16, background: '#FFFFFF', borderRadius: 16, border: '1px solid #E2E8F0' }}>
+                                <div style={{ background: 'var(--muted)', borderRadius: 20, padding: 24, border: '1px solid var(--border)', marginBottom: 20 }}>
+                                    <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.2em', marginBottom: 20 }}>{formData.inviteCode}</div>
+                                    <div style={{ display: 'flex', justifyContent: 'center', padding: 16, background: 'var(--card)', borderRadius: 16, border: '1px solid var(--border)' }}>
                                         <QRCodeSVG value={formData.inviteCode} size={150} />
                                     </div>
                                 </div>
-                                <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.5 }}>Los estudiantes pueden usar este código o escanear el QR desde la App SIERCP para unirse.</div>
+                                <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>Los estudiantes pueden usar este código o escanear el QR desde la App SIERCP para unirse.</div>
                             </div>
 
                             {/* Certificación */}
-                            <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                                     <div style={{ width: 40, height: 40, borderRadius: 12, background: '#FDF2F8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#DB2777' }}>
                                         <Award size={20} />
                                     </div>
-                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0F172A' }}>Certificación</h3>
+                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--foreground)' }}>Certificación</h3>
                                 </div>
                                 <select
                                     name="certification"
                                     value={formData.certification}
                                     onChange={handleChange}
-                                    style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 15, outline: 'none', background: '#FFFFFF' }}
+                                    style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', fontSize: 15, outline: 'none', background: 'var(--card)' }}
                                 >
                                     <option value="Certificado de Asistencia">Solo Asistencia</option>
                                     <option value="Certificado de Aprobación">Aprobación (Min. 85%)</option>
@@ -225,7 +332,7 @@ export default function CreateCoursePage() {
                                 disabled={loading}
                                 style={{
                                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '18px', borderRadius: 16,
-                                    background: '#1800AD', color: '#FFFFFF', border: 'none', fontSize: 16, fontWeight: 800, cursor: 'pointer',
+                                    background: 'var(--brand)', color: 'var(--text-on-brand)', border: 'none', fontSize: 16, fontWeight: 800, cursor: 'pointer',
                                     opacity: loading ? 0.7 : 1, boxShadow: '0 10px 15px -3px rgba(24, 0, 173, 0.4)'
                                 }}
                             >

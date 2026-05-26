@@ -19,13 +19,13 @@ export function EmptyState({ title, description, action }: EmptyStateProps) {
             }}>○</div>
             <h3 style={{
                 fontSize: 16, fontWeight: 600,
-                color: '#0B1C30', margin: '0 0 8px',
+                color: 'var(--foreground)', margin: '0 0 8px',
             }}>
                 {title}
             </h3>
             {description && (
                 <p style={{
-                    fontSize: 14, color: '#8892A4',
+                    fontSize: 14, color: 'var(--text-muted)',
                     margin: '0 0 16px', maxWidth: 320,
                 }}>
                     {description}

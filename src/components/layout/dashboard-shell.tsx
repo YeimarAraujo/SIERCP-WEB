@@ -64,7 +64,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                     width: 40,
                     height: 40,
                     border: '3px solid rgba(24, 0, 173, 0.1)',
-                    borderTop: '3px solid #1800AD',
+                    borderTop: '3px solid var(--brand)',
                     borderRadius: '50%',
                     animation: 'spin 0.8s linear infinite',
                 }} />
@@ -86,7 +86,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                     width: 40,
                     height: 40,
                     border: '3px solid rgba(24, 0, 173, 0.1)',
-                    borderTop: '3px solid #1800AD',
+                    borderTop: '3px solid var(--brand)',
                     borderRadius: '50%',
                     animation: 'spin 0.8s linear infinite',
                 }} />

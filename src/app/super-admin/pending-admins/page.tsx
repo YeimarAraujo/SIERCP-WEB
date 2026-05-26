@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import { UserCheck, UserX } from 'lucide-react';
 import { UserService } from '@/services/firestore.service';
@@ -9,6 +9,7 @@ import { updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/shared/lib/firebase';
 import { ROLE_ADMIN } from '@/shared/lib/constants';
 import type { UserModel } from '@/models/user';
+import { Header } from '@/components/layout/header';
 
 export default function SuperAdminPendingAdminsPage() {
     const [admins, setAdmins] = useState<UserModel[]>([]);
@@ -22,7 +23,11 @@ export default function SuperAdminPendingAdminsPage() {
     }, []);
 
     const handleApprove = async (uid: string) => {
-        await updateDoc(doc(db, 'users', uid), { status: 'ACTIVE', updatedAt: serverTimestamp() });
+        const admin = admins.find(a => a.uid === uid);
+        await updateDoc(doc(db, 'users', uid), { status: 'ACTIVE', isActive: true, updatedAt: serverTimestamp() });
+        if (admin?.institutionId) {
+            await updateDoc(doc(db, 'institutions', admin.institutionId), { status: 'active', updatedAt: serverTimestamp() });
+        }
         setAdmins(prev => prev.filter(a => a.uid !== uid));
     };
 
@@ -68,17 +73,22 @@ export default function SuperAdminPendingAdminsPage() {
     ];
 
     return (
-        <div>
-            <PageHeader
-                title="Administradores pendientes"
-                subtitle={`Aprueba o rechaza solicitudes de administradores (${admins.length} pendientes)`}
+        <div style={{ display: 'grid', gap: 22 }}>
+            <Header />
+            <PageHero
+                title="Administradores Pendientes"
+                subtitle={`Aprueba o rechaza solicitudes de acceso administrativo — ${admins.length} pendientes`}
+                parentTitle="Super Admin"
+                parentHref="/super-admin/dashboard"
             />
-            <DataTable
-                columns={columns}
-                data={admins}
-                loading={loading}
-                emptyMessage="No hay administradores pendientes de aprobación"
-            />
+            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: 'var(--shadow-sm)' }}>
+                <DataTable
+                    columns={columns}
+                    data={admins}
+                    loading={loading}
+                    emptyMessage="No hay administradores pendientes de aprobación"
+                />
+            </div>
         </div>
     );
 }

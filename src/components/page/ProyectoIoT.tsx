@@ -59,6 +59,7 @@ function AppScreen({ visible }: { visible: boolean }) {
     /* Phone frame */
     <div style={{
       width: 220,
+      height: 350,
       background: "#0b0f1a",
       borderRadius: 36,
       border: "6px solid #1a1f2e",

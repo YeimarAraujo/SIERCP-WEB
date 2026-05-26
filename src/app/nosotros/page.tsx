@@ -225,7 +225,7 @@ export default function NosotrosPage() {
                                 <a href="/contacto" className="btn-brand-on-dark" style={{ padding: "13px 26px", borderRadius: "12px" }}>
                                     Contáctanos
                                 </a>
-                                <a href="/cursos" className="btn-outline-on-dark" style={{ padding: "13px 26px", borderRadius: "12px" }}>
+                                <a href="/programas" className="btn-outline-on-dark" style={{ padding: "13px 26px", borderRadius: "12px" }}>
                                     Ver Programas
                                 </a>
                             </div>

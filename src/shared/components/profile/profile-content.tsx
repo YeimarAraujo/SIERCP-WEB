@@ -63,7 +63,7 @@ export function ProfileContent() {
             {/* Premium Profile Header Banner */}
             <div style={{ 
                 position: 'relative', height: 200, borderRadius: 32, marginBottom: -60,
-                background: 'linear-gradient(135deg, #1800AD 0%, #6366F1 100%)', overflow: 'hidden'
+                background: 'linear-gradient(135deg, var(--brand) 0%, var(--clr-accent) 100%)', overflow: 'hidden'
             }}>
                 <div style={{ position: 'absolute', top: -50, right: -50, width: 300, height: 300, borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
                 <div style={{ position: 'absolute', bottom: -20, left: '10%', width: 150, height: 150, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
@@ -73,14 +73,14 @@ export function ProfileContent() {
                 
                 {/* Left Column: Fixed Profile Info */}
                 <div style={{ position: 'relative', zIndex: 10 }}>
-                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 28, padding: '32px 24px', textAlign: 'center', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)' }}>
+                    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 28, padding: '32px 24px', textAlign: 'center', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)' }}>
                         <div style={{ position: 'relative', width: 140, height: 140, margin: '-100px auto 24px auto' }}>
                             <div 
                                 onClick={handlePhotoClick}
                                 style={{ 
-                                    width: '100%', height: '100%', borderRadius: 40, background: 'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD', fontSize: 40, fontWeight: 900,
-                                    overflow: 'hidden', cursor: 'pointer', border: '6px solid #FFFFFF', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                                    width: '100%', height: '100%', borderRadius: 40, background: 'linear-gradient(135deg, var(--muted) 0%, var(--border) 100%)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', fontSize: 40, fontWeight: 900,
+                                    overflow: 'hidden', cursor: 'pointer', border: '6px solid var(--card)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                                 }}
                             >
                                 {user.avatarUrl ? (
@@ -89,20 +89,20 @@ export function ProfileContent() {
                             </div>
                             <button 
                                 onClick={handlePhotoClick}
-                                style={{ position: 'absolute', bottom: 5, right: 5, width: 40, height: 40, borderRadius: 14, background: '#1800AD', border: '3px solid #FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)' }}
+                                style={{ position: 'absolute', bottom: 5, right: 5, width: 40, height: 40, borderRadius: 14, background: 'var(--brand)', border: '3px solid var(--card)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-on-brand)', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)' }}
                             >
                                 <Camera size={20} />
                             </button>
                             <input type="file" ref={fileInputRef} onChange={handlePhotoChange} style={{ display: 'none' }} accept="image/*" />
                         </div>
 
-                        <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0F172A', margin: '0 0 4px 0' }}>{getFullName(user)}</h2>
-                        <p style={{ fontSize: 13, color: '#64748B', fontWeight: 600, marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                        <h2 style={{ fontSize: 24, fontWeight: 900, color: 'var(--foreground)', margin: '0 0 4px 0' }}>{getFullName(user)}</h2>
+                        <p style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600, marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                             <Mail size={14} /> {user.email}
                         </p>
 
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
-                            <div style={{ background: '#EEF2FF', color: '#1800AD', padding: '6px 14px', borderRadius: 10, fontSize: 11, fontWeight: 800, letterSpacing: '0.05em' }}>{user.role}</div>
+                            <div style={{ background: 'var(--accent)', color: 'var(--brand)', padding: '6px 14px', borderRadius: 10, fontSize: 11, fontWeight: 800, letterSpacing: '0.05em' }}>{user.role}</div>
                             <div style={{ background: '#ECFDF5', color: '#10B981', padding: '6px 14px', borderRadius: 10, fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 4 }}><ShieldCheck size={12} /> VERIFICADO</div>
                         </div>
 
@@ -113,7 +113,7 @@ export function ProfileContent() {
                             <TabLink active={activeTab === 'activity'} onClick={() => setActiveTab('activity')} icon={History} label="Historial de Acceso" />
                         </div>
 
-                        <div style={{ height: 1, background: '#F1F5F9', margin: '24px 0' }} />
+                        <div style={{ height: 1, background: 'var(--muted)', margin: '24px 0' }} />
 
                         <button
                             onClick={logout}
@@ -124,8 +124,8 @@ export function ProfileContent() {
                     </div>
 
                     {/* AHA Badges / Certifications */}
-                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 28, padding: 24, marginTop: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                        <h4 style={{ margin: '0 0 16px 0', fontSize: 13, fontWeight: 800, color: '#0F172A', textTransform: 'uppercase' }}>Certificaciones</h4>
+                    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 28, padding: 24, marginTop: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                        <h4 style={{ margin: '0 0 16px 0', fontSize: 13, fontWeight: 800, color: 'var(--foreground)', textTransform: 'uppercase' }}>Certificaciones</h4>
                         <div style={{ display: 'flex', gap: 10 }}>
                             <div style={{ width: 44, height: 44, borderRadius: 12, background: '#FFF7ED', border: '1px solid #FFEDD5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EA580C' }} title="BLS Instructor">
                                 <Award size={24} />
@@ -142,14 +142,14 @@ export function ProfileContent() {
                     {activeTab === 'info' && (
                         <div style={{ display: 'grid', gap: 32 }}>
                             {/* Personal Info Form */}
-                            <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 28, padding: 40, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 28, padding: 40, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
                                     <div>
-                                        <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: '#0F172A' }}>Información Personal</h3>
-                                        <p style={{ margin: '4px 0 0 0', fontSize: 14, color: '#64748B' }}>Gestiona tus datos de contacto e identificación institucional.</p>
+                                        <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'var(--foreground)' }}>Información Personal</h3>
+                                        <p style={{ margin: '4px 0 0 0', fontSize: 14, color: 'var(--text-secondary)' }}>Gestiona tus datos de contacto e identificación institucional.</p>
                                     </div>
                                     {!editing && (
-                                        <button onClick={() => setEditing(true)} style={{ background: '#F1F5F9', border: 'none', padding: '10px 20px', borderRadius: 12, fontSize: 14, fontWeight: 700, color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <button onClick={() => setEditing(true)} style={{ background: 'var(--muted)', border: 'none', padding: '10px 20px', borderRadius: 12, fontSize: 14, fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                                             <Edit3 size={16} /> Editar
                                         </button>
                                     )}
@@ -165,8 +165,8 @@ export function ProfileContent() {
 
                                     {editing && (
                                         <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-                                            <button type="button" onClick={() => setEditing(false)} style={{ flex: 1, padding: '14px', borderRadius: 14, background: '#F1F5F9', border: 'none', color: '#475569', fontWeight: 700, cursor: 'pointer' }}>Cancelar</button>
-                                            <button type="submit" disabled={loading} style={{ flex: 2, padding: '14px', borderRadius: 14, background: '#1800AD', border: 'none', color: '#FFFFFF', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                                            <button type="button" onClick={() => setEditing(false)} style={{ flex: 1, padding: '14px', borderRadius: 14, background: 'var(--muted)', border: 'none', color: 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer' }}>Cancelar</button>
+                                            <button type="submit" disabled={loading} style={{ flex: 2, padding: '14px', borderRadius: 14, background: 'var(--brand)', border: 'none', color: 'var(--text-on-brand)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                                                 {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Guardar Cambios
                                             </button>
                                         </div>
@@ -175,26 +175,26 @@ export function ProfileContent() {
                             </div>
 
                             {/* Stats Summary */}
-                            <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 28, padding: 40, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 28, padding: 40, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
                                     <div style={{ width: 44, height: 44, borderRadius: 14, background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
                                         <Target size={22} />
                                     </div>
-                                    <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: '#0F172A' }}>Rendimiento Clínico Histórico</h3>
+                                    <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'var(--foreground)' }}>Rendimiento Clínico Histórico</h3>
                                 </div>
                                 <div style={{ display: 'grid', gap: 24 }}>
                                     <MetricBar label="Precisión en Compresión (Profundidad)" value={stats?.averageDepthMm || 0} max={70} unit=" mm" color="#10B981" />
-                                    <MetricBar label="Sincronización de Ritmo (Frecuencia)" value={stats?.averageRatePerMin || 0} max={130} unit=" /min" color="#1800AD" />
-                                    <MetricBar label="Puntaje de Certificación Acumulado" value={stats?.averageScore || 0} max={100} unit="%" color="#6366F1" />
+                                    <MetricBar label="Sincronización de Ritmo (Frecuencia)" value={stats?.averageRatePerMin || 0} max={130} unit=" /min" color="var(--brand)" />
+                                    <MetricBar label="Puntaje de Certificación Acumulado" value={stats?.averageScore || 0} max={100} unit="%" color="var(--clr-accent)" />
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'security' && (
-                        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 28, padding: 40 }}>
-                            <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: '#0F172A', marginBottom: 8 }}>Seguridad de la Cuenta</h3>
-                            <p style={{ margin: 0, fontSize: 14, color: '#64748B', marginBottom: 40 }}>Actualiza tu contraseña y configura la protección de tu cuenta institucional.</p>
+                        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 28, padding: 40 }}>
+                            <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'var(--foreground)', marginBottom: 8 }}>Seguridad de la Cuenta</h3>
+                            <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', marginBottom: 40 }}>Actualiza tu contraseña y configura la protección de tu cuenta institucional.</p>
                             
                             <div style={{ display: 'grid', gap: 24 }}>
                                 <SecurityAction icon={Lock} title="Cambiar Contraseña" description="Se recomienda usar una contraseña fuerte que no uses en otros sitios." action="Cambiar" />
@@ -205,8 +205,8 @@ export function ProfileContent() {
                     )}
 
                     {activeTab === 'activity' && (
-                        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 28, padding: 40 }}>
-                            <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: '#0F172A', marginBottom: 40 }}>Actividad de Sesión</h3>
+                        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 28, padding: 40 }}>
+                            <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'var(--foreground)', marginBottom: 40 }}>Actividad de Sesión</h3>
                             <div style={{ display: 'grid', gap: 16 }}>
                                 <ActivityRow device="Chrome en Windows" location="Bogotá, Colombia" date="Hoy, 10:45 AM" current />
                                 <ActivityRow device="iPhone 15 - Safari" location="Bogotá, Colombia" date="Ayer, 08:20 PM" />
@@ -226,8 +226,8 @@ function TabLink({ active, onClick, icon: Icon, label }: any) {
             onClick={onClick}
             style={{ 
                 display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12,
-                cursor: 'pointer', background: active ? '#F1F5F9' : 'transparent', 
-                color: active ? '#1800AD' : '#64748B', fontWeight: active ? 700 : 500,
+                cursor: 'pointer', background: active ? 'var(--muted)' : 'transparent', 
+                color: active ? 'var(--brand)' : 'var(--text-secondary)', fontWeight: active ? 700 : 500,
                 fontSize: 14, transition: 'all 0.2s'
             }}
         >
@@ -239,17 +239,17 @@ function TabLink({ active, onClick, icon: Icon, label }: any) {
 function InputGroup({ label, value, onChange, disabled, icon: Icon }: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean; icon: any }) {
     return (
         <div style={{ display: 'grid', gap: 10 }}>
-            <label style={{ fontSize: 13, fontWeight: 800, color: '#475569', letterSpacing: '0.02em' }}>{label}</label>
+            <label style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '0.02em' }}>{label}</label>
             <div style={{ position: 'relative' }}>
-                <Icon size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                <Icon size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
                     disabled={disabled}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     style={{ 
                         width: '100%', padding: '14px 16px 14px 48px', borderRadius: 14, 
-                        border: '1px solid #E2E8F0', fontSize: 14, outline: 'none',
-                        background: disabled ? '#F8FAFC' : '#FFFFFF', color: disabled ? '#64748B' : '#0F172A',
+                        border: '1px solid var(--border)', fontSize: 14, outline: 'none',
+                        background: disabled ? 'var(--muted)' : 'var(--card)', color: disabled ? 'var(--text-secondary)' : 'var(--foreground)',
                         transition: 'border-color 0.2s'
                     }}
                 />
@@ -260,17 +260,17 @@ function InputGroup({ label, value, onChange, disabled, icon: Icon }: { label: s
 
 function SecurityAction({ icon: Icon, title, description, action, disabled }: any) {
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderRadius: 20, background: '#F8FAFC', border: '1px solid #F1F5F9' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderRadius: 20, background: 'var(--muted)', border: '1px solid var(--muted)' }}>
             <div style={{ display: 'flex', gap: 16 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#FFFFFF', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1800AD' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--card)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)' }}>
                     <Icon size={20} />
                 </div>
                 <div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', marginBottom: 4 }}>{title}</div>
-                    <div style={{ fontSize: 13, color: '#64748B' }}>{description}</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--foreground)', marginBottom: 4 }}>{title}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{description}</div>
                 </div>
             </div>
-            <button disabled={disabled} style={{ padding: '8px 16px', borderRadius: 10, background: disabled ? '#E2E8F0' : '#FFFFFF', border: '1px solid #E2E8F0', fontSize: 13, fontWeight: 700, color: disabled ? '#94A3B8' : '#1800AD', cursor: disabled ? 'default' : 'pointer' }}>
+            <button disabled={disabled} style={{ padding: '8px 16px', borderRadius: 10, background: disabled ? 'var(--muted)' : 'var(--card)', border: '1px solid var(--border)', fontSize: 13, fontWeight: 700, color: disabled ? 'var(--text-muted)' : 'var(--brand)', cursor: disabled ? 'default' : 'pointer' }}>
                 {action}
             </button>
         </div>
@@ -279,17 +279,17 @@ function SecurityAction({ icon: Icon, title, description, action, disabled }: an
 
 function ActivityRow({ device, location, date, current }: any) {
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderRadius: 16, border: '1px solid #F1F5F9', background: current ? '#F0FDF4' : 'transparent' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderRadius: 16, border: '1px solid var(--muted)', background: current ? '#F0FDF4' : 'transparent' }}>
             <div style={{ display: 'flex', gap: 14 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: '#FFFFFF', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
                     <Monitor size={16} />
                 </div>
                 <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>{device} {current && <span style={{ color: '#10B981', fontSize: 11, marginLeft: 8 }}>• Sesión actual</span>}</div>
-                    <div style={{ fontSize: 12, color: '#64748B' }}>{location}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--foreground)' }}>{device} {current && <span style={{ color: '#10B981', fontSize: 11, marginLeft: 8 }}>• Sesión actual</span>}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{location}</div>
                 </div>
             </div>
-            <div style={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>{date}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>{date}</div>
         </div>
     );
 }

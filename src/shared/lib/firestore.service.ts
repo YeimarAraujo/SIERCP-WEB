@@ -1,6 +1,6 @@
-import { 
-    collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, 
-    query, where, orderBy, limit, serverTimestamp, Timestamp,
+import {
+    collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
+    query, where, orderBy, limit, serverTimestamp, Timestamp, increment,
     type QueryConstraint, collectionGroup, getCountFromServer
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -9,6 +9,7 @@ import type { SessionModel } from '@/shared/types/session';
 import type { CourseModel, Enrollment } from '@/shared/types/course';
 import type { ManiquiModel } from '@/shared/types/device';
 import type { GuideModel } from '@/shared/types/guide';
+import { AuditService } from '@/features/audit/services/audit.service';
 
 function tsToDate(val: unknown): Date {
     if (val instanceof Timestamp) return val.toDate();
@@ -34,10 +35,18 @@ export const UserService = {
 
     async update(uid: string, data: Partial<UserModel>): Promise<void> {
         await updateDoc(doc(db, 'users', uid), { ...data, updatedAt: serverTimestamp() });
+        await AuditService.record({
+            action: data.role ? 'role.change' : 'update',
+            resource: 'user',
+            resourceId: uid,
+            institutionId: data.institutionId,
+            metadata: { fields: Object.keys(data) },
+        });
     },
 
     async delete(uid: string): Promise<void> {
         await deleteDoc(doc(db, 'users', uid));
+        await AuditService.record({ action: 'delete', resource: 'user', resourceId: uid, severity: 'warning' });
     },
 };
 
@@ -95,11 +104,23 @@ export const SessionService = {
     async create(session: Omit<SessionModel, 'id'>): Promise<string> {
         const ref = doc(collection(db, 'sessions'));
         await setDoc(ref, { ...session, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        await AuditService.record({
+            action: 'create',
+            resource: 'session',
+            resourceId: ref.id,
+            metadata: { studentId: session.studentId, courseId: session.courseId, status: session.status },
+        });
         return ref.id;
     },
 
     async update(id: string, data: Partial<SessionModel>): Promise<void> {
         await updateDoc(doc(db, 'sessions', id), { ...data, updatedAt: serverTimestamp() });
+        await AuditService.record({
+            action: 'update',
+            resource: 'session',
+            resourceId: id,
+            metadata: { fields: Object.keys(data), status: data.status },
+        });
     },
 
     async getAllRecent(limitN = 20): Promise<SessionModel[]> {
@@ -192,16 +213,33 @@ export const CourseService = {
 
     async create(course: Omit<CourseModel, 'id'>): Promise<string> {
         const ref = doc(collection(db, 'courses'));
-        await setDoc(ref, { ...course, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        const createdBy = course.createdBy || course.instructorId;
+        await setDoc(ref, { ...course, createdBy, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        if (course.instructorId) {
+            await updateDoc(doc(db, 'users', course.instructorId), { coursesCreated: increment(1) });
+        }
+        await AuditService.record({
+            action: 'create',
+            resource: 'course',
+            resourceId: ref.id,
+            metadata: { title: course.title, instructorId: course.instructorId },
+        });
         return ref.id;
     },
 
     async update(id: string, data: Partial<CourseModel>): Promise<void> {
         await updateDoc(doc(db, 'courses', id), { ...data, updatedAt: serverTimestamp() });
+        await AuditService.record({
+            action: 'update',
+            resource: 'course',
+            resourceId: id,
+            metadata: { fields: Object.keys(data), title: data.title },
+        });
     },
 
     async delete(id: string): Promise<void> {
         await deleteDoc(doc(db, 'courses', id));
+        await AuditService.record({ action: 'delete', resource: 'course', resourceId: id, severity: 'warning' });
     },
 
     async getByInviteCode(code: string): Promise<CourseModel | null> {
@@ -221,6 +259,12 @@ export const CourseService = {
         await updateDoc(doc(db, 'courses', courseId), {
             studentCount: (await getDoc(doc(db, 'courses', courseId))).data()?.studentCount + 1 || 1,
             updatedAt: serverTimestamp(),
+        });
+        await AuditService.record({
+            action: 'create',
+            resource: 'enrollment',
+            resourceId: `${courseId}:${enrollment.studentId}`,
+            metadata: { courseId, studentId: enrollment.studentId, status: enrollment.status },
         });
     },
 
@@ -281,6 +325,7 @@ export const ManiquiService = {
 
     async update(id: string, data: Partial<ManiquiModel>): Promise<void> {
         await updateDoc(doc(db, 'manikins', id), { ...data, updatedAt: serverTimestamp() });
+        await AuditService.record({ action: 'update', resource: 'manikin', resourceId: id, metadata: { fields: Object.keys(data) } });
     },
 };
 
@@ -310,15 +355,23 @@ export const GuideService = {
             createdAt: serverTimestamp(), 
             updatedAt: serverTimestamp() 
         });
+        await AuditService.record({
+            action: 'create',
+            resource: 'guide',
+            resourceId: ref.id,
+            metadata: { title: guide.title, courseId: guide.courseId },
+        });
         return ref.id;
     },
 
     async update(id: string, data: Partial<GuideModel>): Promise<void> {
         await updateDoc(doc(db, 'guides', id), { ...data, updatedAt: serverTimestamp() });
+        await AuditService.record({ action: 'update', resource: 'guide', resourceId: id, metadata: { fields: Object.keys(data) } });
     },
 
     async delete(id: string): Promise<void> {
         await deleteDoc(doc(db, 'guides', id));
+        await AuditService.record({ action: 'delete', resource: 'guide', resourceId: id, severity: 'warning' });
     },
 };
 

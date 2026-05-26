@@ -9,21 +9,21 @@ import { ToastProvider } from '@/components/layout/toast-provider';
 export function StudentShell({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [ready, setReady] = useState(false);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     useEffect(() => {
         const checkAuth = () => {
             const state = useAuthStore.getState();
 
             if (state.user) {
-                if (state.user.role !== 'ESTUDIANTE') {
-                    if (state.user.role === 'ADMIN' || state.user.role === 'SUPER_ADMIN') {
-                        router.replace('/admin/dashboard');
-                    } else if (state.user.role === 'INSTRUCTOR') {
-                        router.replace('/instructor/dashboard');
-                    }
+                if (state.user.role === 'ADMIN' || state.user.role === 'SUPER_ADMIN') {
+                    router.replace('/admin/dashboard');
                     return;
                 }
+                if (state.user.role === 'INSTRUCTOR') {
+                    router.replace('/instructor/dashboard');
+                    return;
+                }
+                // USUARIO, USUARIO_SST, USUARIO_PROFESIONAL → allowed
                 setReady(true);
                 return;
             }
@@ -70,18 +70,23 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div style={{
+        <div className="app-shell-root" style={{
             display: 'flex',
-            minHeight: '100vh',
+            height: '100dvh',
+            minHeight: '100dvh',
             background: 'var(--bg-page)',
             color: 'var(--text-primary)',
+            overflow: 'hidden',
         }}>
-            <StudentSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
-            <main style={{
+            <StudentSidebar collapsed />
+            <main className="app-main" style={{
                 flex: 1,
                 overflowY: 'auto',
                 background: 'var(--bg-page)',
                 padding: '32px',
+                minHeight: '100dvh',
+                display: 'flex',
+                flexDirection: 'column',
             }}>
                 {children}
             </main>

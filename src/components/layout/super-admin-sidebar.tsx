@@ -8,7 +8,9 @@ import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Building2, UserCheck, CreditCard,
     ScrollText, Settings, User, LogOut,
-    Sun, Moon
+    Sun, Moon, GraduationCap, Users, BookOpen,
+    BookMarked, ShoppingCart, Package, Briefcase,
+    ShieldCheckIcon,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -16,15 +18,29 @@ interface NavItem {
     label: string;
     href: string;
     icon: LucideIcon;
+    group?: string;
 }
 
 const navItems: NavItem[] = [
-    { label: 'Dashboard',          href: '/super-admin/dashboard',       icon: LayoutDashboard },
-    { label: 'Instituciones',      href: '/super-admin/institutions',    icon: Building2 },
-    { label: 'Admins pendientes',  href: '/super-admin/pending-admins',  icon: UserCheck },
-    { label: 'Planes y licencias', href: '/super-admin/plans',           icon: CreditCard },
-    { label: 'Logs de actividad',  href: '/super-admin/logs',            icon: ScrollText },
-    { label: 'Configuración',      href: '/super-admin/settings',        icon: Settings },
+    { label: 'Dashboard', href: '/super-admin/dashboard', icon: LayoutDashboard },
+    // ── Gestión ─────────────────────────────────────────────────────────────
+    // { label: 'Instituciones', href: '/super-admin/institutions', icon: Building2, group: 'Gestión' },
+    // { label: 'Usuarios', href: '/super-admin/usuarios', icon: Users, group: 'Gestión' },
+    // { label: 'Instructores', href: '/super-admin/instructores', icon: GraduationCap, group: 'Gestión' },
+    // // ── Contenido ───────────────────────────────────────────────────────────
+    // { label: 'Cursos plataforma', href: '/super-admin/cursos', icon: BookOpen, group: 'Contenido' },
+    { label: 'Cursos Jomar', href: '/super-admin/cursos-jomar', icon: BookMarked, group: 'Contenido' },
+    { label: 'Servicios Jomar', href: '/super-admin/servicios-jomar', icon: Briefcase, group: 'Contenido' },
+    // ── Comercial ───────────────────────────────────────────────────────────
+    { label: 'Planes y licencias', href: '/super-admin/plans', icon: CreditCard, group: 'Comercial' },
+    { label: 'Pedidos y compras', href: '/super-admin/pedidos', icon: ShoppingCart, group: 'Comercial' },
+    { label: 'Stock de maniquíes', href: '/super-admin/stock', icon: Package, group: 'Comercial' },
+    // ── Pendientes ──────────────────────────────────────────────────────────
+    { label: 'Admins pendientes', href: '/super-admin/pending-admins', icon: UserCheck, group: 'Pendientes' },
+    { label: 'Instructores pendientes', href: '/super-admin/pending-instructors', icon: UserCheck, group: 'Pendientes' },
+    // ── Sistema ─────────────────────────────────────────────────────────────
+    { label: 'Logs de actividad', href: '/super-admin/logs', icon: ScrollText, group: 'Sistema' },
+    { label: 'Configuración', href: '/super-admin/settings', icon: Settings, group: 'Sistema' },
 ];
 
 export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
@@ -44,7 +60,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
     };
 
     const handleLogout = async () => {
-        try { await logout(); } catch {}
+        try { await logout(); } catch { }
         router.replace('/');
     };
 
@@ -66,11 +82,11 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
             transition: 'width 0.25s ease, min-width 0.25s ease',
             zIndex: 50,
         }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
         >
             <div style={{
-                padding: isCollapsed ? '16px 12px' : '20px 20px 16px',
+                padding: '20px 20px 16px',
                 borderBottom: '1px solid var(--sidebar-border)',
                 display: 'flex',
                 alignItems: 'center',
@@ -89,20 +105,21 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                     fontSize: 14, fontWeight: 700,
                     cursor: 'pointer',
                 }}
-                onClick={onToggle}
-                title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
-                >S</div>
+                    onClick={onToggle}
+                    title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+                ><ShieldCheckIcon size={18} />
+                </div>
                 <span style={{
                     fontSize: '16px',
                     fontWeight: '700',
-                    color: 'var(--text-primary)',
+                    color: 'var(--sidebar-text)',
                     letterSpacing: '-0.3px',
                     opacity: isCollapsed ? 0 : 1,
                     overflow: 'hidden',
                     whiteSpace: 'nowrap',
                     transition: 'opacity 0.2s ease',
                 }}>
-                    SIERCP
+                    SUPER ADMIN
                 </span>
                 {collapsed && (
                     <div style={{
@@ -115,64 +132,57 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                 )}
             </div>
 
-            <nav style={{ flex: 1, padding: isCollapsed ? '8px 6px' : '12px 12px' }}>
-                {navItems.map((item) => {
+            <nav style={{ flex: 1, padding: '12px 12px', overflowY: 'auto' }}>
+                {navItems.map((item, idx) => {
                     const active = isActive(item.href);
                     const Icon = item.icon;
 
                     return (
-                        <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: isCollapsed ? 'center' : 'flex-start',
-                                gap: isCollapsed ? 0 : '10px',
-                                padding: isCollapsed ? '10px' : '10px 12px',
-                                borderRadius: 'var(--radius-md)',
-                                marginBottom: '2px',
-                                background: active
-                                    ? 'var(--sidebar-active-bg)'
-                                    : 'transparent',
-                                color: active
-                                    ? 'var(--sidebar-active-text)'
-                                    : 'var(--sidebar-text)',
-                                fontWeight: active ? '600' : '500',
-                                fontSize: '14px',
-                                borderLeft: active
-                                    ? '3px solid var(--brand)'
-                                    : '3px solid transparent',
-                                transition: 'all 0.15s ease',
-                                cursor: 'pointer',
-                                width: isCollapsed ? 44 : 'auto',
-                                marginLeft: isCollapsed ? 'auto' : 0,
-                                marginRight: isCollapsed ? 'auto' : 0,
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!active) {
-                                    e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                                    e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!active) {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = 'var(--sidebar-text)';
-                                }
-                            }}
-                            >
-                                <Icon
-                                    size={20}
-                                    strokeWidth={active ? 2.5 : 2}
-                                />
-                                <span style={{
-                                    opacity: isCollapsed ? 0 : 1,
-                                    overflow: 'hidden',
-                                    whiteSpace: 'nowrap',
-                                    maxWidth: isCollapsed ? 0 : '200px',
-                                    transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                                }}>{item.label}</span>
-                            </div>
-                        </Link>
+                        <div key={item.href} style={{ marginBottom: '4px' }}>
+                            <Link href={item.href} style={{ textDecoration: 'none' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: isCollapsed ? 'center' : 'flex-start',
+                                    gap: isCollapsed ? 0 : '10px',
+                                    padding: isCollapsed ? '10px' : '9px 12px',
+                                    borderRadius: 'var(--radius-md)',
+                                    marginBottom: '1px',
+                                    background: active ? 'var(--sidebar-active-bg)' : 'transparent',
+                                    color: active ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)',
+                                    fontWeight: active ? '600' : '500',
+                                    fontSize: '13px',
+                                    transition: 'all 0.15s ease',
+                                    cursor: 'pointer',
+                                    width: isCollapsed ? 44 : 'auto',
+                                    marginLeft: isCollapsed ? 'auto' : 0,
+                                    marginRight: isCollapsed ? 'auto' : 0,
+                                }}
+                                    onMouseEnter={(e) => {
+                                        if (!active) {
+                                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!active) {
+                                            e.currentTarget.style.background = 'transparent';
+                                            e.currentTarget.style.color = 'var(--sidebar-text)';
+                                        }
+                                    }}
+                                    title={isCollapsed ? item.label : undefined}
+                                >
+                                    <Icon size={18} strokeWidth={active ? 2.5 : 2} />
+                                    <span style={{
+                                        opacity: isCollapsed ? 0 : 1,
+                                        overflow: 'hidden',
+                                        whiteSpace: 'nowrap',
+                                        maxWidth: isCollapsed ? 0 : '200px',
+                                        transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                                    }}>{item.label}</span>
+                                </div>
+                            </Link>
+                        </div>
                     );
                 })}
             </nav>
@@ -185,12 +195,12 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                 gap: 4,
                 alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
-                {user && !collapsed && (
+                {/* {user && !isCollapsed && (
                     <div style={{ padding: '8px 12px' }}>
                         <p style={{
                             fontSize: 12,
                             fontWeight: 500,
-                            color: 'var(--text-primary)',
+                            color: 'var(--sidebar-text)',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -199,7 +209,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                         </p>
                         <p style={{
                             fontSize: 11,
-                            color: 'var(--text-muted)',
+                            color: 'rgba(255,255,255,0.55)',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -207,9 +217,9 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                             {user.role}
                         </p>
                     </div>
-                )}
+                )} */}
 
-                <Link href="/super-admin/profile" style={{ textDecoration: 'none' }}>
+                {/* <Link href="/super-admin/settings" style={{ textDecoration: 'none' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -225,15 +235,15 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                         marginLeft: isCollapsed ? 'auto' : 0,
                         marginRight: isCollapsed ? 'auto' : 0,
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                    }}
-                    title={isCollapsed ? 'Mi perfil' : undefined}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'var(--sidebar-text)';
+                        }}
+                        title={isCollapsed ? 'Configuración' : undefined}
                     >
                         <User size={20} />
                         <span style={{
@@ -242,9 +252,9 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                             whiteSpace: 'nowrap',
                             maxWidth: isCollapsed ? 0 : '200px',
                             transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                        }}>Mi perfil</span>
+                        }}>Configuración</span>
                     </div>
-                </Link>
+                </Link> */}
 
                 <button
                     onClick={toggleTheme}
@@ -298,7 +308,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                         background: 'transparent',
                         border: 'none',
                         cursor: 'pointer',
-                        color: 'var(--danger-text)',
+                        color: 'var(--sidebar-text)',
                         fontSize: '14px',
                         fontWeight: '500',
                         marginLeft: isCollapsed ? 'auto' : 0,

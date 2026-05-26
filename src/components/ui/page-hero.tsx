@@ -17,13 +17,13 @@ export function PageHero({ title, subtitle, actions, parentTitle, parentHref }: 
     const { user } = useAuth();
 
     return (
-        <div style={{ 
-            background: '#FFFFFF', 
-            borderRadius: 24, 
-            padding: '24px 32px', 
-            marginBottom: 32, 
+        <div className="surface-glass lighting-border" style={{
+            background: 'var(--card)',
+            borderRadius: 24,
+            padding: '24px 32px',
+            marginBottom: 32,
             boxShadow: '0 4px 20px -5px rgba(0,0,0,0.05)',
-            border: '1px solid #E2E8F0',
+            border: '1px solid var(--border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -31,39 +31,41 @@ export function PageHero({ title, subtitle, actions, parentTitle, parentHref }: 
             overflow: 'hidden'
         }}>
             {/* Background Accent */}
-            <div style={{ 
-                position: 'absolute', 
-                top: 0, 
-                left: 0, 
-                width: 4, 
-                height: '100%', 
-                background: 'linear-gradient(to bottom, #1800AD, #6366F1)' 
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: 4,
+                height: '100%',
+                background: 'linear-gradient(to bottom, var(--brand), var(--clr-accent))'
             }} />
 
             <div>
                 {/* Breadcrumbs */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, color: '#94A3B8', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     <Home size={14} />
                     <ChevronRight size={12} />
                     {parentTitle && parentHref ? (
                         <>
-                            <Link href={parentHref} style={{ color: '#94A3B8', textDecoration: 'none' }}>{parentTitle}</Link>
+                            <Link href={parentHref} style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>{parentTitle}</Link>
                             <ChevronRight size={12} />
                         </>
-                    ) : (
-                        <>
-                            <span>Panel</span>
-                            <ChevronRight size={12} />
-                        </>
-                    )}
-                    <span style={{ color: '#1800AD' }}>{title}</span>
+                    )
+                        : (
+                            <>
+                                <span>Panel</span>
+                                <ChevronRight size={12} />
+                            </>
+                        )
+                    }
+                    <span style={{ color: 'var(--brand)' }}>{title}</span>
                 </div>
 
-                <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0F172A', margin: 0, letterSpacing: '-0.02em' }}>
+                <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--foreground)', margin: 0, letterSpacing: '-0.02em' }}>
                     {title}
                 </h1>
                 {subtitle && (
-                    <p style={{ margin: '6px 0 0 0', fontSize: 14, color: '#64748B', fontWeight: 500 }}>
+                    <p style={{ margin: '6px 0 0 0', fontSize: 14, color: 'var(--text-secondary)', fontWeight: 500 }}>
                         {subtitle}
                     </p>
                 )}

@@ -1,1 +1,1 @@
-export { type Institution, type InstitutionStatus, type InstitutionPlan } from '@/shared/types/institution';
+export { type Institution, type InstitutionStatus, type InstitutionPlan, type InstitutionMode } from '@/shared/types/institution';
