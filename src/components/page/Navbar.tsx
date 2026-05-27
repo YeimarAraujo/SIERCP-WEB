@@ -5,7 +5,7 @@ import { Container } from "react-bootstrap";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useThemeStore } from "@/stores/theme-store";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthMinimal } from "@/shared/hooks/use-auth-minimal";
 import { cursos } from "@/data/cursos";
 import { servicios } from "@/data/servicios";
 
@@ -24,7 +24,7 @@ const logoDark = "/assets/JOMAR/LogoTexto.png";
 export default function Navbar({ forceScrolled = false }: { forceScrolled?: boolean }) {
   const pathname = usePathname();
   const { theme, toggleTheme } = useThemeStore();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthMinimal();
   const isDark = theme === 'dark';
 
   const [scrolled, setScrolled] = useState(forceScrolled);
@@ -45,10 +45,6 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [forceScrolled]);
-
-  useEffect(() => {
-    if (mounted) document.documentElement.setAttribute('data-theme', theme);
-  }, [theme, mounted]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
