@@ -1,194 +1,246 @@
 'use client';
 
-import React from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import React, { useEffect, useRef, useState } from "react";
 import "../../app/landing.css";
 
-const heroImg = "/assets/hero-bg.jpeg";
-
+/* ── Estadísticas animadas del hero ──────────────────────────────────────── */
 const stats = [
-  { value: "20+", label: "Años de experiencia" },
-  { value: "40", label: "Est. máx por grupo" },
-  { value: "AHA 2025", label: "Certificado" },
-  { value: "+500", label: "Profesionales formados" },
+  { value: 2, suffix: "+", label: "Años de experiencia" },
+  { value: 40, suffix: "", label: "Est. máx por grupo" },
+  { value: 50, suffix: "+", label: "Profesionales formados" },
+  { value: 98, suffix: "%", label: "Tasa de satisfacción" },
 ];
 
-export default function Hero() {
+/* ── Hook: contador animado al entrar en pantalla ─────────────────────────── */
+function useCountUp(target: number, duration = 1800, active: boolean = false) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!active) return;
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, duration, active]);
+
+  return count;
+}
+
+/* ── Tarjeta de stat individual con contador ──────────────────────────────── */
+function StatCounter({ value, suffix, label, active }: { value: number; suffix: string; label: string; active: boolean }) {
+  const count = useCountUp(value, 1600, active);
   return (
-    <section id="inicio" style={{
-      minHeight: "100vh",
-      background: "var(--clr-bg-hero)",
-      display: "flex",
-      alignItems: "center",
-      position: "relative",
-      overflow: "hidden",
-      padding: "80px 0 40px"
-    }}>
-      {/* Orb 1 — large soft purple */}
-      <div style={{
-        position: "absolute",
-        top: "10%",
-        right: "10%",
-        width: "70%",
-        height: "70%",
-        background: "radial-gradient(ellipse 55% 60% at 75% 20%, rgba(100,80,255,0.35) 0%, transparent 70%)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
-      {/* Orb 2 — cyan accent bottom-left */}
-      <div style={{
-        position: "absolute",
-        bottom: "5%",
-        left: "0%",
-        width: "50%",
-        height: "50%",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
-      {/* Subtle circular accent top-right */}
-      <div style={{ position: "absolute", bottom: "-10%", left: "-5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(109, 74, 255, 0.1) 0%, transparent 70%)", borderRadius: "50%" }} />
-      {/* Noise texture overlay */}
-      <div className="noise-overlay" />
+    <div className="hero-stat-item">
+      <div className="hero-stat-value">
+        {count}{suffix}
+      </div>
+      <div className="hero-stat-label">{label}</div>
+    </div>
+  );
+}
+export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
-      <Container style={{ position: "relative", zIndex: 1 }}>
-        <Row className="align-items-center g-5">
-          <Col lg={7} className="text-center text-lg-start">
-            {/* Badge */}
-            <div className="badge-pill-white mb-4 hero-badge-enter">
-              <span className="pulse-dot" />
-              <i className="bi bi-shield-check text-accent" /> 20 Años Protegiendo el Caribe
+  /* ── Animación de entrada escalonada ──────────────────────────────────── */
+  useEffect(() => {
+    const timer = setTimeout(() => setEntered(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  /* ── Activar contadores al hacer scroll ──────────────────────────────── */
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
+      { threshold: 0.3 }
+    );
+    if (sectionRef.current) obs.observe(sectionRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  /* ── Efecto parallax sutil en scroll ──────────────────────────────────── */
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollY = window.scrollY;
+
+      if (videoRef.current) {
+        videoRef.current.style.transform = `scale(1.08) translateY(${scrollY * 0.25}px)`;
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* ── Scroll suave al hacer click en el indicador ─────────────────────── */
+  const scrollToNext = () => {
+    const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
+    next?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
+  return (
+    <section
+      ref={sectionRef}
+      id="inicio"
+      className="hero-section"
+    >
+      <div className="hero-video-wrapper">
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          onCanPlay={() => setVideoReady(true)}
+          className={`hero-video ${videoReady ? "hero-video--ready" : ""}`}
+        >
+          <source src="/assets/RCP_Hero.mp4" type="video/mp4" />
+        </video>
+
+        {/* Overlay en capas: oscurecimiento + gradiente brand */}
+        <div className="hero-overlay hero-overlay--dark" />
+        <div className="hero-overlay hero-overlay--brand" />
+        <div className="hero-overlay hero-overlay--vignette" />
+        {/* Ruido de textura sutil */}
+        <div className="noise-overlay" />
+      </div>
+
+      {/* ── FONDO ANIMADO (orbs dinámicos) ─────────────────────────────── */}
+      <div className="hero-orb hero-orb--1" />
+      <div className="hero-orb hero-orb--2" />
+      <div className="hero-orb hero-orb--3" />
+
+      {/* ── LÍNEAS DECORATIVAS ─────────────────────────────────────────── */}
+      <div className="hero-grid-lines" aria-hidden="true">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="hero-grid-line" style={{ left: `${(i + 1) * 16.66}%` }} />
+        ))}
+      </div>
+
+      {/* ── CONTENIDO PRINCIPAL ────────────────────────────────────────── */}
+      <div className="hero-content">
+        <div className="container-fluid px-4 px-md-5" style={{ maxWidth: "1400px", margin: "0 auto" }}>
+
+          {/* Badge animado */}
+          <div className={`hero-badge-wrapper ${entered ? "hero-anim--badge" : ""}`}>
+            {/* <div className="hero-badge-live">
+              <span className="hero-badge-dot" />
+              <span>En vivo · AHA 2025</span>
             </div>
+            <div className="hero-badge-sep" /> */}
+            <span className="hero-badge-text">
+              <i className="bi bi-shield-check" /> Protegiendo el Caribe Colombiano
+            </span>
+          </div>
 
-            {/* H1 */}
-            <h1 className="hero-h1-enter" style={{
-              fontSize: "clamp(2.5rem, 7vw, 4.2rem)",
-              fontWeight: 900,
-              letterSpacing: "-0.04em",
-              lineHeight: 1.1,
-              marginBottom: 24,
-              color: "#fff"
-            }}>
-              Líderes en <span style={{ color: "#fff", borderBottom: "4px solid var(--clr-accent)" }}>Simulación</span> de Grado <span className="hero-underline">Clínico</span>
-            </h1>
+          {/* Título principal con efecto de revelación */}
+          <h1 className={`hero-h1 ${entered ? "hero-anim--title" : ""}`}>
+            <span className="hero-h1-line" style={{ animationDelay: "0.1s" }}>
+              Aprende a{" "}
+              <span className="hero-highlight">
+                Salvar Vidas{" "}
+                <svg className="hero-underline-svg" viewBox="0 0 300 12" preserveAspectRatio="none">
+                  <path d="M0,8 Q75,0 150,8 Q225,16 300,8" strokeWidth="3" fill="none" />
+                </svg>
+              </span>
+            </span>
+            <span className="hero-h1-line" style={{ animationDelay: "0.22s" }}>
+              con nuestros{" "}
+              <span className="hero-highlight-box"> Cursos de Emergencias</span>
+            </span>
+          </h1>
 
-            {/* Subtitle */}
-            <p className="mb-5 on-dark-text hero-subtitle-enter" style={{
-              fontSize: "1.2rem",
-              maxWidth: "600px",
-              lineHeight: 1.7,
-              opacity: 0.9,
-              color: "#fff"
-            }}>
-              Desde 2024, transformamos la formación en emergencias mediante tecnología
-              SIERCP de última generación y estándares AHA 2025.
-            </p>
+          {/* Subtítulo */}
+          <p className={`hero-subtitle ${entered ? "hero-anim--subtitle" : ""}`}>
+            {/*En Jomar Segurid ofrecemos formación en primeros auxilios, RCP y atención de emergencias con enfoque práctico y certificación.*/}
+            {/*Integramos el sistema de simulación clínica SIERCP y tecnología avanzada bajo estándares AHA 2025
+             para una experiencia de aprendizaje realista, moderna y efectiva.*/}
+          </p>
 
-            {/* CTAs */}
-            <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start hero-cta-enter">
-              <a href="/login" className="btn-brand-on-dark py-3 px-5" style={{ borderRadius: "15px", fontWeight: 800 }}>
-                Acceder a SIERCP App <i className="bi bi-cpu ms-2" />
-              </a>
-              <a href="/programas" className="btn-outline-on-dark py-3 px-5" style={{ borderRadius: "15px" }}>
-                Ver Programas
-              </a>
+          {/* CTAs */}
+          <div className={`hero-ctas ${entered ? "hero-anim--cta" : ""}`}>
+            <a href="/login" className="hero-btn-primary">
+              <span className="hero-btn-bg" />
+              <span className="hero-btn-content">
+                <i className="bi bi-cpu-fill" />
+                Acceder a SIERCP App
+              </span>
+              <span className="hero-btn-shine" />
+            </a>
+            <a href="/programas" className="hero-btn-secondary">
+              <i className="bi bi-play-circle-fill" />
+              Ver Programas
+            </a>
+          </div>
+
+          {/* Indicadores de confianza */}
+          <div className={`hero-trust ${entered ? "hero-anim--trust" : ""}`}>
+            <div className="hero-trust-item">
+              <i className="bi bi-patch-check-fill" style={{ color: "#6d4aff" }} />
+              <span>Certificado AHA</span>
             </div>
-
-            {/* Stats Row */}
-            <div className="d-flex align-items-center mt-5 hero-stats-enter hero-stats-row" style={{ gap: "0" }}>
-              {stats.map((stat, i) => (
-                <React.Fragment key={stat.label}>
-                  {i > 0 && (
-                    <div className="stat-divider" style={{
-                      width: "1px",
-                      height: "36px",
-                      background: "rgba(255,255,255,0.15)",
-                      margin: "0 20px",
-                      flexShrink: 0,
-                    }} />
-                  )}
-                  <div style={{ flexShrink: 0 }}>
-                    <div style={{
-                      fontSize: "1.3rem",
-                      fontWeight: 900,
-                      color: "#fff",
-                      lineHeight: 1,
-                    }}>
-                      {stat.value}
-                    </div>
-                    <div style={{
-                      fontSize: "0.65rem",
-                      fontWeight: 700,
-                      color: "rgba(255,255,255,0.5)",
-                      textTransform: "uppercase",
-                      marginTop: 4,
-                      letterSpacing: "0.5px",
-                    }}>
-                      {stat.label}
-                    </div>
-                  </div>
-                </React.Fragment>
-              ))}
+            <div className="hero-trust-divider" />
+            <div className="hero-trust-item">
+              <i className="bi bi-shield-lock-fill" style={{ color: "#6d4aff" }} />
+              <span>Pago 100% Seguro</span>
             </div>
-          </Col>
-
-          <Col lg={5} className="d-none d-lg-block">
-            <div style={{ position: "relative" }} className="hero-image-enter">
-              {/* Decorative ring */}
-              <div style={{
-                position: "absolute",
-                inset: "-26px",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: "38px",
-                pointerEvents: "none",
-                zIndex: 0,
-              }} />
-
-              {/* Background rotated pane */}
-              <div style={{
-                position: "absolute", inset: "-20px",
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: "40px", transform: "rotate(-3deg)", zIndex: 0,
-                border: "1px solid rgba(255,255,255,0.1)"
-              }} />
-
-              <img
-                src={heroImg}
-                alt="Formación Profesional Jomar"
-                style={{
-                  width: "100%",
-                  borderRadius: "32px",
-                  position: "relative",
-                  zIndex: 1,
-                  boxShadow: "0 50px 100px rgba(0,0,0,0.4)",
-                  animation: "float-senior 6s ease-in-out infinite",
-                  border: "1px solid rgba(255,255,255,0.15)"
-                }}
-              />
-
-              {/* Floating AHA 2025 badge */}
-              <div className="float-badge-anim" style={{
-                position: "absolute",
-                top: "-14px",
-                right: "20px",
-                zIndex: 10,
-                background: "var(--clr-bg-surface)",
-                color: "var(--clr-primary)",
-                padding: "8px 16px",
-                borderRadius: "100px",
-                fontSize: "0.75rem",
-                fontWeight: 800,
-                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}>
-                <i className="bi bi-patch-check-fill" style={{ color: "var(--clr-accent)" }} />
-                AHA 2025 Certificado
-              </div>
+            <div className="hero-trust-divider" />
+            <div className="hero-trust-item">
+              <i className="bi bi-award-fill" style={{ color: "#6d4aff" }} />
+              <span>Aval Internacional</span>
             </div>
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
+
+      {/* ── STATS FLOTANTES (bottom) ─────────────────────────────────────── */}
+      <div className={`hero-stats-bar ${entered ? "hero-anim--stats" : ""}`}>
+        <div className="hero-stats-inner">
+          {stats.map((s, i) => (
+            <React.Fragment key={s.label}>
+              {i > 0 && <div className="hero-stats-sep" />}
+              <StatCounter value={s.value} suffix={s.suffix} label={s.label} active={statsVisible} />
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+      {/* ── CONTROLES DE VIDEO ──────────────────────────────────────────── */}
+      <button
+        className="hero-video-ctrl"
+        onClick={toggleMute}
+        aria-label={isMuted ? "Activar sonido" : "Silenciar"}
+        title={isMuted ? "Activar sonido" : "Silenciar"}
+      >
+        <i className={`bi ${isMuted ? "bi-volume-mute-fill" : "bi-volume-up-fill"}`} />
+      </button>
+
+      {/* ── SCROLL INDICATOR ────────────────────────────────────────────── */}
+      <button className="hero-scroll-indicator" onClick={scrollToNext} aria-label="Siguiente sección">
+        <div className="hero-scroll-mouse">
+          <div className="hero-scroll-wheel" />
+        </div>
+        <span>Explorar</span>
+      </button>
     </section>
   );
 }

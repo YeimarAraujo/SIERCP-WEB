@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
-import { PageHeader } from '@/components/ui/page-header';
-import { CourseService } from '@/services/firestore.service';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
+import { useAuth } from '@/hooks/use-auth';
 import type { CourseModel } from '@/models/course';
-import { Edit2, Trash2, Plus, BookOpen, User, Users, ChevronRight, Search, FileText } from 'lucide-react';
+import { Plus, BookOpen, User, Users, ChevronRight, Search, FileText } from 'lucide-react';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import { downloadCsv } from '@/shared/lib/export-utils';
@@ -14,15 +15,25 @@ import toast from 'react-hot-toast';
 
 export default function AdminCoursesPage() {
     const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
     const [courses, setCourses] = useState<CourseModel[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const institutionId: string | null = user?.institutionId ?? null;
+
     useEffect(() => {
-        CourseService.getAll()
-            .then(setCourses)
+        if (authLoading) return;
+        if (!institutionId) { setLoading(false); return; }
+
+        getDocs(query(
+            collection(db, 'courses'),
+            where('institutionId', '==', institutionId),
+        ))
+            .then(snap => setCourses(snap.docs.map(d => ({ ...d.data(), id: d.id } as CourseModel))))
+            .catch(err => console.error('Error fetching courses:', err))
             .finally(() => setLoading(false));
-    }, []);
+    }, [institutionId, authLoading]);
 
     const filtered = courses.filter(c =>
         searchTerm === '' ||
@@ -73,7 +84,7 @@ export default function AdminCoursesPage() {
             render: (val: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: val ? '#10B981' : 'var(--border-strong)' }} />
-                    <span style={{ 
+                    <span style={{
                         fontSize: 10, fontWeight: 900, padding: '4px 10px', borderRadius: 20,
                         background: val ? '#DCFCE7' : 'var(--muted)',
                         color: val ? '#166534' : 'var(--text-secondary)',
@@ -94,11 +105,11 @@ export default function AdminCoursesPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Gestión Académica" />
-            
+
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-                <PageHero 
-                    title="Oferta Formativa" 
-                    subtitle={`Control centralizado de programas y cohortes (${courses.length} cursos activos)`} 
+                <PageHero
+                    title="Oferta Formativa"
+                    subtitle={`Control centralizado de programas y cohortes (${courses.length} cursos activos)`}
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
@@ -138,14 +149,14 @@ export default function AdminCoursesPage() {
                             })), 'oferta-formativa');
                             toast.success('Reporte exportado');
                         }} style={{
-                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'var(--card)', 
+                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'var(--card)',
                             border: '1px solid var(--border)', borderRadius: 12, fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer'
                         }}>
                             <FileText size={16} /> Exportar Reporte
                         </button>
                     </div>
 
-                    <DataTable 
+                    <DataTable
                         columns={columns}
                         data={filtered}
                         loading={loading}
@@ -154,12 +165,6 @@ export default function AdminCoursesPage() {
                     />
                 </div>
             </div>
-            <style jsx>{`
-                @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                }
-            `}</style>
         </div>
     );
 }

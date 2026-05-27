@@ -17,11 +17,11 @@ export function PageHero({ title, subtitle, actions, parentTitle, parentHref }: 
     const { user } = useAuth();
 
     return (
-        <div className="surface-glass lighting-border" style={{ 
-            background: 'var(--card)', 
-            borderRadius: 24, 
-            padding: '24px 32px', 
-            marginBottom: 32, 
+        <div className="surface-glass lighting-border" style={{
+            background: 'var(--card)',
+            borderRadius: 24,
+            padding: '24px 32px',
+            marginBottom: 32,
             boxShadow: '0 4px 20px -5px rgba(0,0,0,0.05)',
             border: '1px solid var(--border)',
             display: 'flex',
@@ -31,13 +31,13 @@ export function PageHero({ title, subtitle, actions, parentTitle, parentHref }: 
             overflow: 'hidden'
         }}>
             {/* Background Accent */}
-            <div style={{ 
-                position: 'absolute', 
-                top: 0, 
-                left: 0, 
-                width: 4, 
-                height: '100%', 
-                background: 'linear-gradient(to bottom, var(--brand), var(--clr-accent))' 
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: 4,
+                height: '100%',
+                background: 'linear-gradient(to bottom, var(--brand), var(--clr-accent))'
             }} />
 
             <div>
@@ -50,12 +50,14 @@ export function PageHero({ title, subtitle, actions, parentTitle, parentHref }: 
                             <Link href={parentHref} style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>{parentTitle}</Link>
                             <ChevronRight size={12} />
                         </>
-                    ) : (
-                        <>
-                            <span>Panel</span>
-                            <ChevronRight size={12} />
-                        </>
-                    )}
+                    )
+                        : (
+                            <>
+                                <span>Panel</span>
+                                <ChevronRight size={12} />
+                            </>
+                        )
+                    }
                     <span style={{ color: 'var(--brand)' }}>{title}</span>
                 </div>
 

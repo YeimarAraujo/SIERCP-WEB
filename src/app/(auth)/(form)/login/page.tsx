@@ -46,14 +46,16 @@ function LoginContent() {
             await useAuthStore.getState().login(email, password);
             toast.success('Inicio de sesión exitoso');
             const currentUser = useAuthStore.getState().user;
-            const role = currentUser?.role ?? 'ESTUDIANTE';
+            const role = currentUser?.role ?? 'USUARIO';
             if (nextParam) {
                 router.replace(nextParam);
             } else {
                 switch (role) {
                     case 'ADMIN':
-                    case 'SUPER_ADMIN':
                         router.replace('/admin/dashboard');
+                        break;
+                    case 'SUPER_ADMIN':
+                        router.replace('/super-admin/dashboard');
                         break;
                     case 'INSTRUCTOR':
                         router.replace('/instructor/dashboard');

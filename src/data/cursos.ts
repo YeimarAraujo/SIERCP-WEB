@@ -1,5 +1,6 @@
 export interface Grupo {
   id: string;
+  /** Turno del grupo — se usa para mostrar el ícono y la etiqueta */
   horario: 'mañana' | 'tarde';
   horarioLabel: string;
   inscripcionInicio: Date;
@@ -62,21 +63,9 @@ function generarGruposCiclicos(baseDate: Date): Grupo[] {
 
     if (estado !== 'finalizado') {
       cycleGroups.push({
-        id: `grp-m-${cycleStart.getTime()}`,
+        id: `grp-${cycleStart.getTime()}`,
         horario: 'mañana',
-        horarioLabel: '7:00 AM - 11:00 AM',
-        inscripcionInicio: new Date(inicio),
-        inscripcionFin: new Date(fin),
-        inicioClases: new Date(inicioClases),
-        maxEstudiantes: 40,
-        inscritos: 0,
-        estado: estado,
-      });
-
-      cycleGroups.push({
-        id: `grp-t-${cycleStart.getTime()}`,
-        horario: 'tarde',
-        horarioLabel: '2:00 PM - 6:00 PM',
+        horarioLabel: '7:00 AM - 6:00 PM',
         inscripcionInicio: new Date(inicio),
         inscripcionFin: new Date(fin),
         inicioClases: new Date(inicioClases),

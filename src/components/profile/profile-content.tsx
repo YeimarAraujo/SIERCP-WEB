@@ -4,10 +4,10 @@ import { useState, useRef } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { getUserInitials, getFullName } from '@/models/user';
 import { UserService } from '@/services/firestore.service';
-import { 
-    User, Mail, Shield, IdCard, CheckCircle, 
-    Camera, Save, LogOut, Loader2, Edit3, 
-    Zap, Target, Award, Clock, ShieldCheck, 
+import {
+    User, Mail, Shield, IdCard, CheckCircle,
+    Camera, Save, LogOut, Loader2, Edit3,
+    Zap, Target, Award, Clock, ShieldCheck,
     Bell, Lock, History, Settings, Monitor
 } from 'lucide-react';
 import { MetricBar } from '@/components/charts/metric-bar';
@@ -61,7 +61,7 @@ export function ProfileContent() {
     return (
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             {/* Premium Profile Header Banner */}
-            <div style={{ 
+            <div style={{
                 position: 'relative', height: 200, borderRadius: 32, marginBottom: -60,
                 background: 'linear-gradient(135deg, var(--brand) 0%, var(--clr-accent) 100%)', overflow: 'hidden'
             }}>
@@ -70,15 +70,15 @@ export function ProfileContent() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 32, padding: '0 32px' }}>
-                
+
                 {/* Left Column: Fixed Profile Info */}
                 <div style={{ position: 'relative', zIndex: 10 }}>
                     <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 28, padding: '32px 24px', textAlign: 'center', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)' }}>
                         <div style={{ position: 'relative', width: 140, height: 140, margin: '-100px auto 24px auto' }}>
-                            <div 
+                            <div
                                 onClick={handlePhotoClick}
-                                style={{ 
-                                    width: '100%', height: '100%', borderRadius: 40, background: 'linear-gradient(135deg, var(--muted) 0%, var(--border) 100%)',
+                                style={{
+                                    width: '100%', height: '100%', borderRadius: 40, background: ' var(--bg-surface)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', fontSize: 40, fontWeight: 900,
                                     overflow: 'hidden', cursor: 'pointer', border: '6px solid var(--card)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                                 }}
@@ -87,7 +87,7 @@ export function ProfileContent() {
                                     <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : getUserInitials(user)}
                             </div>
-                            <button 
+                            <button
                                 onClick={handlePhotoClick}
                                 style={{ position: 'absolute', bottom: 5, right: 5, width: 40, height: 40, borderRadius: 14, background: 'var(--brand)', border: '3px solid var(--card)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-on-brand)', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)' }}
                             >
@@ -161,7 +161,7 @@ export function ProfileContent() {
                                         <InputGroup label="Apellido" disabled={!editing} value={formData.lastName} onChange={(v: string) => setFormData(p => ({ ...p, lastName: v }))} icon={User} />
                                     </div>
                                     <InputGroup label="Documento de Identificación" disabled={!editing} value={formData.identificacion} onChange={(v: string) => setFormData(p => ({ ...p, identificacion: v }))} icon={IdCard} />
-                                    <InputGroup label="Correo Institucional" disabled value={user.email} onChange={() => {}} icon={Mail} />
+                                    <InputGroup label="Correo Institucional" disabled value={user.email} onChange={() => { }} icon={Mail} />
 
                                     {editing && (
                                         <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
@@ -195,7 +195,7 @@ export function ProfileContent() {
                         <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 28, padding: 40 }}>
                             <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'var(--foreground)', marginBottom: 8 }}>Seguridad de la Cuenta</h3>
                             <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', marginBottom: 40 }}>Actualiza tu contraseña y configura la protección de tu cuenta institucional.</p>
-                            
+
                             <div style={{ display: 'grid', gap: 24 }}>
                                 <SecurityAction icon={Lock} title="Cambiar Contraseña" description="Se recomienda usar una contraseña fuerte que no uses en otros sitios." action="Cambiar" />
                                 <SecurityAction icon={ShieldCheck} title="Autenticación de Dos Factores" description="Añade una capa extra de seguridad a tu acceso (Próximamente)." action="Configurar" disabled />
@@ -222,11 +222,11 @@ export function ProfileContent() {
 
 function TabLink({ active, onClick, icon: Icon, label }: any) {
     return (
-        <div 
+        <div
             onClick={onClick}
-            style={{ 
+            style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12,
-                cursor: 'pointer', background: active ? 'var(--muted)' : 'transparent', 
+                cursor: 'pointer', background: active ? 'var(--muted)' : 'transparent',
                 color: active ? 'var(--brand)' : 'var(--text-secondary)', fontWeight: active ? 700 : 500,
                 fontSize: 14, transition: 'all 0.2s'
             }}
@@ -242,12 +242,12 @@ function InputGroup({ label, value, onChange, disabled, icon: Icon }: { label: s
             <label style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '0.02em' }}>{label}</label>
             <div style={{ position: 'relative' }}>
                 <Icon size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input 
+                <input
                     disabled={disabled}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    style={{ 
-                        width: '100%', padding: '14px 16px 14px 48px', borderRadius: 14, 
+                    style={{
+                        width: '100%', padding: '14px 16px 14px 48px', borderRadius: 14,
                         border: '1px solid var(--border)', fontSize: 14, outline: 'none',
                         background: disabled ? 'var(--muted)' : 'var(--card)', color: disabled ? 'var(--text-secondary)' : 'var(--foreground)',
                         transition: 'border-color 0.2s'

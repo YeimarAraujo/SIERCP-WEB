@@ -32,6 +32,10 @@ export interface TrustReason {
   text: string;
 }
 
+const WA = typeof window !== 'undefined'
+  ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '573153778892'}`
+  : `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '573153778892'}`;
+
 export const contactItems: ContactItem[] = [
   {
     icon: "bi-geo-alt-fill",
@@ -42,8 +46,8 @@ export const contactItems: ContactItem[] = [
   {
     icon: "bi-whatsapp",
     title: "WhatsApp Soporte",
-    value: "+57 300 000 0000",
-    href: "https://wa.me/573000000000",
+    value: "+57 315 377 8892",
+    href: WA,
     desc: "Respuesta en menos de 2 horas",
   },
   {

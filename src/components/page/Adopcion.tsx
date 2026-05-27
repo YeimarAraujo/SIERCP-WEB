@@ -45,7 +45,6 @@ export default function Adopcion() {
         <Row className="g-5 align-items-center">
           {/* Left: Narrative Symmetry */}
           <Col lg={5} className={`fade-in-left d-flex flex-column justify-content-center ${isVisible ? "visible" : ""}`}>
-            <span className="badge-pill mb-3">Adopción Tecnológica</span>
             <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "var(--clr-text-head)", lineHeight: 1.15 }}>
               Lleva la tecnología <span style={{ color: 'var(--clr-primary)' }}>SIERCP</span> a tu institución
             </h2>

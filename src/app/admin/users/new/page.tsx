@@ -25,7 +25,7 @@ export default function NewUserPage() {
         password: '',
         identificacion: '',
         phone: '',
-        role: 'ESTUDIANTE' as string,
+        role: 'USUARIO' as string,
         institutionId: 'SIERCP-GENERAL',
         isActive: true,
     });
@@ -124,7 +124,7 @@ export default function NewUserPage() {
                                     </label>
                                     <div style={{ display: 'flex', gap: 12 }}>
                                         {[
-                                            { value: 'ESTUDIANTE', label: 'Estudiante', icon: User },
+                                            { value: 'USUARIO', label: 'Usuario', icon: User },
                                             { value: 'INSTRUCTOR', label: 'Instructor', icon: Shield },
                                         ].map((opt) => (
                                             <button

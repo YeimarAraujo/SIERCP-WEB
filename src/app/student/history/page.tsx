@@ -32,9 +32,9 @@ export default function StudentHistoryPage() {
     );
 
     const columns = [
-        { 
-            key: 'startedAt', 
-            label: 'Fecha y Hora', 
+        {
+            key: 'startedAt',
+            label: 'Fecha y Hora',
             render: (val: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <Clock size={14} style={{ color: 'var(--text-muted)' }} />
@@ -42,9 +42,9 @@ export default function StudentHistoryPage() {
                 </div>
             )
         },
-        { 
-            key: 'scenarioTitle', 
-            label: 'Escenario', 
+        {
+            key: 'scenarioTitle',
+            label: 'Escenario',
             render: (val: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <Activity size={14} style={{ color: 'var(--text-muted)' }} />
@@ -52,14 +52,14 @@ export default function StudentHistoryPage() {
                 </div>
             )
         },
-        { 
-            key: 'qualityScore', 
-            label: 'Calidad', 
+        {
+            key: 'qualityScore',
+            label: 'Calidad',
             render: (_: any, row: any) => {
                 const score = row.metrics?.qualityScore || 0;
                 return (
-                    <div style={{ 
-                        fontSize: 16, fontWeight: 900, 
+                    <div style={{
+                        fontSize: 16, fontWeight: 900,
                         color: score >= 85 ? '#10B981' : '#EF4444'
                     }}>
                         {Math.round(score)}%
@@ -67,14 +67,14 @@ export default function StudentHistoryPage() {
                 );
             }
         },
-        { 
-            key: 'status', 
-            label: 'Resultado', 
+        {
+            key: 'status',
+            label: 'Resultado',
             render: (_: any, row: any) => {
                 const score = row.metrics?.qualityScore || 0;
                 const approved = score >= 85;
                 return (
-                    <span style={{ 
+                    <span style={{
                         fontSize: 10, fontWeight: 900, padding: '6px 12px', borderRadius: 20,
                         background: approved ? '#DCFCE7' : '#FEE2E2',
                         color: approved ? '#166534' : '#991B1B',
@@ -95,12 +95,12 @@ export default function StudentHistoryPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Mi Historial" />
-            
+
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-                <PageHero 
-                    title="Bitácora de Sesiones" 
-                    subtitle="Registro detallado de tu evolución en maniobras RCP" 
-                    parentTitle="Estudiante"
+                <PageHero
+                    title="Historial de Sesiones"
+                    subtitle="Registro detallado de tu evolución en maniobras RCP"
+                    parentTitle="Inicio"
                     parentHref="/student/home"
                 />
 
@@ -118,7 +118,7 @@ export default function StudentHistoryPage() {
                         </div>
                     </div>
 
-                    <DataTable 
+                    <DataTable
                         columns={columns}
                         data={filtered}
                         loading={loading}

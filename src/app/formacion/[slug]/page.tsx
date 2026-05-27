@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getCursoBySlug, formatCOP, formatUSD, getGruposActivos, type Curso, type Grupo } from "@/data/cursos";
 import { getWhatsAppLink } from "@/data/servicios";
 import { CourseService } from "@/services/firestore.service";
+import { JomarCourseService } from "@/features/super-admin/services/jomar-course.service";
 import { useAuth } from "@/hooks/use-auth";
 import Navbar from "@/components/page/Navbar";
 import Footer from "@/components/page/Footer";
@@ -78,24 +79,40 @@ export default function CursoDetallePage() {
   const slug = typeof params.slug === 'string' ? params.slug : '';
   const [activeTab, setActiveTab] = useState<'desc' | 'contenido' | 'grupos'>('desc');
   const [curso, setCurso] = useState<Curso | undefined>();
+  const [loadingCurso, setLoadingCurso] = useState(true);
   const [realCounts, setRealCounts] = useState<Record<string, number>>({});
   const [showEnrollment, setShowEnrollment] = useState(false);
   const [selectedGrupo, setSelectedGrupo] = useState<Grupo | undefined>();
   const { user } = useAuth();
 
   useEffect(() => {
-    const c = getCursoBySlug(slug);
-    setCurso(c);
-    if (c) {
-      CourseService.getEnrollments(slug).then(enrolls => {
-        const counts: Record<string, number> = {};
-        enrolls.forEach(e => {
-          if (e.grupoId) counts[e.grupoId] = (counts[e.grupoId] || 0) + 1;
-        });
-        setRealCounts(counts);
-      }).catch(() => { });
-    }
-  }, [slug]);
+    let cancelled = false;
+    setLoadingCurso(true);
+    JomarCourseService.getBySlug(slug)
+      .then(fsCurso => {
+        if (cancelled) return;
+        const c = fsCurso ?? getCursoBySlug(slug);
+        if (!c) { router.replace('/programas'); return; }
+        setCurso(c);
+        setLoadingCurso(false);
+        CourseService.getEnrollments(slug).then(enrolls => {
+          if (cancelled) return;
+          const counts: Record<string, number> = {};
+          enrolls.forEach(e => {
+            if (e.grupoId) counts[e.grupoId] = (counts[e.grupoId] || 0) + 1;
+          });
+          setRealCounts(counts);
+        }).catch(() => { });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        const c = getCursoBySlug(slug);
+        if (!c) { router.replace('/programas'); return; }
+        setCurso(c);
+        setLoadingCurso(false);
+      });
+    return () => { cancelled = true; };
+  }, [slug, router]);
 
   const handleEnroll = (grupoId?: string) => {
     if (!curso) return;
@@ -104,15 +121,21 @@ export default function CursoDetallePage() {
     setShowEnrollment(true);
   };
 
-  if (!curso) {
+  if (loadingCurso || !curso) {
     return (
       <div className="page-body">
         <Navbar forceScrolled={true} />
         <div style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div className="text-center">
-            <i className="bi bi-exclamation-circle" style={{ fontSize: "3rem", color: "var(--clr-muted)" }} />
-            <h3 className="mt-3" style={{ fontWeight: 800, color: "var(--clr-text-head)" }}>Curso no encontrado</h3>
-            <Link href="/programas" className="btn-brand mt-3">Volver a programas</Link>
+            {loadingCurso ? (
+              <div style={{ width: 40, height: 40, border: '3px solid var(--clr-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }} />
+            ) : (
+              <>
+                <i className="bi bi-exclamation-circle" style={{ fontSize: "3rem", color: "var(--clr-muted)" }} />
+                <h3 className="mt-3" style={{ fontWeight: 800, color: "var(--clr-text-head)" }}>Curso no encontrado</h3>
+                <Link href="/programas" className="btn-brand mt-3">Volver a programas</Link>
+              </>
+            )}
           </div>
         </div>
         <Footer />

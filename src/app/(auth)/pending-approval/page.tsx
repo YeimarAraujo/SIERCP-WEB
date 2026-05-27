@@ -19,9 +19,6 @@ export default function PendingApprovalPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background px-4">
             <div className="w-full max-w-md space-y-6 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 text-yellow-600 text-2xl">
-                    ⏳
-                </div>
                 <h1 className="text-2xl font-semibold tracking-tight">Cuenta pendiente de aprobación</h1>
                 <p className="text-sm text-muted-foreground">
                     Tu cuenta de instructor ha sido registrada con el correo:

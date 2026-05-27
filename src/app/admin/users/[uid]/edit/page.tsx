@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
 import { UserService } from '@/services/firestore.service';
 import { getFullName } from '@/shared/types/user';
-import type { UserModel } from '@/shared/types/user';
+import type { UserModel, UserRole } from '@/shared/types/user';
 import { 
     User, Mail, Save, Building, Shield, AlertTriangle
 } from 'lucide-react';
@@ -25,7 +25,7 @@ export default function EditUserPage() {
         lastName: '',
         email: '',
         institutionId: '',
-        role: 'ESTUDIANTE',
+        role: 'USUARIO',
         status: 'ACTIVE',
     });
 
@@ -44,7 +44,7 @@ export default function EditUserPage() {
                     lastName: u.lastName || '',
                     email: u.email || '',
                     institutionId: u.institutionId || '',
-                    role: u.role || 'ESTUDIANTE',
+                    role: u.role || 'USUARIO',
                     status: u.status || 'ACTIVE',
                 });
             })
@@ -67,7 +67,7 @@ export default function EditUserPage() {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 institutionId: formData.institutionId,
-                role: formData.role as 'ADMIN' | 'INSTRUCTOR' | 'ESTUDIANTE' | 'SUPER_ADMIN',
+                role: formData.role as UserRole,
                 status: formData.status as 'ACTIVE' | 'PENDING',
                 updatedAt: new Date(),
             });
@@ -138,7 +138,7 @@ export default function EditUserPage() {
                                             Rol del Usuario
                                         </label>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                            {['ESTUDIANTE', 'INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN'].map((role) => (
+                                            {(['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL', 'INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN'] as const).map((role) => (
                                                 <button
                                                     key={role}
                                                     type="button"
@@ -150,7 +150,9 @@ export default function EditUserPage() {
                                                         fontWeight: 700, fontSize: 13, cursor: 'pointer', textAlign: 'left',
                                                     }}
                                                 >
-                                                    {role === 'ESTUDIANTE' && 'Estudiante'}
+                                                    {role === 'USUARIO' && 'Usuario'}
+                                                    {role === 'USUARIO_SST' && 'Usuario SST'}
+                                                    {role === 'USUARIO_PROFESIONAL' && 'Usuario Profesional'}
                                                     {role === 'INSTRUCTOR' && 'Instructor'}
                                                     {role === 'ADMIN' && 'Administrador'}
                                                     {role === 'SUPER_ADMIN' && 'Super Administrador'}

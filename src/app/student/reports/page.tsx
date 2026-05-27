@@ -20,7 +20,7 @@ export default function StudentReportsPage() {
 
     useEffect(() => {
         if (!user) return;
-        
+
         const fetchReports = async () => {
             try {
                 setLoading(true);
@@ -31,7 +31,7 @@ export default function StudentReportsPage() {
                     .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime());
 
                 setSessions(uniqueSessions);
-                
+
                 const count = await SessionService.getCountByStudent(user.uid);
                 setTotalSessionsCount(count);
             } catch (error) {
@@ -51,8 +51,8 @@ export default function StudentReportsPage() {
     );
 
     const columns = [
-        { 
-            key: 'startedAt', 
+        {
+            key: 'startedAt',
             label: 'Fecha y Hora',
             render: (val: any) => {
                 const date = val as Date;
@@ -69,15 +69,15 @@ export default function StudentReportsPage() {
                 );
             }
         },
-        { 
-            key: 'scenarioTitle', 
+        {
+            key: 'scenarioTitle',
             label: 'Escenario',
             render: (val: any) => (
                 <div style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>{val || 'Práctica Libre'}</div>
             )
         },
-        { 
-            key: 'metrics', 
+        {
+            key: 'metrics',
             label: 'Calidad AHA',
             render: (metrics: any) => {
                 const score = metrics?.qualityScore || metrics?.score || 0;
@@ -130,10 +130,10 @@ export default function StudentReportsPage() {
                         ],
                     });
                     toast.success('PDF generado');
-                }} style={{ 
-                    padding: '8px 16px', borderRadius: 10, background: 'var(--muted)', border: 'none', 
-                    color: 'var(--brand)', fontSize: 12, fontWeight: 800, cursor: 'pointer', 
-                    display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s' 
+                }} style={{
+                    padding: '8px 16px', borderRadius: 10, background: 'var(--muted)', border: 'none',
+                    color: 'var(--brand)', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s'
                 }}>
                     <FileText size={14} /> PDF
                 </button>
@@ -144,37 +144,37 @@ export default function StudentReportsPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Reportes Clínicos" />
-            
+
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-                <PageHero 
-                    title="Historial de Rendimiento" 
-                    subtitle={`Has completado ${totalSessionsCount > 0 ? totalSessionsCount : sessions.length} sesiones de entrenamiento oficial.`} 
-                    parentTitle="Estudiante"
+                <PageHero
+                    title="Historial de Rendimiento"
+                    subtitle={`Has completado ${totalSessionsCount > 0 ? totalSessionsCount : sessions.length} sesiones de entrenamiento oficial.`}
+                    parentTitle="Inicio"
                     parentHref="/student/home"
                     actions={
-                <button onClick={() => {
-                    if (filteredSessions.length === 0) return toast.error('No hay datos para exportar');
-                    downloadCsvReport(filteredSessions.map(s => ({
-                        Fecha: s.startedAt.toLocaleDateString(),
-                        Hora: s.startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        Escenario: s.scenarioTitle || 'Práctica Libre',
-                        Calidad: `${s.metrics?.qualityScore || s.metrics?.score || 0}%`,
-                        Profundidad: `${(s.metrics as any)?.averageDepthMm?.toFixed(1) || 0}mm`,
-                        Frecuencia: `${(s.metrics as any)?.averageRatePerMin?.toFixed(0) || 0}cpm`
-                    })), {
-                        filename: formatReportFilename('historial-rendimiento', 'csv'),
-                        title: 'Historial de rendimiento RCP',
-                        generatedBy: user ? `${user.firstName} ${user.lastName}` : undefined,
-                        filters: { Busqueda: searchTerm || 'Todos' },
-                    });
-                    toast.success('CSV exportado');
-                }} style={{ 
-                    padding: '10px 18px', borderRadius: 12, background: 'var(--card)', color: 'var(--brand)', 
-                    border: '1px solid var(--brand)', fontWeight: 700, fontSize: 13, cursor: 'pointer', 
-                    display: 'flex', alignItems: 'center', gap: 8 
-                }}>
-                    <Download size={16} /> Exportar Todo (.csv)
-                </button>
+                        <button onClick={() => {
+                            if (filteredSessions.length === 0) return toast.error('No hay datos para exportar');
+                            downloadCsvReport(filteredSessions.map(s => ({
+                                Fecha: s.startedAt.toLocaleDateString(),
+                                Hora: s.startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                Escenario: s.scenarioTitle || 'Práctica Libre',
+                                Calidad: `${s.metrics?.qualityScore || s.metrics?.score || 0}%`,
+                                Profundidad: `${(s.metrics as any)?.averageDepthMm?.toFixed(1) || 0}mm`,
+                                Frecuencia: `${(s.metrics as any)?.averageRatePerMin?.toFixed(0) || 0}cpm`
+                            })), {
+                                filename: formatReportFilename('historial-rendimiento', 'csv'),
+                                title: 'Historial de rendimiento RCP',
+                                generatedBy: user ? `${user.firstName} ${user.lastName}` : undefined,
+                                filters: { Busqueda: searchTerm || 'Todos' },
+                            });
+                            toast.success('CSV exportado');
+                        }} style={{
+                            padding: '10px 18px', borderRadius: 12, background: 'var(--card)', color: 'var(--brand)',
+                            border: '1px solid var(--brand)', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: 8
+                        }}>
+                            <Download size={16} /> Exportar Todo (.csv)
+                        </button>
                     }
                 />
 
@@ -195,7 +195,7 @@ export default function StudentReportsPage() {
                         </div>
                     </div>
 
-                    <DataTable 
+                    <DataTable
                         columns={columns}
                         data={filteredSessions}
                         loading={loading}

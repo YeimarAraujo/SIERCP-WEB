@@ -30,7 +30,7 @@ export default function InstructorStudentDetailPage() {
         const fetchData = async () => {
             try {
                 const studentData = await UserService.get(uid);
-                if (!studentData || studentData.role !== 'ESTUDIANTE') {
+                if (!studentData || !['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(studentData.role)) {
                     router.push('/instructor/students');
                     return;
                 }

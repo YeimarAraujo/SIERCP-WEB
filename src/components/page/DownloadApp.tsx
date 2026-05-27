@@ -2,12 +2,16 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import dynamic from 'next/dynamic';
-
-const Spline = dynamic(() => import('@splinetool/react-spline'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse bg-white/10 w-full h-full rounded-2xl" />,
-});
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  ReferenceLine,
+} from "recharts";
 
 const appFeatures = [
   {
@@ -38,14 +42,344 @@ const appFeatures = [
 
 const metrics = [
   { label: "COMPRESIÓN", value: "50–60 mm", sub: "Profundidad óptima", color: "var(--clr-primary)" },
-  { label: "FRECUENCIA", value: "100–120/min", sub: "Ritmo correcto", color: "#10b981" },
   { label: "CALIDAD", value: "80–100%", sub: "Score general", color: "#f59e0b" },
+  { label: "FRECUENCIA", value: "100–120/min", sub: "Ritmo correcto", color: "#10b981" },
 ];
 
+
+/* ── Mock de pantalla de app ── */
+function AppScreen({ visible }: { visible: boolean }) {
+  const [score, setScore] = useState(88);
+  const [depth, setDepth] = useState(52);
+  const [rate, setRate] = useState(109);
+  const [count, setCount] = useState(0);
+  const [history, setHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const id = setInterval(() => {
+      const newDepth = 52 + Math.round((Math.random() - 0.5) * 10);
+      const newRate = 108 + Math.round((Math.random() - 0.5) * 14);
+
+      setScore((prev) => {
+        const nextScore = Math.min(98, Math.max(70, prev + Math.round((Math.random() - 0.48) * 2)));
+
+        setDepth(newDepth);
+        setRate(newRate);
+        setCount((c) => c + 1);
+
+        setHistory((prevHistory) => {
+          const nextIndex = prevHistory.length + 1;
+          const now = new Date();
+
+          const newEntry = {
+            time: now.toLocaleTimeString("es-CO", {
+              minute: "2-digit",
+              second: "2-digit",
+            }),
+            depth: newDepth,
+            rate: newRate,
+            score: nextScore,
+            idx: nextIndex,
+          };
+
+          return [...prevHistory, newEntry].slice(-20);
+        });
+
+        return nextScore;
+      });
+    }, 1400);
+
+    return () => clearInterval(id);
+  }, [visible]);
+
+  const depthOk = depth >= 50 && depth <= 60;
+  const rateOk = rate >= 100 && rate <= 120;
+  const clr = score >= 85 ? "#34d399" : "#f59e0b";
+
+  const r = 28;
+  const circ = 2 * Math.PI * r;
+  const dash = visible ? circ * (1 - score / 100) : circ;
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload?.length) return null;
+
+    return (
+      <div
+        style={{
+          background: "rgba(15, 23, 42, 0.96)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 12,
+          padding: "10px 12px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, fontWeight: 700, marginBottom: 6 }}>
+          {label}
+        </div>
+        {payload.map((entry: any) => (
+          <div
+            key={entry.dataKey}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              color: "#fff",
+              fontSize: 11,
+              marginBottom: 4,
+            }}
+          >
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 999,
+                background: entry.color,
+              }}
+            />
+            <span style={{ opacity: 0.75, minWidth: 80 }}>
+              {entry.dataKey === "depth" ? "Profundidad" : "Frecuencia"}
+            </span>
+            <strong style={{ fontFamily: "monospace" }}>
+              {entry.value} {entry.dataKey === "depth" ? "mm" : "cpm"}
+            </strong>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div
+      style={{
+        width: 300,
+        background: "#0b0f1a",
+        borderRadius: 36,
+        border: "6px solid #1a1f2e",
+        boxShadow: "0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)",
+        overflow: "hidden",
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ height: 28, background: "#060810", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 60, height: 10, background: "#0b0f1a", borderRadius: 8 }} />
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 16px 0", opacity: 0.4 }}>
+        <span style={{ fontSize: 9, color: "#fff", fontFamily: "monospace", fontWeight: 700 }}>9:41</span>
+        <span style={{ fontSize: 9, color: "#fff", fontFamily: "monospace" }}>BLE ●</span>
+      </div>
+
+      <div style={{ padding: "10px 16px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: 8, color: "rgba(255,255,255,0.35)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>
+            Sesión activa
+          </div>
+          <div style={{ fontSize: 11, color: "#fff", fontWeight: 800, marginTop: 1 }}>María Torres</div>
+        </div>
+        <div
+          style={{
+            fontSize: 9,
+            fontWeight: 800,
+            color: "#f87171",
+            letterSpacing: 1,
+            background: "rgba(239,68,68,0.12)",
+            border: "1px solid rgba(239,68,68,0.2)",
+            padding: "2px 7px",
+            borderRadius: 20,
+          }}
+        >
+          ● LIVE
+        </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px 8px" }}>
+        <svg width="80" height="80" viewBox="0 0 72 72">
+          <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
+          <circle
+            cx="40"
+            cy="40"
+            r={r}
+            fill="none"
+            stroke={clr}
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeDasharray={circ}
+            strokeDashoffset={dash}
+            transform="rotate(-90 40 40)"
+            style={{ transition: "stroke-dashoffset 1.4s ease, stroke 0.4s" }}
+          />
+          <text x="40" y="38" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="800" fontFamily="monospace">
+            {visible ? score : "--"}
+          </text>
+          <text x="40" y="52" textAnchor="middle" fill={clr} fontSize="7" fontWeight="700">
+            SCORE
+          </text>
+        </svg>
+
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
+            Compresiones
+          </div>
+          <div
+            style={{
+              fontSize: 26,
+              fontWeight: 900,
+              color: "#fff",
+              fontFamily: "monospace",
+              lineHeight: 1,
+              marginTop: 2,
+            }}
+          >
+            {visible ? 20 + count : "--"}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ height: 160, padding: "8px 12px 6px" }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={history}
+            margin={{ top: 10, right: 8, left: -20, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="depthStroke" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#22c55e" />
+                <stop offset="100%" stopColor="#00d4aa" />
+              </linearGradient>
+              <linearGradient id="rateStroke" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#fb7185" />
+              </linearGradient>
+            </defs>
+
+            <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+            <XAxis
+              dataKey="time"
+              tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 9 }}
+              axisLine={false}
+              tickLine={false}
+              minTickGap={18}
+            />
+            <YAxis hide domain={[40, 130]} />
+            <Tooltip content={<CustomTooltip />} />
+
+            <ReferenceLine y={50} stroke="rgba(34,197,94,0.35)" strokeDasharray="4 4" />
+            <ReferenceLine y={60} stroke="rgba(34,197,94,0.35)" strokeDasharray="4 4" />
+            <ReferenceLine y={100} stroke="rgba(245,158,11,0.25)" strokeDasharray="3 5" />
+            <ReferenceLine y={120} stroke="rgba(245,158,11,0.25)" strokeDasharray="3 5" />
+
+            <Line
+              type="monotone"
+              dataKey="depth"
+              stroke="url(#depthStroke)"
+              strokeWidth={3}
+              dot={false}
+              activeDot={{ r: 4, stroke: "#0b0f1a", strokeWidth: 2, fill: "#00d4aa" }}
+              isAnimationActive
+              animationDuration={700}
+            />
+            <Line
+              type="monotone"
+              dataKey="rate"
+              stroke="url(#rateStroke)"
+              strokeWidth={2.2}
+              dot={false}
+              activeDot={{ r: 4, stroke: "#0b0f1a", strokeWidth: 2, fill: "#f59e0b" }}
+              isAnimationActive
+              animationDuration={700}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div style={{ height: 1, background: "rgba(255,255,255,0.05)", margin: "0 16px" }} />
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 16px" }}>
+        {[
+          { label: "Profundidad", value: depth, unit: "mm", ok: depthOk, color: "#00d4aa", pct: ((depth - 30) / (70 - 30)) * 100 },
+          { label: "Ritmo", value: rate, unit: "cpm", ok: rateOk, color: "#f59e0b", pct: ((rate - 80) / (140 - 80)) * 100 },
+        ].map((m) => (
+          <div key={m.label}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 8, color: "rgba(255,255,255,0.35)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
+                {m.label}
+              </span>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 900,
+                  color: m.ok ? m.color : "#f87171",
+                  fontFamily: "monospace",
+                  transition: "color 0.3s",
+                }}
+              >
+                {visible ? m.value : "--"}
+                <span style={{ fontSize: 7, opacity: 0.6, marginLeft: 1 }}>{m.unit}</span>
+              </span>
+            </div>
+            <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden" }}>
+              <div
+                style={{
+                  height: "100%",
+                  borderRadius: 2,
+                  width: visible ? `${m.pct}%` : "0%",
+                  background: m.ok ? m.color : "#f87171",
+                  transition: "width 0.55s ease, background 0.3s",
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{
+          margin: "0 12px 16px",
+          borderRadius: 14,
+          background: "rgba(0,212,170,0.1)",
+          border: "1px solid rgba(0,212,170,0.18)",
+          padding: "8px 12px",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <i className="bi bi-volume-up" style={{ color: "#00d4aa", fontSize: 12 }} />
+        <span style={{ fontSize: 9, color: "#00d4aa", fontWeight: 700 }}>
+          {depthOk && rateOk ? "¡Excelente técnica! Mantén el ritmo." : "Ajusta la profundidad."}
+        </span>
+      </div>
+
+      <div style={{ padding: "10px 16px" }}>
+        <button
+          style={{
+            width: "100%",
+            padding: "10px",
+            borderRadius: 12,
+            border: "1px solid rgba(239,68,68,0.25)",
+            background: "rgba(239,68,68,0.12)",
+            color: "#f87171",
+            fontWeight: 800,
+            fontSize: 12,
+          }}
+        >
+          Finalizar sesión
+        </button>
+      </div>
+
+      <div style={{ height: 20, display: "flex", alignItems: "center", justifyContent: "center", paddingBottom: 6 }}>
+        <div style={{ width: 60, height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 2 }} />
+      </div>
+    </div>
+  );
+}
 export default function DownloadApp() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => {
@@ -99,7 +433,7 @@ export default function DownloadApp() {
               marginBottom: "16px",
             }}>
               Tu Entrenamiento,{" "}
-              <span className="text-accent">Siempre Contigo</span>
+              <span style={{ color: "var(--clr-primary)" }}>Siempre Contigo</span>
             </h2>
             <p className="on-dark-text" style={{
               fontSize: "1.05rem",
@@ -158,20 +492,72 @@ export default function DownloadApp() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            {/* Download CTA */}
-            <div style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "18px",
-              padding: "24px",
-            }}>
-              <div style={{ fontSize: "0.7rem", fontWeight: 800, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>
-                Descarga gratuita — incluida con tu curso
+            </div>{/* Download CTA */}
+            <div
+              style={{
+                background: "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
+                border: "1px solid rgba(255,255,255,0.10)",
+                borderRadius: 24,
+                padding: "24px",
+                boxShadow: "0 20px 50px rgba(0,0,0,0.18)",
+                backdropFilter: "blur(10px)",
+                textAlign: "center",
+                maxWidth: 760,
+                margin: "0 auto",
+              }}
+            >
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "6px 12px",
+                  borderRadius: 999,
+                  background: "rgba(16,185,129,0.12)",
+                  border: "1px solid rgba(16,185,129,0.22)",
+                  marginBottom: 14,
+                }}
+              >
+                <i className="bi bi-patch-check-fill" style={{ color: "#34d399", fontSize: "0.9rem" }} />
+                <span
+                  style={{
+                    fontSize: "0.62rem",
+                    fontWeight: 800,
+                    color: "#a7f3d0",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  Descarga gratuita incluida
+                </span>
               </div>
 
-              <a
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", marginBottom: "10px",
+                opacity: isVisible ? 1 : 0, transition: "opacity 1s ease 0.7s",
+              }}>
+                {[
+                  /*{ icon: "bi-apple", label: "App Store", sub: "iOS" },*/
+                  { icon: "bi-google-play", label: "Google Play", sub: "Android" },
+                  { icon: "bi-display", label: "Dashboard Web", sub: "Instructor" },
+                ].map(b => (
+                  <div key={b.label} style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    borderRadius: 16, padding: "12px 22px", cursor: "pointer",
+                    transition: "border-color 0.2s, background 0.2s",
+                  }}>
+                    <i className={`bi ${b.icon}`} style={{ fontSize: "1.3rem", color: "rgba(255,255,255,0.6)" }} />
+                    <div>
+                      <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>{b.sub}</div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: 800, color: "#fff" }}>{b.label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/*<a
                 href="#"
                 className="btn-brand-on-dark py-3 px-4 d-inline-flex align-items-center gap-3 mb-3"
                 style={{ borderRadius: "14px", minWidth: "220px", textDecoration: "none" }}
@@ -181,12 +567,12 @@ export default function DownloadApp() {
                   <div style={{ fontSize: "0.58rem", textTransform: "uppercase", fontWeight: 700, opacity: 0.7, lineHeight: 1 }}>Disponible en</div>
                   <div style={{ fontSize: "1rem", fontWeight: 800, lineHeight: 1.2 }}>Google Play</div>
                 </div>
-              </a>
+              </a>*/}
 
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
                 <i className="bi bi-info-circle" style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem" }} />
                 <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)" }}>
-                  Disponible para estudiantes activos de cualquier curso SIERCP
+                  Disponible para usuarios activos de cualquier curso.
                 </span>
               </div>
             </div>
@@ -220,7 +606,7 @@ export default function DownloadApp() {
 
                 {/* BLE chip */}
                 <div className="card-glass p-3 position-absolute" style={{
-                  top: "8%", right: "-3%", zIndex: 10, width: "185px",
+                  top: "8%", right: "3%", zIndex: 10, width: "185px",
                   animation: "float-chip-1 4s ease-in-out infinite",
                 }}>
                   <div className="d-flex align-items-center gap-2 mb-2">
@@ -245,9 +631,9 @@ export default function DownloadApp() {
                 {/* Metric chips */}
                 {metrics.map((m, i) => {
                   const positions = [
-                    { bottom: "0%", right: "-3%", width: "185px", anim: "float-chip-1 4.5s ease-in-out infinite 0.5s" },
-                    { bottom: "68%", left: "-10%", width: "165px", anim: "float-chip-3 3.5s ease-in-out infinite" },
-                    { bottom: "18%", left: "-4%", width: "148px", anim: "float-chip-2 5s ease-in-out infinite" },
+                    { bottom: "0%", right: "8%", width: "185px", anim: "float-chip-1 4.5s ease-in-out infinite 0.5s" },
+                    { bottom: "68%", left: "10%", width: "165px", anim: "float-chip-3 3.5s ease-in-out infinite" },
+                    { bottom: "18%", left: "8%", width: "148px", anim: "float-chip-2 5s ease-in-out infinite" },
                   ];
                   const pos = positions[i];
                   return (
@@ -265,18 +651,21 @@ export default function DownloadApp() {
                   );
                 })}
 
-                {/* 3D Scene */}
                 <div style={{
-                  width: "100%", height: "620px",
+                  width: "100%",
+                  height: "620px",
                   position: "relative",
                   borderRadius: "24px",
                   overflow: "hidden",
                   transition: "transform 0.6s ease",
+
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}>
-                  <Spline
-                    scene="https://prod.spline.design/Ezjle9SHzmE4jhHK/scene.splinecode"
-                    style={{ width: "100%", height: "100%" }}
-                  />
+                  <div style={{ transform: "scale(1)" }}>
+                    <AppScreen visible={isVisible} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -331,6 +720,6 @@ export default function DownloadApp() {
         </div>
 
       </Container>
-    </section>
+    </section >
   );
 }

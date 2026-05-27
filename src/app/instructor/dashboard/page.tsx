@@ -15,6 +15,7 @@ import {
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import { DashboardHero } from '@/components/ui/dashboard-hero';
+import { XpStrip } from '@/components/ui/xp-strip';
 
 export default function InstructorDashboardPage() {
     const { user } = useAuth();
@@ -83,6 +84,13 @@ export default function InstructorDashboardPage() {
             <Header title="Mission Control" />
             <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
                 <DashboardHero subtitle="CONSOLA DE INSTRUCTOR" />
+
+                {/* XP Level Bar */}
+                {user && (
+                    <div style={{ marginBottom: 28 }}>
+                        <XpStrip userId={user.uid} />
+                    </div>
+                )}
 
                 {/* Grid de Métricas de Alto Impacto */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 32 }}>

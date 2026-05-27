@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
-import { PageHeader } from '@/components/ui/page-header';
-import { UserService } from '@/services/firestore.service';
+import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
+import { useAuth } from '@/hooks/use-auth';
 import { getFullName } from '@/models/user';
 import type { UserModel } from '@/models/user';
-import { Search, User, Mail, Shield, UserCircle, ChevronRight, UserPlus, FileText } from 'lucide-react';
+import { Search, Shield, UserCircle, ChevronRight, UserPlus, FileText } from 'lucide-react';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import { downloadCsv } from '@/shared/lib/export-utils';
@@ -16,18 +17,44 @@ import toast from 'react-hot-toast';
 const ROLE_STYLES: Record<string, { bg: string, color: string }> = {
     ADMIN: { bg: '#F3E8FF', color: '#7E22CE' },
     INSTRUCTOR: { bg: 'var(--accent)', color: 'var(--brand)' },
-    ESTUDIANTE: { bg: 'var(--muted)', color: 'var(--text-secondary)' },
+    USUARIO: { bg: 'var(--muted)', color: 'var(--text-secondary)' },
+    USUARIO_SST: { bg: '#ECFDF5', color: '#059669' },
+    USUARIO_PROFESIONAL: { bg: '#EEF0FF', color: '#1800AD' },
 };
 
 export default function AdminUsersPage() {
     const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
     const [users, setUsers] = useState<UserModel[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
 
+    const institutionId: string | null = user?.institutionId ?? null;
+
     useEffect(() => {
-        UserService.getAll().then(setUsers).finally(() => setLoading(false));
-    }, []);
+        if (authLoading) return;
+        if (!institutionId) { setLoading(false); return; }
+
+        const fetchUsers = async () => {
+            try {
+                const memSnap = await getDocs(query(
+                    collection(db, 'memberships'),
+                    where('institutionId', '==', institutionId),
+                    where('isActive', '==', true),
+                ));
+                const userDocs = await Promise.all(
+                    memSnap.docs.map(m => getDoc(doc(db, 'users', m.data().userId)))
+                );
+                setUsers(userDocs.filter(s => s.exists()).map(s => ({ ...s.data(), uid: s.id } as UserModel)));
+            } catch (err) {
+                console.error('Error fetching users:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUsers();
+    }, [institutionId, authLoading]);
 
     const filtered = users.filter((u) =>
         getFullName(u).toLowerCase().includes(search.toLowerCase()) ||
@@ -54,7 +81,7 @@ export default function AdminUsersPage() {
             key: 'role',
             label: 'Rol',
             render: (val: any) => {
-                const style = ROLE_STYLES[val] || ROLE_STYLES.ESTUDIANTE;
+                const style = ROLE_STYLES[val] || ROLE_STYLES.USUARIO;
                 return (
                     <span style={{ 
                         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 20,

@@ -22,6 +22,7 @@ export const SuperAdminService = {
             maxInstructors: 5,
             maxStudents: 100,
             createdBy: '',
+            mode: 'MANUAL',
         });
     },
 

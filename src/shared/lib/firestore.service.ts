@@ -1,6 +1,6 @@
-import { 
-    collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, 
-    query, where, orderBy, limit, serverTimestamp, Timestamp,
+import {
+    collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
+    query, where, orderBy, limit, serverTimestamp, Timestamp, increment,
     type QueryConstraint, collectionGroup, getCountFromServer
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -213,7 +213,11 @@ export const CourseService = {
 
     async create(course: Omit<CourseModel, 'id'>): Promise<string> {
         const ref = doc(collection(db, 'courses'));
-        await setDoc(ref, { ...course, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        const createdBy = course.createdBy || course.instructorId;
+        await setDoc(ref, { ...course, createdBy, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        if (course.instructorId) {
+            await updateDoc(doc(db, 'users', course.instructorId), { coursesCreated: increment(1) });
+        }
         await AuditService.record({
             action: 'create',
             resource: 'course',

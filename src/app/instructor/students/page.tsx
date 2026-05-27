@@ -126,24 +126,16 @@ export default function InstructorStudentsPage() {
                         }}>
                             <Download size={16} /> Nuevo estudiante
                         </button>
+                        <button
+                            onClick={() => router.push('/instructor/courses')}
+                            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: 'var(--brand)', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, color: 'var(--text-on-brand)', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(24, 0, 173, 0.3)' }}
+                        >
+                            <UserPlus size={16} /> Gestionar Cursos
+                        </button>
                     </>
                 }
             />
 
-            <div style={{ display: 'flex', gap: 12, marginBottom: 24, justifyContent: 'flex-end' }}>
-                <button
-                    onClick={() => router.push('/instructor/students/new')}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer' }}
-                >
-                    <Upload size={16} /> Nuevo estudiante
-                </button>
-                <button
-                    onClick={() => router.push('/instructor/courses')}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: 'var(--brand)', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, color: 'var(--text-on-brand)', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(24, 0, 173, 0.3)' }}
-                >
-                    <UserPlus size={16} /> Gestionar Cursos
-                </button>
-            </div>
 
             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                 <div style={{ marginBottom: 24, position: 'relative', maxWidth: 400 }}>
