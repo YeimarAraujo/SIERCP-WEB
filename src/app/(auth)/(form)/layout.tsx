@@ -4,20 +4,10 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import AuthNavbar from '@/components/layout/auth-navbar';
 import { useThemeStore } from '@/stores/theme-store';
-import { useEffect } from 'react';
 
 export default function AuthFormLayout({ children }: { children: ReactNode }) {
     const { theme } = useThemeStore();
     const isLogin = typeof window !== 'undefined' ? window.location.pathname === '/login' : true;
-
-    useEffect(() => {
-        // Sync theme with global CSS variables if needed, though they handle it automatically via data-theme
-        if (theme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-        }
-    }, [theme]);
 
     return (
         <div style={{

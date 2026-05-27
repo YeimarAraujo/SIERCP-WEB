@@ -14,9 +14,6 @@ import DownloadApp from '@/components/page/DownloadApp';
 import Contacto from '@/components/page/Contacto';
 import Footer from '@/components/page/Footer';
 import WhatsAppFab from '@/components/page/WhatsAppFab';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import './landing.css';
 
 export default function LandingPage() {
     return (

@@ -8,9 +8,6 @@ import WhatsAppFab from '@/components/page/WhatsAppFab';
 import { cursos as staticCursos, type Curso } from '@/data/cursos';
 import { JomarCourseService } from '@/features/super-admin/services/jomar-course.service';
 import Link from 'next/link';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import '../landing.css';
 
 import { servicios } from '@/data/servicios';
 

@@ -13,9 +13,6 @@ import Navbar from "@/components/page/Navbar";
 import Footer from "@/components/page/Footer";
 import WhatsAppFab from "@/components/page/WhatsAppFab";
 import EnrollmentFlow from "@/components/page/EnrollmentFlow";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import '../../landing.css';
 
 function CountdownTimer({ targetDate }: { targetDate: Date }) {
   const [tl, setTl] = useState({ d: 0, h: 0, m: 0 });
