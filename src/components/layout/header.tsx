@@ -59,7 +59,7 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
             <header className="surface-glass" style={{
                 display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between',
                 borderBottom: `1px solid ${borderColor}`, background: bgColor, padding: '0 32px',
-                position: 'sticky', transition: 'all 0.3s ease'
+                position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     {showBack && onBack && (
@@ -137,7 +137,7 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                                 <div style={{
                                     position: 'absolute', top: 'calc(100% + 12px)', right: 0, width: 220,
                                     background: 'var(--popover)', borderRadius: 16, border: '1px solid var(--border)',
-                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', overflow: 'hidden', zIndex: 60
+                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', overflow: 'hidden', zIndex: 9999
                                 }}>
                                     <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
                                         <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em' }}>MI CUENTA</p>

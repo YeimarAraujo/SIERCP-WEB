@@ -4,9 +4,9 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@/shared/lib/firebase';
+import { db, getSecondaryAuth } from '@/shared/lib/firebase';
 import {
     Upload, FileText, Download, AlertTriangle,
     CheckCircle, X, ArrowLeft, Loader2
@@ -69,7 +69,10 @@ export default function ImportStudentsPage() {
                     if (!email) { errors.push(`Fila ${i + 2}: email requerido`); continue; }
 
                     const password = Math.random().toString(36).slice(2, 10) + 'A1!';
-                    const cred = await createUserWithEmailAndPassword(auth!, email, password);
+                    const secondaryAuth = getSecondaryAuth();
+                    if (!secondaryAuth) throw new Error('Auth no disponible');
+                    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                    await signOut(secondaryAuth);
                     await setDoc(doc(db!, 'users', cred.user.uid), {
                         uid: cred.user.uid, email,
                         firstName: nombres || '', lastName: apellidos || '',

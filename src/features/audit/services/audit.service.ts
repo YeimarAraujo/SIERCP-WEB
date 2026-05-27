@@ -15,8 +15,24 @@ import {
     type DocumentSnapshot,
     type QueryConstraint,
 } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { db } from '@/shared/lib/firebase';
 import type { UserModel } from '@/shared/types/user';
+
+/**
+ * Obtiene el Firebase ID Token del usuario actualmente autenticado.
+ * Retorna null si no hay sesión activa o si ocurre algún error.
+ * Utilizado para autenticar llamadas al endpoint /api/audit.
+ */
+async function getFirebaseIdToken(): Promise<string | null> {
+    try {
+        const auth = getAuth();
+        if (!auth.currentUser) return null;
+        return await auth.currentUser.getIdToken();
+    } catch {
+        return null;
+    }
+}
 
 export type AuditAction =
     | 'auth.login'
@@ -123,18 +139,54 @@ const removeUndefined = (obj: any) =>
 export const AuditService = {
     async record(input: AuditLogInput): Promise<void> {
         if (!db) return;
+
+        const persisted = getPersistedAuditActor();
+        const actor = input.actor || persisted.actor || {};
+        const payload = {
+            actor,
+            action: input.action,
+            resource: input.resource,
+            resourceId: input.resourceId || null,
+            institutionId: input.institutionId || persisted.institutionId || null,
+            metadata: removeUndefined(input.metadata),
+            severity: input.severity || 'info',
+        };
+
+        /**
+         * Vía preferente: endpoint API /api/audit.
+         * Utiliza Admin SDK server-side (bypass de reglas de Firestore).
+         * Más seguro que escritura directa desde cliente.
+         */
         try {
-            const persisted = getPersistedAuditActor();
+            const idToken = await getFirebaseIdToken();
+            if (idToken) {
+                const res = await fetch('/api/audit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${idToken}`,
+                    },
+                    body: JSON.stringify(payload),
+                });
+                if (res.ok) return;
+                // Fallback a Firestore directo si el API responde con error 4xx/5xx
+                console.warn('[audit] API falló, intentando Firestore directo:', res.status);
+            }
+        } catch (apiError) {
+            // Error de red o excepción; fallback a Firestore directo
+            console.warn('[audit] API error, fallback a Firestore:', apiError);
+        }
+
+        /**
+         * Fallback: escritura directa vía Firestore SDK.
+         * Requiere que las reglas de seguridad permitan create en auditLogs
+         * (actualizadas para permitir create con validación anti-spoofing).
+         */
+        try {
             const ref = doc(collection(db, 'auditLogs'));
             await setDoc(ref, {
-                actor: input.actor || persisted.actor || {},
-                action: input.action,
-                resource: input.resource,
-                resourceId: input.resourceId || null,
-                institutionId: input.institutionId || persisted.institutionId || null,
-                metadata: removeUndefined(input.metadata),
+                ...payload,
                 ip: input.ip || null,
-                severity: input.severity || 'info',
                 timestamp: serverTimestamp(),
             });
         } catch (error) {

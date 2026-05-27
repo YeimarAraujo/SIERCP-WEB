@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { db } from '@/shared/lib/firebase';
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { db, getSecondaryAuth } from '@/shared/lib/firebase';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
 import {
@@ -113,8 +113,10 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
                 });
                 toast.success('Usuario actualizado');
             } else {
-                const auth = getAuth();
-                const cred = await createUserWithEmailAndPassword(auth, form.email, form.password);
+                const secondaryAuth = getSecondaryAuth();
+                if (!secondaryAuth) throw new Error('Auth no disponible');
+                const cred = await createUserWithEmailAndPassword(secondaryAuth, form.email, form.password);
+                await signOut(secondaryAuth);
                 await setDoc(doc(db, 'users', cred.user.uid), {
                     uid: cred.user.uid,
                     email: form.email,
