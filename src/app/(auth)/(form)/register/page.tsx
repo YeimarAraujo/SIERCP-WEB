@@ -16,6 +16,8 @@ function RegisterContent() {
         role: 'USUARIO', institutionCode: '',
         phoneNumber: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
@@ -216,11 +218,31 @@ function RegisterContent() {
                                     <div className="position-relative">
                                         <i className="bi bi-lock position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
                                         <input
-                                            name="password" type="password" required
+                                            name="password" type={showPassword ? 'text' : 'password'} required
                                             value={form.password} onChange={handleChange}
                                             placeholder="••••••••"
-                                            style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }}
+                                            style={{ ...inputStyle, paddingLeft: '45px', paddingRight: '45px', height: '46px', fontSize: '0.9rem' }}
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.preventDefault(); setShowPassword(v => !v); }}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '1px',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: 'var(--clr-text)',
+                                                padding: '8px 12px',
+                                                fontSize: '1.1rem',
+                                                zIndex: 5,
+                                            }}
+                                            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                        >
+                                            <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`} />
+                                        </button>
                                     </div>
                                     <PasswordStrength
                                         result={passwordStrength}
@@ -234,16 +256,49 @@ function RegisterContent() {
                                     <div className="position-relative">
                                         <i className="bi bi-shield-lock position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
                                         <input
-                                            name="confirm" type="password" required
+                                            name="confirm" type={showConfirm ? 'text' : 'password'} required
                                             value={form.confirm} onChange={handleChange}
                                             placeholder="••••••••"
                                             style={{
                                                 ...inputStyle,
-                                                paddingLeft: '45px', height: '46px', fontSize: '0.9rem',
+                                                paddingLeft: '45px',
+                                                paddingRight: '45px',
+                                                height: '46px',
+                                                fontSize: '0.9rem',
                                                 borderColor: form.confirm && form.confirm !== form.password ? '#DC2626' : undefined,
                                             }}
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.preventDefault(); setShowConfirm(v => !v); }}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '1px',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: 'var(--clr-text)',
+                                                padding: '8px 12px',
+                                                fontSize: '1.1rem',
+                                                zIndex: 5,
+                                            }}
+                                            aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                        >
+                                            <i className={`bi ${showConfirm ? 'bi-eye-slash' : 'bi-eye'}`} />
+                                        </button>
                                     </div>
+                                    {form.confirm && form.confirm !== form.password && (
+                                        <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: '#DC2626', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                            <i className="bi bi-x-circle-fill" /> Las contraseñas no coinciden
+                                        </div>
+                                    )}
+                                    {form.confirm && form.confirm === form.password && (
+                                        <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                            <i className="bi bi-check-circle-fill" /> Las contraseñas coinciden
+                                        </div>
+                                    )}
                                 </div>
 
                                 {form.role === 'USUARIO' && (
