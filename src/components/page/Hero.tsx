@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from "react";
-import "../../app/landing.css";
 
 /* ── Estadísticas animadas del hero ──────────────────────────────────────── */
 const stats = [
@@ -109,7 +108,8 @@ export default function Hero() {
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
+          poster="/assets/hero-bg.jpeg"
           onCanPlay={() => setVideoReady(true)}
           className={`hero-video ${videoReady ? "hero-video--ready" : ""}`}
         >

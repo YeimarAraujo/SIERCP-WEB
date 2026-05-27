@@ -1,19 +1,19 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/page/Navbar';
 import Hero from '@/components/page/Hero';
-import CursosPreview from '@/components/page/CursosPreview';
-import Servicios from '@/components/page/Servicios';
-import ProyectoIoT from '@/components/page/ProyectoIoT';
-import SoftwareSiercp from '@/components/page/SoftwareSiercp';
-import PlanesSiercp from '@/components/page/PlanesSiercp';
-import Metodologia from '@/components/page/Metodologia';
-import Adopcion from '@/components/page/Adopcion';
-import VideoTutorial from '@/components/page/VideoTutorial';
-import FAQPreview from '@/components/page/FAQPreview';
-import DownloadApp from '@/components/page/DownloadApp';
-import Contacto from '@/components/page/Contacto';
-import Footer from '@/components/page/Footer';
 import WhatsAppFab from '@/components/page/WhatsAppFab';
+
+const CursosPreview  = dynamic(() => import('@/components/page/CursosPreview'));
+const Servicios      = dynamic(() => import('@/components/page/Servicios'));
+const DownloadApp    = dynamic(() => import('@/components/page/DownloadApp'));
+const PlanesSiercp   = dynamic(() => import('@/components/page/PlanesSiercp'));
+const Metodologia    = dynamic(() => import('@/components/page/Metodologia'));
+const Adopcion       = dynamic(() => import('@/components/page/Adopcion'));
+const VideoTutorial  = dynamic(() => import('@/components/page/VideoTutorial'));
+const FAQPreview     = dynamic(() => import('@/components/page/FAQPreview'));
+const Contacto       = dynamic(() => import('@/components/page/Contacto'));
+const Footer         = dynamic(() => import('@/components/page/Footer'));
 
 export default function LandingPage() {
     return (
@@ -23,8 +23,6 @@ export default function LandingPage() {
                 <Hero />
                 <CursosPreview />
                 <Servicios />
-                {/* <ProyectoIoT /> */}
-                {/* <SoftwareSiercp /> */}
                 <DownloadApp />
                 <PlanesSiercp />
                 <Metodologia />
