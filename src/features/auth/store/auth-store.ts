@@ -9,8 +9,8 @@ import {
     signOut as firebaseSignOut,
     type User,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@/shared/lib/firebase';
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { auth, db, getSecondaryAuth } from '@/shared/lib/firebase';
 import type { UserModel } from '@/shared/types/user';
 import { ROLE_STUDENT, ROLE_INSTRUCTOR, ROLE_SUPER_ADMIN } from '@/shared/lib/constants';
 import { InstitutionService } from '@/features/institutions/services/institution.service';
@@ -86,6 +86,7 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
 
 // Flag de módulo para evitar múltiples listeners
 let _unsubscribe: (() => void) | null = null;
+let _userDocUnsubscribe: (() => void) | null = null;
 
 export const useAuthStore = create<AuthStore>()(
     persist(
@@ -100,11 +101,52 @@ export const useAuthStore = create<AuthStore>()(
                 if (_unsubscribe) return _unsubscribe;
                 const alreadyHasUser = !!get().user;
                 set({ loading: !alreadyHasUser });
+
                 _unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+                    // Limpiar listener anterior del documento de usuario
+                    if (_userDocUnsubscribe) { _userDocUnsubscribe(); _userDocUnsubscribe = null; }
+
                     try {
                         if (firebaseUser) {
                             const user = await fetchUserModel(firebaseUser.uid);
+
+                            // Verificar si la cuenta está desactivada al inicializar
+                            if (user && user.isActive === false) {
+                                // Cuenta desactivada: forzar logout sin mostrar error
+                                await get().logout();
+                                return;
+                            }
+
                             set({ user, firebaseUser, loading: false, initialized: true, error: null });
+
+                            // Escuchar cambios en tiempo real del documento del usuario
+                            // Esto permite detectar desactivación de cuenta sin recargar
+                            if (user) {
+                                _userDocUnsubscribe = onSnapshot(
+                                    doc(db, 'users', firebaseUser.uid),
+                                    (snapshot) => {
+                                        if (!snapshot.exists()) {
+                                            // Documento eliminado: forzar logout
+                                            get().logout();
+                                            return;
+                                        }
+                                        const data = snapshot.data() as Partial<UserModel>;
+                                        if (data.isActive === false) {
+                                            // Cuenta desactivada en tiempo real: forzar logout
+                                            console.warn('[auth-store] Cuenta desactivada en tiempo real, forzando logout');
+                                            get().logout();
+                                            return;
+                                        }
+                                        // Actualizar datos locales del usuario en tiempo real
+                                        set((state) => ({
+                                            user: state.user ? { ...state.user, ...data } : null,
+                                        }));
+                                    },
+                                    (error) => {
+                                        console.error('[auth-store] Error en snapshot de usuario:', error);
+                                    }
+                                );
+                            }
                         } else {
                             set({ user: null, firebaseUser: null, loading: false, initialized: true });
                         }
@@ -113,7 +155,10 @@ export const useAuthStore = create<AuthStore>()(
                     }
                 });
 
-                return _unsubscribe;
+                return () => {
+                    if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
+                    if (_userDocUnsubscribe) { _userDocUnsubscribe(); _userDocUnsubscribe = null; }
+                };
             },
 
             login: async (email, password) => {
@@ -130,6 +175,14 @@ export const useAuthStore = create<AuthStore>()(
                     if (!res.ok) throw new Error('Error al crear sesión en servidor');
 
                     const user = await fetchUserModel(cred.user.uid);
+
+                    // Validar que la cuenta esté activa antes de permitir el login
+                    if (user && user.isActive === false) {
+                        await firebaseSignOut(auth);
+                        set({ loading: false, error: 'Tu cuenta ha sido desactivada. Contacta al administrador.' });
+                        throw new Error('Tu cuenta ha sido desactivada. Contacta al administrador.');
+                    }
+
                     set({ user, firebaseUser: cred.user, loading: false, initialized: true });
                     if (user) {
                         AuditService.record({
@@ -255,6 +308,7 @@ export const useAuthStore = create<AuthStore>()(
                 await fetch('/api/auth/session', { method: 'DELETE' });
 
                 if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
+                if (_userDocUnsubscribe) { _userDocUnsubscribe(); _userDocUnsubscribe = null; }
                 try {
                     await firebaseSignOut(auth);
                 } catch (error) {

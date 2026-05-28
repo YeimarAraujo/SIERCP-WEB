@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 // In-memory global rate limit (defense-in-depth; per-endpoint limits are in Firestore)
 const rateLimitMap = new Map<string, [number, number]>();
 const RATE_LIMIT_WINDOW = 60 * 1_000; // 1 min
-const MAX_REQUESTS      = 60;         // per IP per window
+const MAX_REQUESTS      = 120;        // per IP per window (solo API routes)
 
 // Paths whose Content-Type is not expected to be application/json
 const CONTENT_TYPE_EXEMPT = ['/api/wompi-webhook', '/api/upload'];
@@ -28,26 +28,30 @@ export function proxy(request: NextRequest) {
     request.headers.get('x-real-ip') ??
     '127.0.0.1';
 
-  // ── 4. Global rate limiting (in-memory, 60 req/min per IP) ───────────────
-  const now      = Date.now();
-  const existing = rateLimitMap.get(ip);
-  if (existing) {
-    const [ts, count] = existing;
-    if (now - ts < RATE_LIMIT_WINDOW) {
-      if (count >= MAX_REQUESTS) {
-        return new NextResponse('Too Many Requests', { status: 429 });
+  // ── 4. Global rate limiting (solo rutas API, 120 req/min per IP) ────────
+  // NOTA: Solo aplica a /api/* para evitar bloquear carga de assets estáticos
+  // y navegación de páginas. Los endpoints sensibles tienen sus propios límites.
+  if (pathname.startsWith('/api/')) {
+    const now      = Date.now();
+    const existing = rateLimitMap.get(ip);
+    if (existing) {
+      const [ts, count] = existing;
+      if (now - ts < RATE_LIMIT_WINDOW) {
+        if (count >= MAX_REQUESTS) {
+          return new NextResponse('Too Many Requests', { status: 429 });
+        }
+        rateLimitMap.set(ip, [ts, count + 1]);
+      } else {
+        rateLimitMap.set(ip, [now, 1]);
       }
-      rateLimitMap.set(ip, [ts, count + 1]);
     } else {
       rateLimitMap.set(ip, [now, 1]);
     }
-  } else {
-    rateLimitMap.set(ip, [now, 1]);
-  }
-  // Evict stale entries to keep map bounded
-  if (rateLimitMap.size > 1_000) {
-    for (const [key, [ts]] of rateLimitMap.entries()) {
-      if (now - ts > RATE_LIMIT_WINDOW) rateLimitMap.delete(key);
+    // Evict stale entries to keep map bounded
+    if (rateLimitMap.size > 1_000) {
+      for (const [key, [ts]] of rateLimitMap.entries()) {
+        if (now - ts > RATE_LIMIT_WINDOW) rateLimitMap.delete(key);
+      }
     }
   }
 

@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@/shared/lib/firebase';
+import { db, getSecondaryAuth } from '@/shared/lib/firebase';
 import { UserService, CourseService } from '@/services/firestore.service';
 import { useAuth } from '@/hooks/use-auth';
 import { getFullName } from '@/models/user';
@@ -58,10 +58,13 @@ export default function InstructorNewStudentPage() {
 
         try {
             setLoading(true);
-            if (!auth || !db) throw new Error('Firebase not configured');
+            if (!db) throw new Error('Firebase not configured');
 
-            const cred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            const secondaryAuth = getSecondaryAuth();
+            if (!secondaryAuth) throw new Error('Auth no disponible');
+            const cred = await createUserWithEmailAndPassword(secondaryAuth, formData.email, formData.password);
             const uid = cred.user.uid;
+            await signOut(secondaryAuth);
 
             await setDoc(doc(db, 'users', uid), {
                 uid,
