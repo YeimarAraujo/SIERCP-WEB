@@ -1,6 +1,6 @@
 import { Timestamp } from 'firebase/firestore';
 
-export type InstitutionStatus = 'active' | 'suspended' | 'pending';
+export type InstitutionStatus = 'active' | 'suspended' | 'pending' | 'rejected';
 
 export type InstitutionPlan =
     | 'pyme'
@@ -17,29 +17,36 @@ export type InstitutionPlan =
  * - MANUAL: Institution admins create and manage courses/cohorts manually
  */
 export type InstitutionMode = 'AUTOMATED' | 'MANUAL';
-
+export type CreateInstitutionInput =
+    Omit<Institution, 'id'>;
 export interface Institution {
     id: string;
     name: string;
     code: string;
-    mode: InstitutionMode;
     nit?: string;
-    description?: string;
-    address?: string;
+    mode: InstitutionMode;
+    type?: string;
+    address: string;
     city?: string;
+    department?: string;
     country?: string;
-    phone?: string;
-    email?: string;
     contactEmail?: string;
     contactPhone?: string;
     logoUrl?: string;
     adminIds: string[];
-    plan: InstitutionPlan;
+    primaryAdminId?: string;
+    memberCount: number;
+    activeCoursesCount: number;
+    totalSessionsCount: number;
+    planType: InstitutionPlan;
     status: InstitutionStatus;
+    planActivatedAt?: Timestamp;
+    planExpiresAt?: Timestamp;
     maxDevices: number;
     maxInstructors: number;
     maxStudents: number;
     createdAt?: Timestamp;
     updatedAt?: Timestamp;
     createdBy: string;
+    config?: Record<string, unknown>;
 }

@@ -27,6 +27,8 @@ export interface CourseModel {
     requiredScore?: number;
     totalModules?: number;
     requirements?: string[];
+    instructorIds?: string[];
+    studentIds?: string[];
     isActive: boolean;
     studentCount: number;
     moduleCount: number;

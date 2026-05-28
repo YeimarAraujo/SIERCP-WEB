@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { InstitutionService } from '@/services/institution.service';
 import { PlanService } from '@/features/super-admin/services/plan.service';
-import type { Institution, InstitutionMode, InstitutionStatus } from '@/shared/types/institution';
+import type { Institution, InstitutionMode, InstitutionStatus, InstitutionPlan, CreateInstitutionInput } from '@/shared/types/institution';
 import type { Plan } from '@/shared/types/plan';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
@@ -13,16 +13,19 @@ import {
   X, CreditCard, ChevronDown, Pencil, Trash2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-// ─── Plan helpers ─────────────────────────────────────────────────────────────
+import { UserModel } from '@/models';
+import { UserService } from '@/services/firestore.service';
+import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
+import { Field, SearchableSelect } from '@/app/checkout/_components/ui';
+import { TIPOS_INSTITUCION } from '@/data/institutions';
 
 const PLAN_META: Record<string, { label: string; bg: string; text: string }> = {
-  pyme:           { label: 'Pyme',            bg: 'rgba(14,165,233,0.12)',  text: '#0ea5e9' },
-  business:       { label: 'Business',        bg: 'rgba(99,102,241,0.12)', text: '#6366F1' },
-  corporate:      { label: 'Corporate',       bg: 'rgba(168,85,247,0.12)', text: '#a855f7' },
-  enterprise:     { label: 'Enterprise',      bg: 'rgba(16,185,129,0.12)', text: '#10B981' },
-  sstSinLicencia: { label: 'SST Sin Lic.',    bg: 'rgba(245,158,11,0.12)', text: '#f59e0b' },
-  sstConLicencia: { label: 'SST Con Lic.',    bg: 'rgba(239,68,68,0.12)',  text: '#ef4444' },
+  pyme: { label: 'Pyme', bg: 'rgba(14,165,233,0.12)', text: '#0ea5e9' },
+  business: { label: 'Business', bg: 'rgba(99,102,241,0.12)', text: '#6366F1' },
+  corporate: { label: 'Corporate', bg: 'rgba(168,85,247,0.12)', text: '#a855f7' },
+  enterprise: { label: 'Enterprise', bg: 'rgba(16,185,129,0.12)', text: '#10B981' },
+  sstSinLicencia: { label: 'SST Sin Lic.', bg: 'rgba(245,158,11,0.12)', text: '#f59e0b' },
+  sstConLicencia: { label: 'SST Con Lic.', bg: 'rgba(239,68,68,0.12)', text: '#ef4444' },
 };
 
 function planMeta(slug: string | undefined) {
@@ -41,9 +44,9 @@ function formatPrice(priceCOP: number) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { bg: string; color: string; label: string }> = {
-    active:    { bg: 'rgba(16,185,129,0.12)', color: '#10B981', label: 'ACTIVA' },
-    pending:   { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B', label: 'PENDIENTE' },
-    suspended: { bg: 'rgba(239,68,68,0.12)',  color: '#EF4444', label: 'SUSPENDIDA' },
+    active: { bg: 'rgba(16,185,129,0.12)', color: '#10B981', label: 'ACTIVA' },
+    pending: { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B', label: 'PENDIENTE' },
+    suspended: { bg: 'rgba(239,68,68,0.12)', color: '#EF4444', label: 'SUSPENDIDA' },
   };
   const s = map[status] || map.pending;
   return (
@@ -53,7 +56,6 @@ function StatusBadge({ status }: { status: string }) {
     }}>{s.label}</span>
   );
 }
-
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
 const inputStyle: React.CSSProperties = {
@@ -92,14 +94,24 @@ function AssignPlanModal({ institution, plans, onClose, onSaved }: {
   institution: Institution; plans: Plan[];
   onClose: () => void; onSaved: (id: string, newPlan: string) => void;
 }) {
-  const [selected, setSelected] = useState<string>(institution.plan || 'pyme');
+  const [selected, setSelected] = useState<string>(institution.planType || 'pyme');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (selected === institution.plan) { onClose(); return; }
+    if (selected === institution.planType) { onClose(); return; }
     setSaving(true);
     try {
-      await InstitutionService.update(institution.id, { plan: selected as never });
+      if (!institution.id) {
+        toast.error('La institución no tiene ID');
+        return;
+      }
+
+      await InstitutionService.update(
+        institution.id,
+        {
+          planType: selected,
+        }
+      );
       toast.success(`Plan actualizado a ${planMeta(selected).label}`);
       onSaved(institution.id, selected);
       onClose();
@@ -171,6 +183,10 @@ function ChangeStatusModal({ institution, onClose, onSaved }: {
     if (selected === institution.status) { onClose(); return; }
     setSaving(true);
     try {
+      if (!institution.id) {
+        toast.error('La institución no tiene ID');
+        return;
+      }
       await InstitutionService.update(institution.id, { status: selected });
       toast.success('Estado actualizado');
       onSaved(institution.id, selected);
@@ -183,9 +199,9 @@ function ChangeStatusModal({ institution, onClose, onSaved }: {
   };
 
   const options: { value: InstitutionStatus; label: string; color: string }[] = [
-    { value: 'active',    label: 'Activa',     color: '#10B981' },
-    { value: 'pending',   label: 'Pendiente',   color: '#F59E0B' },
-    { value: 'suspended', label: 'Suspendida',  color: '#EF4444' },
+    { value: 'active', label: 'Activa', color: '#10B981' },
+    { value: 'pending', label: 'Pendiente', color: '#F59E0B' },
+    { value: 'suspended', label: 'Suspendida', color: '#EF4444' },
   ];
 
   return (
@@ -226,8 +242,11 @@ function ChangeStatusModal({ institution, onClose, onSaved }: {
 function EditModal({ institution, onClose, onSaved }: {
   institution: Institution; onClose: () => void; onSaved: () => void;
 }) {
+  const [admins, setAdmins] = useState<UserModel[]>([]);
+  const [selectedAdmins, setSelectedAdmins] = useState<string[]>(
+    institution.adminIds || []);
+
   const [name, setName] = useState(institution.name || '');
-  const [description, setDescription] = useState(institution.description || '');
   const [contactEmail, setContactEmail] = useState(institution.contactEmail || '');
   const [contactPhone, setContactPhone] = useState(institution.contactPhone || '');
   const [mode, setMode] = useState<InstitutionMode>(institution.mode || 'MANUAL');
@@ -235,22 +254,129 @@ function EditModal({ institution, onClose, onSaved }: {
   const [maxInstructors, setMaxInstructors] = useState(String(institution.maxInstructors ?? 5));
   const [maxDevices, setMaxDevices] = useState(String(institution.maxDevices ?? 10));
   const [saving, setSaving] = useState(false);
+  const [showCreateAdmin, setShowCreateAdmin] = useState(false);
+  const [adminFirstName, setAdminFirstName] = useState('');
+  const [adminLastName, setAdminLastName] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminIdentification, setAdminIdentification] = useState('');
+  const [adminPhone, setAdminPhone] = useState('');
+  const [adminStatus, setAdminStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
+  const [adminCertVerification, setAdminCertVerification] = useState<'NONE' | 'PENDING' | 'VERIFIED'>('NONE');
+
+  useEffect(() => {
+    UserService.getAll().then(users => {
+      const adminsOnly = users.filter(
+        u => u.role === 'ADMIN' && u.institutionId === (institution.id)
+      );
+      setAdmins(adminsOnly);
+    });
+  }, [institution]);
+
+  const handleCreateAdmin = async () => {
+    if (
+      !adminFirstName.trim() ||
+      !adminLastName.trim() ||
+      !adminEmail.trim() ||
+      !adminPassword.trim() ||
+      !adminIdentification.trim() ||
+      !adminPhone.trim()
+    ) {
+      toast.error('Completa todos los campos');
+      return;
+    }
+
+    try {
+      const newAdmin = await UserService.create({
+        firstName: adminFirstName.trim(),
+        lastName: adminLastName.trim(),
+        email: adminEmail.trim(),
+        password: adminPassword,
+        role: 'ADMIN',
+        institutionId: institution.id,
+        identification: adminIdentification.trim(),
+        phoneNumber: adminPhone,
+
+      });
+
+      setAdmins(prev => [...prev, newAdmin]);
+
+      setSelectedAdmins(prev => [
+        ...prev,
+        newAdmin.uid,
+      ]);
+
+      setAdminFirstName('');
+      setAdminLastName('');
+      setAdminEmail('');
+      setAdminPassword('');
+
+      setShowCreateAdmin(false);
+
+      toast.success('Administrador creado');
+    } catch (e) {
+      toast.error(
+        e instanceof Error
+          ? e.message
+          : 'Error al crear administrador'
+      );
+    }
+  };
+
+  const removeAdmin = (uid: string) => {
+    setAdmins(prev =>
+      prev.filter(admin => admin.uid !== uid)
+    );
+
+    setSelectedAdmins(prev =>
+      prev.filter(id => id !== uid)
+    );
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { toast.error('El nombre es requerido'); return; }
     setSaving(true);
     try {
+      if (!institution.id) {
+        toast.error('La institución no tiene ID');
+        return;
+      }
       await InstitutionService.update(institution.id, {
         name: name.trim(),
-        description: description.trim() || undefined,
         contactEmail: contactEmail.trim() || undefined,
         contactPhone: contactPhone.trim() || undefined,
         mode,
         maxStudents: parseInt(maxStudents, 10) || 100,
         maxInstructors: parseInt(maxInstructors, 10) || 5,
         maxDevices: parseInt(maxDevices, 10) || 10,
+        adminIds: selectedAdmins,
+        primaryAdminId: selectedAdmins[0] || undefined,
       });
+      const previousAdmins = institution.adminIds || [];
+      const addedAdmins = selectedAdmins.filter(id => !previousAdmins.includes(id));
+      const removedAdmins = previousAdmins.filter(id => !selectedAdmins.includes(id));
+
+      for (const uid of addedAdmins) {
+        await UserService.update(uid, {
+          role: 'ADMIN',
+          institutionId: institution.id,
+          memberships: [institution.id],
+        });
+      }
+
+      for (const uid of removedAdmins) {
+        const user = await UserService.get(uid);
+
+        if (!user) continue;
+        const memberships = (user.memberships || []).filter(id => id !== institution.id);
+
+        await UserService.update(uid, {
+          memberships,
+          institutionId: memberships[0] || '',
+        });
+
+      }
       toast.success('Institución actualizada');
       onSaved();
       onClose();
@@ -284,7 +410,50 @@ function EditModal({ institution, onClose, onSaved }: {
               <label style={labelStyle}>Nombre *</label>
               <input required value={name} onChange={e => setName(e.target.value)} style={inputStyle} placeholder="Nombre de la institución" />
             </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, }}>
+                <label style={labelStyle}>Administradores</label>
+                <button type="button" onClick={() => setShowCreateAdmin(!showCreateAdmin)} style={{ ...btnPrimary, padding: '6px 12px', fontSize: 12, }}><Plus size={14} /> Crear admin</button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {admins.map(admin => (
+                  <div key={admin.uid} style={{ padding: '10px 14px', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--bg-surface-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700 }}>{admin.firstName}{' '} {admin.lastName}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)', }}>{admin.email}</div>
+                    </div>
 
+                    <button type="button" onClick={() => removeAdmin(admin.uid)} style={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: 'none', background: 'rgba(239,68,68,0.1)', color: '#ef4444', width: 32, height: 32, borderRadius: 8, cursor: 'pointer', }}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {showCreateAdmin && (
+              <div style={{ border: '1px solid var(--border)', borderRadius: 16, padding: 16, background: 'var(--bg-surface-2)', }}>
+                <h4 style={{ marginTop: 0, marginBottom: 14, fontSize: 14, fontWeight: 800, }}>Nuevo administrador</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                  <input placeholder='Nombre' value={adminFirstName} onChange={e => setAdminFirstName(e.target.value)} style={inputStyle} />
+                  <input placeholder='Apellido' value={adminLastName} onChange={e => setAdminLastName(e.target.value)} style={inputStyle} />
+                  <input placeholder='Identificación' value={adminIdentification} onChange={e => setAdminIdentification(e.target.value)} style={inputStyle} />
+                  <input
+                    placeholder="Teléfono"
+                    value={adminPhone}
+                    onChange={e => setAdminPhone(e.target.value)}
+                    style={inputStyle}
+                  />
+
+                  <input type='email' placeholder='Correo' value={adminEmail} onChange={e => setAdminEmail(e.target.value)} style={inputStyle} />
+                  <input type='password' placeholder='Contraseña' value={adminPassword} onChange={e => setAdminPassword(e.target.value)} style={inputStyle} />
+                </div>
+
+
+                <button type='button' onClick={handleCreateAdmin} style={{ ...btnPrimary, width: '100%', marginTop: 14, }}>
+                  Crear administrador
+                </button>
+              </div>
+            )}
             <div>
               <label style={labelStyle}>Modo de operación</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -319,10 +488,6 @@ function EditModal({ institution, onClose, onSaved }: {
               </div>
             </div>
 
-            <div>
-              <label style={labelStyle}>Descripción</label>
-              <textarea value={description} onChange={e => setDescription(e.target.value)} style={{ ...inputStyle, height: 80, padding: '10px 14px', resize: 'vertical' }} placeholder="Descripción de la institución..." />
-            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
               <div>
@@ -421,33 +586,124 @@ function DeleteModal({ institution, onClose, onDeleted }: {
 // ─── Create Modal ─────────────────────────────────────────────────────────────
 
 function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: () => void; onCreated: () => void }) {
+
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
+  const [nit, setNit] = useState('');
   const [mode, setMode] = useState<InstitutionMode>('MANUAL');
   const [plan, setPlan] = useState(plans[0]?.slug || 'pyme');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [description, setDescription] = useState('');
+  const [typeOfInstitution, setTypeOfInstitution] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [department, setDepartment] = useState('');
+  const [country, setCountry] = useState('Colombia');
   const [creating, setCreating] = useState(false);
+  const [adminFirstName, setAdminFirstName] = useState('');
+  const [adminLastName, setAdminLastName] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminIdentification, setAdminIdentification] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPhone, setAdminPhone] = useState('');
+  const [adminAddress, setAdminAddress] = useState('');
+  const [adminCity, setAdminCity] = useState('');
+  const [adminDepartment, setAdminDepartment] = useState('');
+  const [adminCountry, setAdminCountry] = useState('Colombia');
+
+  const municipios = getMunicipalities(department);
+
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!code.trim() || !name.trim()) { toast.error('Código y nombre son requeridos'); return; }
+
+    if (!code.trim() || !name.trim()) {
+      toast.error('Código y nombre son requeridos');
+      return;
+    }
+    if (!department.trim()) {
+      toast.error('Departamento requerido');
+      return;
+    }
+
+    if (!city.trim()) {
+      toast.error('Ciudad requerida');
+      return;
+    }
+
+    if (!adminEmail.trim()) {
+      toast.error('Email del administrador requerido');
+      return;
+    }
+
+    if (!adminPassword.trim()) {
+      toast.error('Contraseña del administrador requerida');
+      return;
+    }
+    if (!adminIdentification.trim()) {
+      toast.error('Identificación requerida');
+      return;
+    }
     setCreating(true);
     try {
-      await InstitutionService.create(code.trim().toUpperCase(), {
-        name: name.trim(), code: code.trim().toUpperCase(), adminIds: [], plan: plan as never,
-        status: 'pending', maxDevices: 10, maxInstructors: 5, maxStudents: 100,
-        createdBy: '', mode,
+      const institutionId = code.trim().toUpperCase();
+
+      const InstitutionData: CreateInstitutionInput = {
+        name: name.trim(), code: code.trim().toUpperCase(),
+        nit: nit,
+        mode,
+        planType: plan as InstitutionPlan,
+        status: 'pending',
+        address: address,
+        city: city,
+        department: department,
+        type: typeOfInstitution,
+        country: 'Colombia',
+        activeCoursesCount: 0,
+        totalSessionsCount: 0,
+        memberCount: 1,
+        maxDevices: 10, maxInstructors: 5, maxStudents: 100,
+        createdBy: 'SuperAdmin',
         contactEmail: email.trim() || undefined,
         contactPhone: phone.trim() || undefined,
-        description: description.trim() || undefined,
-      } as never);
+        config: {},
+        adminIds: [],
+      };
+      await InstitutionService.create(
+        InstitutionData.code,
+        InstitutionData
+      );
+      const admin = await UserService.create({
+        email: adminEmail.trim(),
+        password: adminPassword,
+        firstName: adminFirstName.trim(),
+        lastName: adminLastName.trim(),
+        identification: adminIdentification.trim(),
+        phoneNumber: adminPhone.trim(),
+        role: 'ADMIN',
+        address: adminAddress,
+        city: adminCity,
+        department: adminDepartment,
+        country: adminCountry,
+        institutionId,
+      });
+      await InstitutionService.update(institutionId, {
+        primaryAdminId: admin.uid,
+        adminIds: [admin.uid],
+      });
+
       toast.success('Institución creada exitosamente');
+
       onCreated();
+
       onClose();
-    } catch {
+
+    } catch (error) {
+
+      console.error(error);
+
       toast.error('Error al crear la institución');
+
     } finally {
       setCreating(false);
     }
@@ -468,7 +724,7 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
         </div>
 
         <form onSubmit={handleCreate}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label style={labelStyle}>Código *</label>
@@ -477,6 +733,181 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
               <div>
                 <label style={labelStyle}>Nombre *</label>
                 <input required placeholder="Jomar Seguridad" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Tipo de Institución *</label>
+                <SearchableSelect
+                  value={typeOfInstitution}
+                  onChange={setTypeOfInstitution}
+                  options={TIPOS_INSTITUCION}
+                  placeholder="Tipo de institución"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Nit *</label>
+                <input required placeholder="Nit" value={nit} onChange={e => setNit(e.target.value)} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Email contacto*</label>
+                <input type="email" placeholder="admin@institucion.com" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Teléfono contacto*</label>
+                <input placeholder="+57 300 000 0000" value={phone} onChange={e => setPhone(e.target.value)} style={inputStyle} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div>
+                <label style={labelStyle}>Departamento *</label>
+
+                <SearchableSelect
+                  value={department}
+                  onChange={(v) => {
+                    setDepartment(v);
+                    setCity('');
+                  }}
+                  options={COLOMBIA_DEPARTMENTS}
+                  placeholder="Buscar departamento..."
+                />
+              </div>
+
+              <div>
+                <label style={labelStyle}>Ciudad / Municipio *</label>
+
+                <SearchableSelect
+                  value={city}
+                  onChange={setCity}
+                  options={municipios}
+                  placeholder={
+                    department
+                      ? 'Buscar municipio...'
+                      : 'Selecciona un departamento'
+                  }
+                  disabled={!department}
+                />
+              </div>
+              <div >
+                <label style={labelStyle}>Dirección</label>
+                <input placeholder="Dirección" value={address} onChange={e => setAddress(e.target.value)} style={inputStyle} />
+              </div>
+
+            </div>
+
+            <div style={{
+              border: '1px solid var(--border)',
+              borderRadius: 16,
+              padding: 16,
+              background: 'var(--bg-surface-2)',
+            }}>
+              <h4 style={{
+                margin: '0 0 16px',
+                fontSize: 14,
+                fontWeight: 800,
+                color: 'var(--text-primary)',
+              }}>
+                Administrador Principal
+              </h4>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 12,
+              }}>
+                <div>
+                  <label style={labelStyle}>Nombres *</label>
+                  <input
+                    required
+                    value={adminFirstName}
+                    onChange={e => setAdminFirstName(e.target.value)}
+                    placeholder="Juan"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Apellidos *</label>
+                  <input
+                    required
+                    value={adminLastName}
+                    onChange={e => setAdminLastName(e.target.value)}
+                    placeholder="Pérez"
+                    style={inputStyle}
+                  />
+                </div>
+
+
+                <div>
+                  <label style={labelStyle}>Identificación *</label>
+                  <input
+                    required
+                    value={adminIdentification}
+                    onChange={e => setAdminIdentification(e.target.value)}
+                    placeholder="123456789"
+                    style={inputStyle}
+                  />
+                </div>
+
+
+                <div>
+                  <label style={labelStyle}>Teléfono</label>
+                  <input placeholder="+57 300 000 0000" value={adminPhone} onChange={e => setAdminPhone(e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Departamento *</label>
+
+                  <SearchableSelect
+                    value={adminDepartment}
+                    onChange={(v) => {
+                      setAdminDepartment(v);
+                      setAdminCity('');
+                    }}
+                    options={COLOMBIA_DEPARTMENTS}
+                    placeholder="Buscar departamento..."
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Ciudad / Municipio *</label>
+
+                  <SearchableSelect
+                    value={adminCity}
+                    onChange={setAdminCity}
+                    options={municipios}
+                    placeholder={
+                      adminDepartment
+                        ? 'Buscar municipio...'
+                        : 'Selecciona un departamento'
+                    }
+                    disabled={!adminDepartment}
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Dirección</label>
+                  <input placeholder="Dirección" value={adminAddress} onChange={e => setAdminAddress(e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Email *</label>
+                  <input
+                    required
+                    type="email"
+                    value={adminEmail}
+                    onChange={e => setAdminEmail(e.target.value)}
+                    placeholder="admin@empresa.com"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Contraseña *</label>
+                  <input
+                    required
+                    type="password"
+                    value={adminPassword}
+                    onChange={e => setAdminPassword(e.target.value)}
+                    placeholder="********"
+                    style={inputStyle}
+                  />
+                </div>
               </div>
             </div>
 
@@ -518,28 +949,15 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
-                <label style={labelStyle}>Email contacto</label>
-                <input type="email" placeholder="admin@institucion.com" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
-              </div>
-              <div>
-                <label style={labelStyle}>Teléfono</label>
-                <input placeholder="+57 300 000 0000" value={phone} onChange={e => setPhone(e.target.value)} style={inputStyle} />
-              </div>
-            </div>
 
-            <div>
-              <label style={labelStyle}>Descripción</label>
-              <textarea value={description} onChange={e => setDescription(e.target.value)} style={{ ...inputStyle, height: 80, padding: '10px 14px', resize: 'vertical' }} placeholder="Descripción de la institución..." />
-            </div>
 
             <button type="submit" disabled={creating} style={{ ...btnPrimary, width: '100%', height: 48, opacity: creating ? 0.7 : 1, cursor: creating ? 'not-allowed' : 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', marginTop: 4 }}>
               {creating ? 'Creando...' : 'Crear Institución'}
             </button>
           </div>
-        </form>
-      </div>
+        </form >
+      </div >
+
     </>
   );
 }
@@ -612,10 +1030,10 @@ export default function InstitutionsPage() {
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
           {[
-            { label: 'Instituciones', value: institutions.length,                                       icon: Building2,    color: 'var(--brand)' },
-            { label: 'Activas',       value: institutions.filter(i => i.status === 'active').length,    icon: CheckCircle2, color: '#10B981' },
-            { label: 'Automatizadas', value: institutions.filter(i => i.mode === 'AUTOMATED').length,   icon: Zap,          color: '#6366F1' },
-            { label: 'Manuales',      value: institutions.filter(i => i.mode !== 'AUTOMATED').length,   icon: Settings,     color: '#F59E0B' },
+            { label: 'Instituciones', value: institutions.length, icon: Building2, color: 'var(--brand)' },
+            { label: 'Activas', value: institutions.filter(i => i.status === 'active').length, icon: CheckCircle2, color: '#10B981' },
+            { label: 'Automatizadas', value: institutions.filter(i => i.mode === 'AUTOMATED').length, icon: Zap, color: '#6366F1' },
+            { label: 'Manuales', value: institutions.filter(i => i.mode !== 'AUTOMATED').length, icon: Settings, color: '#F59E0B' },
           ].map((s, i) => (
             <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: `color-mix(in srgb, ${s.color} 12%, transparent)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color }}><s.icon size={20} /></div>
@@ -655,7 +1073,7 @@ export default function InstitutionsPage() {
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 16 }}>
               {filtered.map((inst) => {
-                const meta = planMeta(inst.plan);
+                const meta = planMeta(inst.planType);
                 const isAuto = inst.mode === 'AUTOMATED';
 
                 return (
@@ -663,8 +1081,8 @@ export default function InstitutionsPage() {
                     background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20,
                     padding: 20, transition: 'all 0.2s', boxShadow: 'var(--shadow-sm)',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--brand)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--brand)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
 
                     {/* Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
@@ -712,9 +1130,9 @@ export default function InstitutionsPage() {
                     {/* Metrics */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, background: 'var(--bg-surface-2)', borderRadius: 12, padding: '10px 14px', marginBottom: 14 }}>
                       {[
-                        { icon: Users,         value: inst.maxStudents    || 0, label: 'Est. máx.' },
+                        { icon: Users, value: inst.maxStudents || 0, label: 'Est. máx.' },
                         { icon: GraduationCap, value: inst.maxInstructors || 0, label: 'Inst. máx.' },
-                        { icon: Cpu,           value: inst.maxDevices     || 0, label: 'Disp. máx.' },
+                        { icon: Cpu, value: inst.maxDevices || 0, label: 'Disp. máx.' },
                       ].map(({ icon: Icon, value, label }) => (
                         <div key={label} style={{ textAlign: 'center' }}>
                           <Icon size={13} style={{ color: 'var(--text-muted)', marginBottom: 2 }} />
@@ -750,11 +1168,11 @@ export default function InstitutionsPage() {
       </div>
 
       {/* Modals */}
-      {showCreateModal     && <CreateModal plans={plans} onClose={() => setShowCreateModal(false)} onCreated={loadData} />}
-      {assignPlanTarget    && <AssignPlanModal institution={assignPlanTarget} plans={plans} onClose={() => setAssignPlanTarget(null)} onSaved={handlePlanSaved} />}
-      {changeStatusTarget  && <ChangeStatusModal institution={changeStatusTarget} onClose={() => setChangeStatusTarget(null)} onSaved={handleStatusSaved} />}
-      {editTarget          && <EditModal institution={editTarget} onClose={() => setEditTarget(null)} onSaved={loadData} />}
-      {deleteTarget        && <DeleteModal institution={deleteTarget} onClose={() => setDeleteTarget(null)} onDeleted={handleDeleted} />}
+      {showCreateModal && <CreateModal plans={plans} onClose={() => setShowCreateModal(false)} onCreated={loadData} />}
+      {assignPlanTarget && <AssignPlanModal institution={assignPlanTarget} plans={plans} onClose={() => setAssignPlanTarget(null)} onSaved={handlePlanSaved} />}
+      {changeStatusTarget && <ChangeStatusModal institution={changeStatusTarget} onClose={() => setChangeStatusTarget(null)} onSaved={handleStatusSaved} />}
+      {editTarget && <EditModal institution={editTarget} onClose={() => setEditTarget(null)} onSaved={loadData} />}
+      {deleteTarget && <DeleteModal institution={deleteTarget} onClose={() => setDeleteTarget(null)} onDeleted={handleDeleted} />}
     </div>
   );
 }

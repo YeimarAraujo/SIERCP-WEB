@@ -12,6 +12,7 @@ import {
     Sun, Moon, GraduationCap, Users, BookOpen,
     BookMarked, ShoppingCart, Package, Briefcase,
     ShieldCheckIcon,
+    Building,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -39,6 +40,7 @@ const navItems: NavItem[] = [
     // ── Pendientes ──────────────────────────────────────────────────────────
     { label: 'Admins pendientes', href: '/super-admin/pending-admins', icon: UserCheck, group: 'Pendientes' },
     { label: 'Instructores pendientes', href: '/super-admin/pending-instructors', icon: UserCheck, group: 'Pendientes' },
+    { label: 'Instituciones pendientes', href: '/super-admin/pending-institutions', icon: Building, group: 'Pendientes' },
     // ── Sistema ─────────────────────────────────────────────────────────────
     { label: 'Logs de actividad', href: '/super-admin/logs', icon: ScrollText, group: 'Sistema' },
     { label: 'Configuración', href: '/super-admin/settings', icon: Settings, group: 'Sistema' },
