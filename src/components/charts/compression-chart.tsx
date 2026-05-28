@@ -19,7 +19,8 @@ interface CompressionChartProps {
 
 export function CompressionChart({ data, height = 200 }: CompressionChartProps) {
     return (
-        <ResponsiveContainer width="100%" height={height}>
+        <div style={{ width: "100%", height }}>
+            <ResponsiveContainer width="100%" height={height}>
             <LineChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis
@@ -60,6 +61,7 @@ export function CompressionChart({ data, height = 200 }: CompressionChartProps) 
                     isAnimationActive={false}
                 />
             </LineChart>
-        </ResponsiveContainer>
+            </ResponsiveContainer>
+        </div>
     );
 }

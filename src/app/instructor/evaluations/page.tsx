@@ -29,8 +29,8 @@ export default function InstructorEvaluationsPage() {
 
     const filteredRubrics = rubrics.filter(r =>
         searchTerm === '' ||
-        r.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.type?.toLowerCase().includes(searchTerm.toLowerCase())
+        (r.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (r.type || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (

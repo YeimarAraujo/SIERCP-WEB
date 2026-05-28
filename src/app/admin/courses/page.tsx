@@ -37,9 +37,9 @@ export default function AdminCoursesPage() {
 
     const filtered = courses.filter(c =>
         searchTerm === '' ||
-        c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.instructorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.certification?.toLowerCase().includes(searchTerm.toLowerCase())
+        (c.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.instructorName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.certification || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const columns = [

@@ -54,8 +54,8 @@ export default function AdminInstructorsPage() {
     }, [institutionId, authLoading]);
 
     const filteredInstructors = instructors.filter(i => 
-        i.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        i.email?.toLowerCase().includes(searchTerm.toLowerCase())
+        (i.displayName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (i.email || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const columns = [

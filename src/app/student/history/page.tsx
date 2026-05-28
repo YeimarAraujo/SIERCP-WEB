@@ -28,7 +28,7 @@ export default function StudentHistoryPage() {
 
     const filtered = sessions.filter(s =>
         searchTerm === '' ||
-        s.scenarioTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+        (s.scenarioTitle || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const columns = [

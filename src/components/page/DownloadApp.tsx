@@ -238,7 +238,7 @@ function AppScreen({ visible }: { visible: boolean }) {
         </div>
       </div>
 
-      <div style={{ height: 160, minHeight: 160, padding: "8px 12px 6px" }}>
+      <div style={{ width: "100%", height: 160, minHeight: 160, padding: "8px 12px 6px" }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={history}

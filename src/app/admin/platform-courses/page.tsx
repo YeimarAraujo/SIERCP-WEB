@@ -80,8 +80,8 @@ export default function AdminPlatformCoursesPage() {
   const filtered = templates.filter(
     (t) =>
       searchTerm === '' ||
-      t.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.slug?.toLowerCase().includes(searchTerm.toLowerCase()),
+      (t.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.slug || '').toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const totalEnrolled = templates.reduce(
