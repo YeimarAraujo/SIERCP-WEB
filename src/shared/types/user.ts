@@ -62,23 +62,40 @@ export interface UserStats {
   averageRatePerMin: number;
 }
 
+export interface UserCourseRef {
+  courseId: string;
+  slug: string;
+  title: string;
+  cohortId?: string;
+  enrollmentId?: string;
+  institutionId?: string;
+  status: 'active' | 'completed' | 'cancelled';
+  enrolledAt?: Date;
+}
+
 export interface UserModel {
   uid: string;
   email: string;
   firstName: string;
   lastName: string;
+  address?: string;
+  city?: string;
+  department?: string;
+  country?: string;
   role: UserRole;
   avatarUrl?: string;
   identificacion?: string;
   isActive: boolean;
   institutionId: string;
   phoneNumber?: string;
+  courses?: UserCourseRef[];
   status: 'PENDING' | 'ACTIVE';
   certVerification: CertVerificationStatus;
   coursesCreated: number;
   stats?: UserStats;
   fcmTokens?: string[];
   fcmTokensUpdatedAt?: Date;
+  memberships?: string[];
   appInstalled?: boolean;
   createdAt: Date;
   updatedAt: Date;
