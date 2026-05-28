@@ -284,7 +284,7 @@ function RegisterForm({
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(registerSchema as any),
+    resolver: zodResolver(registerSchema) as any,
     mode: 'onBlur',
   });
 

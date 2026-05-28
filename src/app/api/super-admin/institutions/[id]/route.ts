@@ -29,8 +29,14 @@ export async function PATCH(
 
     try {
         const body = await request.json() as Record<string, unknown>;
-        // Strip fields the client must not overwrite
-        const { createdAt: _c, createdBy: _cb, id: _id, ...safe } = body;
+        const ALLOWED_FIELDS = [
+            'name', 'nit', 'sector', 'city', 'phone',
+            'website', 'email', 'logo', 'description', 'status',
+        ] as const;
+        const safe: Record<string, unknown> = {};
+        for (const field of ALLOWED_FIELDS) {
+            if (field in body) safe[field] = body[field];
+        }
 
         await adminDb.collection('institutions').doc(id).update({
             ...safe,

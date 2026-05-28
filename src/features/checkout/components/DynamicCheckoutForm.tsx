@@ -2,6 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { ZodSchema } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, Check, ChevronDown, Eye, EyeOff, Info } from 'lucide-react';
 import { useState, useCallback } from 'react';

@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase-admin';
+import { rateLimiter } from '@/lib/rate-limiter';
 
 export async function POST(req: NextRequest) {
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : 'unknown';
+    const { allowed } = await rateLimiter.check(`auth-session:${ip}`, { max: 10, windowMs: 60_000 });
+    if (!allowed) {
+        return NextResponse.json({ error: 'Demasiados intentos. Espera un minuto.' }, { status: 429 });
+    }
+
     try {
         const { idToken } = await req.json();
         if (!idToken) return NextResponse.json({ error: 'ID Token requerido' }, { status: 400 });
