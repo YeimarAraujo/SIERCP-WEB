@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { CourseService } from '@/services/firestore.service';
 import type { Curso, Grupo } from '@/data/cursos';
 import toast from 'react-hot-toast';
+import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
 
 interface EnrollmentFlowProps {
   show: boolean;
@@ -225,7 +226,7 @@ export default function EnrollmentFlow({ show, onHide, curso, grupo }: Enrollmen
 
 function AuthStep({ onSuccess }: { onSuccess: () => void; onSwitchToLogin: () => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('register');
-  const [formData, setFormData] = useState({ email: '', password: '', firstName: '', lastName: '', identificacion: '', phoneNumber: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', firstName: '', lastName: '', identificacion: '', phoneNumber: '', departamento: '', ciudad: '', direccion: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, register } = useAuth();
@@ -238,7 +239,7 @@ function AuthStep({ onSuccess }: { onSuccess: () => void; onSwitchToLogin: () =>
       if (mode === 'login') {
         await login(formData.email, formData.password);
       } else {
-        await register({ ...formData, phoneNumber: formData.phoneNumber || undefined, role: 'USUARIO' });
+        await register({ ...formData, phoneNumber: formData.phoneNumber || undefined, role: 'USUARIO', address: formData.direccion || undefined, city: formData.ciudad || undefined, department: formData.departamento || undefined, country: 'Colombia' });
       }
       onSuccess();
     } catch (err: any) {
@@ -262,6 +263,19 @@ function AuthStep({ onSuccess }: { onSuccess: () => void; onSwitchToLogin: () =>
             <div className="col-6"><Form.Control placeholder="Apellido" required onChange={e => setFormData({...formData, lastName: e.target.value})} className="form-control-custom" /></div>
             <div className="col-12"><Form.Control placeholder="Identificación (Cédula/DNI)" required onChange={e => setFormData({...formData, identificacion: e.target.value})} className="form-control-custom" /></div>
             <div className="col-12"><Form.Control type="tel" placeholder="Teléfono / WhatsApp (opcional)" onChange={e => setFormData({...formData, phoneNumber: e.target.value})} className="form-control-custom" /></div>
+            <div className="col-12">
+              <Form.Select value={formData.departamento} onChange={e => setFormData({...formData, departamento: e.target.value, ciudad: ''})} className="form-control-custom">
+                <option value="">Departamento (opcional)</option>
+                {COLOMBIA_DEPARTMENTS.map(d => (<option key={d} value={d}>{d}</option>))}
+              </Form.Select>
+            </div>
+            <div className="col-12">
+              <Form.Select value={formData.ciudad} onChange={e => setFormData({...formData, ciudad: e.target.value})} className="form-control-custom" disabled={!formData.departamento}>
+                <option value="">{formData.departamento ? 'Ciudad / Municipio (opcional)' : 'Selecciona un departamento'}</option>
+                {getMunicipalities(formData.departamento).map(m => (<option key={m} value={m}>{m}</option>))}
+              </Form.Select>
+            </div>
+            <div className="col-12"><Form.Control placeholder="Dirección (opcional)" onChange={e => setFormData({...formData, direccion: e.target.value})} className="form-control-custom" /></div>
           </div>
         )}
         <Form.Control type="email" placeholder="Email" required className="form-control-custom mb-2" onChange={e => setFormData({...formData, email: e.target.value})} />

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Modal, Form, Spinner, Alert } from 'react-bootstrap';
 import { useAuth } from '@/hooks/use-auth';
 import toast from 'react-hot-toast';
+import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
 
 interface AuthModalProps {
   show: boolean;
@@ -20,6 +21,9 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
   const [lastName, setLastName] = useState('');
   const [identificacion, setIdentificacion] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [departamento, setDepartamento] = useState('');
+  const [ciudad, setCiudad] = useState('');
+  const [direccion, setDireccion] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +46,11 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
           lastName,
           identificacion,
           phoneNumber: phoneNumber || undefined,
-          role: 'USUARIO'
+          role: 'USUARIO',
+          address: direccion || undefined,
+          city: ciudad || undefined,
+          department: departamento || undefined,
+          country: 'Colombia',
         });
         toast.success('Cuenta creada exitosamente');
       }
@@ -104,6 +112,33 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
                   <Form.Control
                     type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
                     className="form-control-custom" placeholder="+57 300 000 0000"
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-12">
+                <Form.Group>
+                  <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Departamento <span style={{ fontWeight: 400, color: '#94a3b8' }}>(opcional)</span></Form.Label>
+                  <Form.Select value={departamento} onChange={e => { setDepartamento(e.target.value); setCiudad(''); }} className="form-control-custom">
+                    <option value="">Selecciona un departamento</option>
+                    {COLOMBIA_DEPARTMENTS.map(d => (<option key={d} value={d}>{d}</option>))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
+              <div className="col-12">
+                <Form.Group>
+                  <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Ciudad / Municipio <span style={{ fontWeight: 400, color: '#94a3b8' }}>(opcional)</span></Form.Label>
+                  <Form.Select value={ciudad} onChange={e => setCiudad(e.target.value)} className="form-control-custom" disabled={!departamento}>
+                    <option value="">{departamento ? 'Selecciona un municipio' : 'Primero selecciona departamento'}</option>
+                    {getMunicipalities(departamento).map(m => (<option key={m} value={m}>{m}</option>))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
+              <div className="col-12">
+                <Form.Group>
+                  <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Dirección <span style={{ fontWeight: 400, color: '#94a3b8' }}>(opcional)</span></Form.Label>
+                  <Form.Control
+                    type="text" value={direccion} onChange={e => setDireccion(e.target.value)}
+                    className="form-control-custom" placeholder="Cra. 1 # 2-3"
                   />
                 </Form.Group>
               </div>

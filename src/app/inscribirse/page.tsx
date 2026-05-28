@@ -56,6 +56,7 @@ function EnrollmentContent() {
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Error al procesar la inscripción');
+    } finally {
       setLoading(false);
     }
   };

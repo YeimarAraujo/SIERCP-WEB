@@ -7,6 +7,8 @@ import { useThemeStore } from '@/stores/theme-store';
 import toast from 'react-hot-toast';
 import { usePasswordStrength } from '@/hooks/usePasswordStrength';
 import PasswordStrength from '@/components/ui/PasswordStrength';
+import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
+import { SearchableSelect } from '@/app/checkout/_components/ui';
 
 function RegisterContent() {
     const [step, setStep] = useState(1);
@@ -15,6 +17,7 @@ function RegisterContent() {
         identificacion: '', password: '', confirm: '',
         role: 'USUARIO', institutionCode: '',
         phoneNumber: '',
+        departamento: '', ciudad: '', direccion: '',
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -82,6 +85,10 @@ function RegisterContent() {
                 phoneNumber: form.phoneNumber || undefined,
                 role: form.role,
                 institutionCode: form.institutionCode || undefined,
+                address: form.direccion || undefined,
+                city: form.ciudad || undefined,
+                department: form.departamento || undefined,
+                country: 'Colombia',
             });
             toast.success('Registro exitoso');
             if (nextParam) {
@@ -93,6 +100,7 @@ function RegisterContent() {
             const msg = err instanceof Error ? err.message : 'Error al registrar';
             setError(msg);
             toast.error(msg);
+        } finally {
             setLoading(false);
         }
     }
@@ -174,6 +182,38 @@ function RegisterContent() {
                                     <div className="position-relative">
                                         <i className="bi bi-telephone position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
                                         <input name="phoneNumber" type="tel" value={form.phoneNumber} onChange={handleChange} placeholder="+57 300 000 0000" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>
+                                        Departamento <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span>
+                                    </label>
+                                    <SearchableSelect
+                                        value={form.departamento}
+                                        onChange={v => setForm(prev => ({ ...prev, departamento: v, ciudad: '' }))}
+                                        options={COLOMBIA_DEPARTMENTS}
+                                        placeholder="Buscar departamento…"
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>
+                                        Ciudad / Municipio <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span>
+                                    </label>
+                                    <SearchableSelect
+                                        value={form.ciudad}
+                                        onChange={v => setForm(prev => ({ ...prev, ciudad: v }))}
+                                        options={getMunicipalities(form.departamento)}
+                                        placeholder={form.departamento ? 'Buscar municipio…' : 'Selecciona un departamento'}
+                                        disabled={!form.departamento}
+                                    />
+                                </div>
+                                <div className="col-12">
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>
+                                        Dirección <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span>
+                                    </label>
+                                    <div className="position-relative">
+                                        <i className="bi bi-geo-alt position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
+                                        <input name="direccion" value={form.direccion} onChange={handleChange} placeholder="Cra. 1 # 2-3, Barrio Centro" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
                                     </div>
                                 </div>
                             </div>

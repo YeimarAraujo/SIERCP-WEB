@@ -68,6 +68,7 @@ function LoginContent() {
             const msg = err instanceof Error ? err.message : 'Error al iniciar sesión';
             setError(msg);
             toast.error(msg);
+        } finally {
             setLoading(false);
         }
     }
