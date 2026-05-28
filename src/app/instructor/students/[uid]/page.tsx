@@ -39,12 +39,16 @@ export default function InstructorStudentDetailPage() {
                 const courseIds = instructorCourses.map(c => c.id);
                 
                 const allEnrollments: (Enrollment & { courseId: string; courseTitle: string })[] = [];
-                for (const course of instructorCourses) {
-                    const enrolls = await CourseService.getEnrollments(course.id);
-                    const studentEnrolls = enrolls.filter(e => e.studentId === uid);
-                    studentEnrolls.forEach(en => {
-                        allEnrollments.push({ ...en, courseId: course.id, courseTitle: course.title });
-                    });
+                const enrollmentResults = await Promise.all(
+                    instructorCourses.map(async (course) => {
+                        const enrolls = await CourseService.getEnrollments(course.id);
+                        return enrolls.filter(e => e.studentId === uid).map(en => ({
+                            ...en, courseId: course.id, courseTitle: course.title,
+                        }));
+                    })
+                );
+                for (const batch of enrollmentResults) {
+                    for (const en of batch) allEnrollments.push(en);
                 }
                 
                 const sessionsData = await SessionService.getByStudent(uid, 10);

@@ -9,8 +9,6 @@ import { getCursoBySlug } from "@/data/cursos";
 import Navbar from "@/components/page/Navbar";
 import Footer from "@/components/page/Footer";
 import AuthModal from "@/components/page/AuthModal";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../landing.css';
 
 function EnrollmentContent() {
   const { user, loading: authLoading, initialized } = useAuth();
@@ -58,6 +56,7 @@ function EnrollmentContent() {
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Error al procesar la inscripción');
+    } finally {
       setLoading(false);
     }
   };

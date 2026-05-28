@@ -391,7 +391,7 @@ export default function SuperAdminDashboard() {
             <div>
                 <h3 style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 900, color: 'var(--text-primary)' }}>Tendencias mensuales</h3>
                 <p style={{ margin: '0 0 16px', color: 'var(--text-muted)', fontSize: 13 }}>Sesiones y certificados por mes</p>
-                <div style={{ height: 260 }}>
+                <div style={{ width: "100%", height: 260 }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={data?.trends || []}>
                             <defs>
@@ -423,7 +423,7 @@ export default function SuperAdminDashboard() {
                 <div style={{ padding: 20, borderRadius: 24, border: '1px solid var(--border)', background: 'var(--bg-surface)', boxShadow: 'var(--shadow-sm)' }}>
                     <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 900, color: 'var(--text-primary)' }}>Distribución de usuarios</h3>
                     <p style={{ margin: '0 0 16px', color: 'var(--text-muted)', fontSize: 13 }}>Admins · Instructores · Estudiantes</p>
-                    <div style={{ height: 220 }}>
+                    <div style={{ width: "100%", height: 220 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
@@ -448,7 +448,7 @@ export default function SuperAdminDashboard() {
                 <div style={{ padding: 20, borderRadius: 24, border: '1px solid var(--border)', background: 'var(--bg-surface)', boxShadow: 'var(--shadow-sm)' }}>
                     <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 900, color: 'var(--text-primary)' }}>Estado de instituciones</h3>
                     <p style={{ margin: '0 0 16px', color: 'var(--text-muted)', fontSize: 13 }}>Activas · Pendientes · Suspendidas</p>
-                    <div style={{ height: 220 }}>
+                    <div style={{ width: "100%", height: 220 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie

@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/page/Navbar';
 import toast from 'react-hot-toast';
+import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
+import { SearchableSelect } from '@/app/checkout/_components/ui';
 
 const PLAN_LABELS: Record<string, { name: string; price: string; certs: string }> = {
   'sst-basico': { name: 'SST Básico', price: '$150.000/mes', certs: '30 certificados/mes' },
@@ -26,6 +28,7 @@ function RegisterSSTContent() {
     firstName: '', lastName: '', identificacion: '', phoneNumber: '',
     email: '', password: '', confirm: '',
     licenseNumber: '', issuingEntity: '',
+    departamento: '', ciudad: '', direccion: '',
   });
 
   const inputStyle: React.CSSProperties = {
@@ -73,6 +76,10 @@ function RegisterSSTContent() {
         identificacion: form.identificacion,
         phoneNumber: form.phoneNumber || undefined,
         role: 'INSTRUCTOR',
+        address: form.direccion || undefined,
+        city: form.ciudad || undefined,
+        department: form.departamento || undefined,
+        country: 'Colombia',
       });
       toast.success('Cuenta creada. Ahora sube tu licencia SST.');
       router.replace(`/instructor-apply?plan=${planParam}&from=sst-register`);
@@ -173,6 +180,29 @@ function RegisterSSTContent() {
                 <div className="col-md-6">
                   <label style={labelStyle}>Teléfono / WhatsApp <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span></label>
                   <input type="tel" value={form.phoneNumber} onChange={e => setForm(p => ({ ...p, phoneNumber: e.target.value }))} placeholder="+57 300 000 0000" style={inputStyle} />
+                </div>
+                <div className="col-md-6">
+                  <label style={labelStyle}>Departamento <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span></label>
+                  <SearchableSelect
+                    value={form.departamento}
+                    onChange={v => setForm(p => ({ ...p, departamento: v, ciudad: '' }))}
+                    options={COLOMBIA_DEPARTMENTS}
+                    placeholder="Buscar departamento…"
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label style={labelStyle}>Ciudad / Municipio <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span></label>
+                  <SearchableSelect
+                    value={form.ciudad}
+                    onChange={v => setForm(p => ({ ...p, ciudad: v }))}
+                    options={getMunicipalities(form.departamento)}
+                    placeholder={form.departamento ? 'Buscar municipio…' : 'Selecciona un departamento'}
+                    disabled={!form.departamento}
+                  />
+                </div>
+                <div className="col-12">
+                  <label style={labelStyle}>Dirección <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span></label>
+                  <input type="text" value={form.direccion} onChange={e => setForm(p => ({ ...p, direccion: e.target.value }))} placeholder="Cra. 1 # 2-3, Barrio Centro" style={inputStyle} />
                 </div>
               </div>
               <button type="button" onClick={() => validate1() && setStep(2)} style={{

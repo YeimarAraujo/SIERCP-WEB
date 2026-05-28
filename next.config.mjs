@@ -11,6 +11,7 @@ const CSP = [
 
   /* Scripts: mismo origen + Firebase SDK + Wompi widget + reCAPTCHA Enterprise */
   `script-src 'self' 'unsafe-inline' 'unsafe-eval'
+     https://apis.google.com
      https://www.gstatic.com
      https://www.googleapis.com
      https://cdn.wompi.co

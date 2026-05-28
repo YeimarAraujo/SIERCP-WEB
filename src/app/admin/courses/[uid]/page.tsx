@@ -120,9 +120,9 @@ export default function AdminCourseDetailPage() {
 
     const filteredEnrollments = enrollments.filter(e =>
         searchTerm === '' ||
-        e.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.studentEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.identificacion?.toLowerCase().includes(searchTerm.toLowerCase())
+        (e.studentName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (e.studentEmail || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (e.identificacion || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const activeCount = enrollments.filter(e => e.status === 'active').length;

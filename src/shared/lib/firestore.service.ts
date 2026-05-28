@@ -257,7 +257,7 @@ export const CourseService = {
             { ...enrollment, enrolledAt: serverTimestamp() },
         );
         await updateDoc(doc(db, 'courses', courseId), {
-            studentCount: (await getDoc(doc(db, 'courses', courseId))).data()?.studentCount + 1 || 1,
+            studentCount: increment(1),
             updatedAt: serverTimestamp(),
         });
         await AuditService.record({

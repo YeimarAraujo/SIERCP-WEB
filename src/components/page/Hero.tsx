@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from "react";
-import "../../app/landing.css";
 
 /* ── Estadísticas animadas del hero ──────────────────────────────────────── */
 const stats = [
@@ -70,19 +69,6 @@ export default function Hero() {
     return () => obs.disconnect();
   }, []);
 
-  /* ── Efecto parallax sutil en scroll ──────────────────────────────────── */
-  useEffect(() => {
-    const onScroll = () => {
-      const scrollY = window.scrollY;
-
-      if (videoRef.current) {
-        videoRef.current.style.transform = `scale(1.08) translateY(${scrollY * 0.25}px)`;
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   /* ── Scroll suave al hacer click en el indicador ─────────────────────── */
   const scrollToNext = () => {
     const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
@@ -109,7 +95,8 @@ export default function Hero() {
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
+          poster="/assets/hero-bg.jpeg"
           onCanPlay={() => setVideoReady(true)}
           className={`hero-video ${videoReady ? "hero-video--ready" : ""}`}
         >

@@ -588,8 +588,8 @@ export default function InstitutionsPage() {
   const filtered = institutions.filter(
     (inst) =>
       searchTerm === '' ||
-      inst.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inst.id?.toLowerCase().includes(searchTerm.toLowerCase()),
+      (inst.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (inst.id || '').toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (

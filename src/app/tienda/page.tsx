@@ -11,7 +11,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/page/Navbar';
 import Footer from '@/components/page/Footer';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 
 // ── Data ───────────────────────────────────────────────────────────────────────
 

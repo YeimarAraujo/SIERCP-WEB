@@ -55,8 +55,8 @@ export default function AdminCertificatesPage() {
     }, [institutionId, authLoading]);
 
     const filteredCerts = certificates.filter(c =>
-        c.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.scenarioTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+        (c.studentName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.scenarioTitle || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const columns = [

@@ -46,7 +46,7 @@ export default function StudentReportsPage() {
 
     const filteredSessions = sessions.filter(s =>
         searchTerm === '' ||
-        s.scenarioTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (s.scenarioTitle || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.startedAt.toLocaleDateString().includes(searchTerm)
     );
 

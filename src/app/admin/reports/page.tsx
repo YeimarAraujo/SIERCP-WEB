@@ -71,8 +71,8 @@ export default function AdminReportsPage() {
 
     const filteredSessions = sessions.filter(s =>
         searchTerm === '' ||
-        s.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.scenarioTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+        (s.studentName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (s.scenarioTitle || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const columns = [

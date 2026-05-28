@@ -6,14 +6,16 @@ import { useAuthStore } from '@/stores/auth-store';
 
 export default function HomeRedirect() {
     const router = useRouter();
+    const user = useAuthStore((s) => s.user);
+    const initialized = useAuthStore((s) => s.initialized);
 
     useEffect(() => {
-        const state = useAuthStore.getState();
-        if (!state.user) {
+        if (!initialized) return;
+        if (!user) {
             router.replace('/login');
             return;
         }
-        switch (state.user.role) {
+        switch (user.role) {
             case 'ADMIN':
                 router.replace('/admin/dashboard');
                 break;
@@ -26,17 +28,17 @@ export default function HomeRedirect() {
             default:
                 router.replace('/student/home');
         }
-    }, [router]);
+    }, [router, user, initialized]);
 
     return (
         <div style={{
-            minHeight: '100vh', background: '#F4F5FF',
+            minHeight: '100vh', background: 'var(--background)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
             <div style={{
                 width: 36, height: 36,
-                border: '3px solid #E2E4F0',
-                borderTop: '3px solid #1800AD',
+                border: '3px solid var(--border)',
+                borderTop: '3px solid var(--brand)',
                 borderRadius: '50%',
                 animation: 'spin 0.7s linear infinite',
             }} />

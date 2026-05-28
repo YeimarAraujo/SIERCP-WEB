@@ -34,6 +34,10 @@ interface AuthStore {
         phoneNumber?: string;
         role?: string;
         institutionCode?: string;
+        address?: string;
+        city?: string;
+        department?: string;
+        country?: string;
     }) => Promise<void>;
     logout: () => Promise<void>;
     clearError: () => void;
@@ -49,12 +53,17 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
                 email: '',
                 firstName: 'Usuario',
                 lastName: '',
+                address: '',
+                city: '',
+                department: '',
+                country: 'Colombia',
                 role: ROLE_STUDENT,
                 isActive: true,
                 institutionId: uid,
                 status: 'ACTIVE',
                 certVerification: 'NONE',
                 coursesCreated: 0,
+                memberships: [],
                 createdAt: new Date(),
                 updatedAt: new Date(),
             };
@@ -65,6 +74,10 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             email: d.email ?? '',
             firstName: d.firstName ?? '',
             lastName: d.lastName ?? '',
+            address: d.address ?? '',
+            city: d.city ?? '',
+            department: d.department ?? '',
+            country: d.country ?? 'Colombia',
             role: d.role ?? ROLE_STUDENT,
             avatarUrl: d.avatarUrl,
             identificacion: d.identificacion,
@@ -75,6 +88,7 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             certVerification: d.certVerification ?? 'NONE',
             coursesCreated: d.coursesCreated ?? 0,
             stats: d.stats,
+            memberships: d.memberships ?? [],
             createdAt: d.createdAt?.toDate?.() ?? new Date(),
             updatedAt: d.updatedAt?.toDate?.() ?? new Date(),
         };
@@ -216,7 +230,7 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-            register: async ({ email, password, firstName, lastName, identificacion, phoneNumber, role, institutionCode }) => {
+            register: async ({ email, password, firstName, lastName, identificacion, phoneNumber, role, institutionCode, address, city, department, country }) => {
                 set({ loading: true, error: null });
                 try {
                     const roleValue = (role as UserModel['role']) ?? ROLE_STUDENT;
@@ -247,6 +261,10 @@ export const useAuthStore = create<AuthStore>()(
                         role: roleValue,
                         identificacion,
                         ...(phoneNumber ? { phoneNumber } : {}),
+                        ...(address ? { address } : {}),
+                        ...(city ? { city } : {}),
+                        ...(department ? { department } : {}),
+                        ...(country ? { country } : {}),
                         isActive: true,
                         institutionId: finalInstitutionId,
                         status: finalStatus,

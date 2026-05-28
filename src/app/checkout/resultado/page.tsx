@@ -3,6 +3,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/page/Navbar';
+import toast from 'react-hot-toast';
 import Footer from '@/components/page/Footer';
 import { Check, Clock, X, ArrowRight } from 'lucide-react';
 import { corporatePlans, maniquiPackages, sstConLicenciaPlans, sstSinLicenciaPlans } from '@/data/planes';
@@ -132,8 +133,16 @@ function WompiResult({ ref: txRef, transactionId }: { ref?: string | null; trans
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
                     body: JSON.stringify({ paymentId: transactionId || '', amountPaid: amount || 0 }),
                 });
-                await res.json();
-            } catch { /* non-fatal */ } finally {
+                const body = await res.json();
+                if (!res.ok) {
+                    if (res.status === 409) return; // already enrolled
+                    console.error('[Checkout] Enrollment failed:', body);
+                    toast.error(body.error || body.message || 'Error al registrar la matrícula. Contacta a soporte.');
+                }
+            } catch (err) {
+                console.error('[Checkout] Enrollment error:', err);
+                toast.error('Error de red al registrar la matrícula. Contacta a soporte.');
+            } finally {
                 setEnrollmentDone(true);
             }
         }

@@ -103,6 +103,14 @@ async function fetchPlatformEnrollments(userId: string): Promise<{
   );
 
   const snaps = await getDocs(q);
+  const allCohortIds = [...new Set(
+    snaps.docs.map(d => d.data().cohortId).filter(Boolean) as string[]
+  )];
+  const cohortSnaps = await Promise.all(
+    allCohortIds.map(id => getDoc(doc(db, 'cohorts', id)))
+  );
+  const cohortMap = new Map(cohortSnaps.filter(s => s.exists()).map(s => [s.id, s.data()]));
+
   const enrollments: PlatformEnrollment[] = [];
   const cards: StudentCourseCard[] = [];
 
@@ -117,8 +125,15 @@ async function fetchPlatformEnrollments(userId: string): Promise<{
 
     enrollments.push(enrollment);
 
-    // Compute lock state from cohort
-    const lockState = await computeLockState(enrollment.cohortId);
+    const cohortData = cohortMap.get(enrollment.cohortId);
+    const lockState = (() => {
+      if (!cohortData) return { isLocked: false, lockedReason: null };
+      const classesStart = cohortData.classesStart ? tsToDate(cohortData.classesStart) : null;
+      if (classesStart && classesStart > new Date()) {
+        return { isLocked: true, lockedReason: `Inicia el ${formatDateES(classesStart)}` };
+      }
+      return { isLocked: false, lockedReason: null };
+    })();
 
     cards.push({
       id: `platform-${dSnap.id}`,
