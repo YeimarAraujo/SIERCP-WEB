@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
+import toast from 'react-hot-toast';
 import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Building2, UserCheck, CreditCard,
@@ -60,7 +61,9 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
     };
 
     const handleLogout = async () => {
-        try { await logout(); } catch { }
+        try { await logout(); } catch {
+            toast.error('Error al cerrar sesión. Intenta de nuevo.');
+        }
         router.replace('/');
     };
 
