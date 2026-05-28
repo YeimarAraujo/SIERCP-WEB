@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import {
   getMerchantInfo,
   tokenizeCard,
@@ -117,18 +118,18 @@ export function useWompiCheckout({ cursoSlug, grupoId, cohortId, templateId, ins
       const json = await res.json();
 
       if (!res.ok) {
-        // If already enrolled (409), that's fine — not an error
         if (res.status === 409) {
           console.log('[Checkout] Already enrolled:', json);
           return;
         }
         console.error('[Checkout] Enrollment failed:', json);
+        toast.error(`Error al registrar la matrícula: ${json.error || json.message || 'Error desconocido'}`);
       } else {
         console.log('[Checkout] Enrollment completed:', json);
       }
     } catch (enrollErr) {
-      // Non-fatal: the payment succeeded, enrollment can be retried
-      console.error('[Checkout] Enrollment error (non-fatal):', enrollErr);
+      console.error('[Checkout] Enrollment error:', enrollErr);
+      toast.error('Error de red al registrar la matrícula. Contacta a soporte.');
     }
   }
 
