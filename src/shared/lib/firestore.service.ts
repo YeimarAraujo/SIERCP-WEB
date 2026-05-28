@@ -33,7 +33,7 @@ function buildUserModel(
 
         firstName: data.firstName,
         lastName: data.lastName,
-        identificacion: data.identificacion,
+        identification: data.identification,
         phoneNumber: data.phoneNumber,
         role: data.role,
 

@@ -37,16 +37,6 @@ export const COURSE_LIMITS: Record<UserRole, number> = {
   USUARIO_PROFESIONAL: 10,
   USUARIO: 3,
 };
-export interface UserCourseRef {
-  courseId: string;
-  institutionId: string;
-
-  role:
-  | 'STUDENT'
-  | 'INSTRUCTOR';
-
-  joinedAt: Date;
-}
 
 
 export interface UserStats {
@@ -67,6 +57,11 @@ export interface UserCourseRef {
   cohortId?: string;
   enrollmentId?: string;
   institutionId?: string;
+  role:
+  | 'STUDENT'
+  | 'INSTRUCTOR';
+
+  joinedAt: Date;
   status: 'active' | 'completed' | 'cancelled';
   enrolledAt?: Date;
 }
