@@ -15,11 +15,11 @@ type OrderStatus = 'pending_payment' | 'paid' | 'processing' | 'shipped' | 'deli
 type ShippingStatus = 'pending' | 'preparing' | 'shipped' | 'delivered';
 
 interface Order {
-    id: string;
+    orderId: string;
     type: OrderType;
     status: OrderStatus;
     shippingStatus?: ShippingStatus;
-    totalCOP: number;
+    priceTotal: number;
     payMethod: string;
     createdAt: Timestamp | null;
     // plan / licencia-sst
@@ -30,7 +30,7 @@ interface Order {
     userEmail?: string;
     personal?: { nombreCompleto?: string; nombre?: string; email: string; };
     // corporate plan
-    company?: { razonSocial: string; email: string; nit: string; };
+    company?: { institucionName: string; email: string; nit: string; };
     // manikin
     quantity?: number;
     buyer?: { razonSocial?: string; nombre?: string; email: string; };
@@ -51,7 +51,7 @@ function fmtDate(ts: Timestamp | null): string {
 }
 
 function getBuyerName(order: Order): string {
-    if (order.company?.razonSocial) return order.company.razonSocial;
+    if (order.company?.institucionName) return order.company.institucionName;
     if (order.buyer?.razonSocial) return order.buyer.razonSocial;
     if (order.buyer?.nombre) return order.buyer.nombre;
     if (order.personal?.nombreCompleto) return order.personal.nombreCompleto;
@@ -60,12 +60,18 @@ function getBuyerName(order: Order): string {
 }
 
 function getBuyerEmail(order: Order): string {
-    return order.company?.email ?? order.buyer?.email ?? order.personal?.email ?? order.userEmail ?? '—';
+    if (order.company?.email) return order.company.email;
+    if (order.buyer?.email) return order.buyer.email;
+    if (order.personal?.email) return order.personal.email;
+    if (order.userEmail) return order.userEmail;
+    return '—';
 }
 
 function getProductName(order: Order): string {
     if (order.planName) return order.planName;
+    if (order.planSlug) return order.planSlug;
     if (order.packName) return order.packName;
+    if (order.packSlug) return order.packSlug;
     return '—';
 }
 
@@ -105,7 +111,7 @@ const SHIPPING_LABELS: Record<ShippingStatus, string> = {
 function StatusBadge({ status }: { status: OrderStatus }) {
     const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending_payment;
     return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: cfg.bg, color: cfg.color, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>
+        <span style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: cfg.bg, color: cfg.color, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>
             {cfg.icon}{cfg.label}
         </span>
     );
@@ -131,8 +137,8 @@ function OrderDetail({ order, onClose, onUpdate }: { order: Order; onClose: () =
         try {
             const changes: Record<string, unknown> = { status, updatedAt: serverTimestamp() };
             if (isManikin) changes.shippingStatus = shippingStatus;
-            await updateDoc(doc(db, 'orders', order.id), changes);
-            onUpdate(order.id, { status, ...(isManikin ? { shippingStatus } : {}) });
+            await updateDoc(doc(db, 'orders', order.orderId), changes);
+            onUpdate(order.orderId, { status, ...(isManikin ? { shippingStatus } : {}) });
             toast.success('Pedido actualizado');
             onClose();
         } catch {
@@ -149,7 +155,7 @@ function OrderDetail({ order, onClose, onUpdate }: { order: Order; onClose: () =
                 onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
                     <div>
-                        <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 800, color: 'var(--text-secondary,#6b7280)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Pedido #{order.id.slice(-8).toUpperCase()}</p>
+                        <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 800, color: 'var(--text-secondary,#6b7280)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Pedido #{order.orderId.slice(-8).toUpperCase()}</p>
                         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: 'var(--text-primary,#111827)' }}>{getProductName(order)}</h2>
                     </div>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary,#6b7280)', fontSize: 20, lineHeight: 1 }}>×</button>
@@ -161,7 +167,7 @@ function OrderDetail({ order, onClose, onUpdate }: { order: Order; onClose: () =
                         ['Estado', <StatusBadge key="s" status={order.status} />],
                         ['Comprador', getBuyerName(order)],
                         ['Correo', getBuyerEmail(order)],
-                        ['Total', fmt(order.totalCOP) + ' COP'],
+                        ['Total', fmt(order.priceTotal) + ' COP'],
                         ['Método de pago', order.payMethod === 'card' ? 'Tarjeta' : 'PSE'],
                         ['Fecha', fmtDate(order.createdAt)],
                         ...(order.quantity ? [['Cantidad', `${order.quantity} maniquí${order.quantity > 1 ? 'es' : ''}`]] : []),
@@ -241,7 +247,7 @@ export default function PedidosPage() {
         setLoading(true);
         try {
             const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc')));
-            setOrders(snap.docs.map(d => ({ id: d.id, ...d.data() } as Order)));
+            setOrders(snap.docs.map(d => ({ orderId: d.id, ...d.data() } as Order)));
         } catch {
             toast.error('Error cargando pedidos');
         } finally {
@@ -252,7 +258,7 @@ export default function PedidosPage() {
     useEffect(() => { load(); }, [load]);
 
     const handleUpdate = (id: string, changes: Partial<Order>) => {
-        setOrders(prev => prev.map(o => o.id === id ? { ...o, ...changes } : o));
+        setOrders(prev => prev.map(o => o.orderId === id ? { ...o, ...changes } : o));
     };
 
     const filtered = orders.filter(o =>
@@ -260,7 +266,7 @@ export default function PedidosPage() {
         (statusFilter === 'all' || o.status === statusFilter)
     );
 
-    const totalRevenue = filtered.reduce((sum, o) => sum + (o.totalCOP ?? 0), 0);
+    const totalRevenue = filtered.reduce((sum, o) => sum + (o.priceTotal ?? 0), 0);
     const pendingCount = filtered.filter(o => o.status === 'pending_payment').length;
     const manikinPending = filtered.filter(o => o.type === 'manikin' && (o.shippingStatus === 'pending' || o.shippingStatus === 'preparing')).length;
 
@@ -346,7 +352,7 @@ export default function PedidosPage() {
                     </div>
                 ) : (
                     filtered.map((order, i) => (
-                        <div key={order.id} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 130px 100px 110px 60px', gap: 0, padding: '14px 20px', borderBottom: i < filtered.length - 1 ? '1px solid var(--border,#f3f4f6)' : 'none', alignItems: 'center' }}>
+                        <div key={order.orderId} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 130px 100px 110px 60px', gap: 0, padding: '14px 20px', borderBottom: i < filtered.length - 1 ? '1px solid var(--border,#f3f4f6)' : 'none', alignItems: 'center' }}>
                             <div>
                                 <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: 13, color: 'var(--text-primary,#111827)' }}>{getBuyerName(order)}</p>
                                 <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary,#6b7280)' }}>{getProductName(order)} · {getBuyerEmail(order)}</p>
@@ -358,7 +364,7 @@ export default function PedidosPage() {
                             </div>
                             <TypeBadge type={order.type} />
                             <StatusBadge status={order.status} />
-                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary,#111827)' }}>{fmt(order.totalCOP)}</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary,#111827)' }}>{fmt(order.priceTotal)}</span>
                             <span style={{ fontSize: 12, color: 'var(--text-secondary,#6b7280)' }}>{fmtDate(order.createdAt)}</span>
                             <button onClick={() => setSelected(order)}
                                 style={{ padding: '7px 12px', borderRadius: 8, border: '1.5px solid var(--border,#e5e7eb)', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary,#6b7280)', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600 }}>

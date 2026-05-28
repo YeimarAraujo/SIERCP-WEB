@@ -1,17 +1,4 @@
-// ── Role types ──────────────────────────────────────────────────────────────
 
-/**
- * System roles — ordered from highest to lowest privilege.
- *
- * SUPER_ADMIN   → Jomar Segurid engineers only. Creates ADMIN accounts, full monitoring.
- * ADMIN         → Institution accounts. Registers/adds instructors for their org.
- * INSTRUCTOR    → Added by an ADMIN. Runs live training sessions.
- * USUARIO_SST   → User holding a valid SST (Seguridad y Salud en el Trabajo) license.
- *                 Gets more benefits; must purchase SST plans to unlock them.
- * USUARIO_PROFESIONAL → User with a professional certificate (no SST license).
- *                 Can create up to 10 courses. Must pay per-student to issue certifications.
- * USUARIO       → Formerly ESTUDIANTE. Basic user. Can create up to 3 courses.
- */
 export type UserRole =
   | 'SUPER_ADMIN'
   | 'ADMIN'
@@ -51,6 +38,7 @@ export const COURSE_LIMITS: Record<UserRole, number> = {
   USUARIO: 3,
 };
 
+
 export interface UserStats {
   totalSessions: number;
   sessionsToday: number;
@@ -69,6 +57,11 @@ export interface UserCourseRef {
   cohortId?: string;
   enrollmentId?: string;
   institutionId?: string;
+  role:
+  | 'STUDENT'
+  | 'INSTRUCTOR';
+
+  joinedAt: Date;
   status: 'active' | 'completed' | 'cancelled';
   enrolledAt?: Date;
 }
@@ -84,7 +77,7 @@ export interface UserModel {
   country?: string;
   role: UserRole;
   avatarUrl?: string;
-  identificacion?: string;
+  identification?: string;
   isActive: boolean;
   institutionId: string;
   phoneNumber?: string;
@@ -101,6 +94,69 @@ export interface UserModel {
   updatedAt: Date;
 }
 
+
+export type CreateUserDTO = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  identification: string;
+  phoneNumber?: string;
+  address?: string;
+  city?: string;
+  department?: string;
+  country?: string;
+  role: UserRole;
+
+  institutionId: string;
+};
+function buildUserModel(
+  uid: string,
+  data: CreateUserDTO
+): UserModel {
+
+  const sharedRoles: UserRole[] = [
+    'INSTRUCTOR',
+    'USUARIO',
+    'USUARIO_SST',
+    'USUARIO_PROFESIONAL',
+  ];
+
+  return {
+    uid,
+    email: data.email,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    role: data.role,
+    address: data.address,
+    city: data.city,
+    department: data.department,
+    country: data.country,
+    identification: data.identification,
+    institutionId: data.institutionId,
+    memberships: sharedRoles.includes(data.role)
+      ? [data.institutionId]
+      : undefined,
+    isActive: true,
+    status: 'ACTIVE',
+    certVerification: 'NONE',
+    coursesCreated: 0,
+    courses: [],
+    stats: {
+      totalSessions: 0,
+      sessionsToday: 0,
+      averageScore: 0,
+      bestScore: 0,
+      streakDays: 0,
+      totalHours: 0,
+      averageDepthMm: 0,
+      averageRatePerMin: 0,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+
+  };
+}
 // ── Utility helpers ──────────────────────────────────────────────────────────
 
 export function getUserInitials(user: UserModel): string {
