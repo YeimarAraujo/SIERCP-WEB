@@ -44,6 +44,7 @@ export interface Cohort {
   parentCohortId: string | null;
 
   // ─── Metadata ──────────────────────────────────────────────────────────────
+  instructorIds: string[];
   createdAt: Date | Timestamp;
   updatedAt: Date | Timestamp;
   closedAt?: Date | Timestamp | null;
