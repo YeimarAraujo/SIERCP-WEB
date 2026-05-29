@@ -88,7 +88,6 @@ export interface UserModel {
   stats?: UserStats;
   fcmTokens?: string[];
   fcmTokensUpdatedAt?: Date;
-  memberships?: string[];
   appInstalled?: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -134,9 +133,6 @@ function buildUserModel(
     country: data.country,
     identification: data.identification,
     institutionId: data.institutionId,
-    memberships: sharedRoles.includes(data.role)
-      ? [data.institutionId]
-      : undefined,
     isActive: true,
     status: 'ACTIVE',
     certVerification: 'NONE',

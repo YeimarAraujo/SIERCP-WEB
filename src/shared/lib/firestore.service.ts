@@ -244,18 +244,26 @@ export const CourseService = {
     },
 
     async getByInstructor(instructorId: string): Promise<CourseModel[]> {
-        const snaps = await getDocs(
-            query(collection(db, 'courses'), where('instructorId', '==', instructorId)),
-        );
-        return Promise.all(snaps.docs.map(async (s) => {
+        // Query 1: instructorId singular (instructor primario)
+        const [snap1, snap2] = await Promise.all([
+            getDocs(query(collection(db, 'courses'), where('instructorId', '==', instructorId))),
+            // Query 2: instructorIds array (instructor asignado por admin)
+            getDocs(query(collection(db, 'courses'), where('instructorIds', 'array-contains', instructorId))),
+        ]);
+
+        // Deduplicar por ID de documento
+        const seen = new Set<string>();
+        const uniqueDocs = [...snap1.docs, ...snap2.docs].filter(d => {
+            if (seen.has(d.id)) return false;
+            seen.add(d.id);
+            return true;
+        });
+
+        // Usar studentCount del documento (evita aggregation query que falla con 403 para instructores).
+        return uniqueDocs.map((s) => {
             const data = s.data() as Record<string, unknown>;
-            let studentCount = data.studentCount || 0;
-            try {
-                const countSnap = await getCountFromServer(collection(db, 'courses', s.id, 'enrollments'));
-                studentCount = countSnap.data().count;
-            } catch (e) { }
-            return parseCourse(s.id, { ...data, studentCount });
-        }));
+            return parseCourse(s.id, data);
+        });
     },
 
     async getByStudent(studentId: string): Promise<CourseModel[]> {

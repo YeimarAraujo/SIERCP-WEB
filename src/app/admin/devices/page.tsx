@@ -33,11 +33,11 @@ export default function AdminDevicesPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Network Operations Center" />
-            
+
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-                <PageHero 
-                    title="Infraestructura IoT" 
-                    subtitle="Monitoreo en tiempo real de nodos SIERCP y telemetría clínica" 
+                <PageHero
+                    title="Infraestructura IoT"
+                    subtitle="Monitoreo en tiempo real de nodos SIERCP y telemetría clínica"
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
@@ -52,7 +52,7 @@ export default function AdminDevicesPage() {
                 />
 
                 <div style={{ display: 'flex', gap: 16, marginBottom: 32 }}>
-                    <div style={{ 
+                    <div style={{
                         background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: '16px 24px',
                         display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', flex: 1
                     }}>
@@ -64,7 +64,7 @@ export default function AdminDevicesPage() {
                             <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--foreground)' }}>{onlineCount} Nodos Activos</div>
                         </div>
                     </div>
-                    <div style={{ 
+                    <div style={{
                         background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: '16px 24px',
                         display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', flex: 1
                     }}>
@@ -85,8 +85,8 @@ export default function AdminDevicesPage() {
                         ))}
                     </div>
                 ) : manikins.length === 0 ? (
-                    <div style={{ 
-                        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 32, 
+                    <div style={{
+                        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 32,
                         padding: '80px 32px', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
                         maxWidth: 600, margin: '0 auto'
                     }}>
@@ -97,9 +97,9 @@ export default function AdminDevicesPage() {
                         <p style={{ color: 'var(--text-secondary)', fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
                             No hay maniquíes vinculados a la organización. Comienza integrando tu primer nodo SIERCP-PRO para iniciar el monitoreo.
                         </p>
-                        <button onClick={() => router.push('/admin/devices/new')} style={{ 
-                            display: 'inline-flex', alignItems: 'center', gap: 10, padding: '12px 24px', 
-                            background: 'var(--brand)', color: 'var(--text-on-brand)', borderRadius: 12, fontWeight: 700, 
+                        <button onClick={() => router.push('/admin/devices/new')} style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 10, padding: '12px 24px',
+                            background: 'var(--brand)', color: 'var(--text-on-brand)', borderRadius: 12, fontWeight: 700,
                             border: 'none', cursor: 'pointer'
                         }}>
                             Configurar Nuevo Nodo
@@ -111,38 +111,38 @@ export default function AdminDevicesPage() {
                             const live = rtdbDevices[m.uuid];
                             const style = STATUS_STYLES[m.status] || STATUS_STYLES.offline;
                             return (
-                                <div key={m.id} style={{ 
+                                <div key={m.id} style={{
                                     background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24,
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: 20,
                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-4px)';
-                                    e.currentTarget.style.boxShadow = '0 12px 24px -10px rgba(0,0,0,0.1)';
-                                    e.currentTarget.style.borderColor = 'var(--brand)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
-                                    e.currentTarget.style.borderColor = 'var(--border)';
-                                }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                        e.currentTarget.style.boxShadow = '0 12px 24px -10px rgba(0,0,0,0.1)';
+                                        e.currentTarget.style.borderColor = 'var(--brand)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+                                        e.currentTarget.style.borderColor = 'var(--border)';
+                                    }}
                                 >
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                                            <div style={{ 
-                                                width: 52, height: 52, borderRadius: 16, background: live ? '#10B98110' : 'var(--muted)', 
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: live ? '#10B981' : 'var(--brand)', 
-                                                border: '1px solid var(--muted)' 
+                                            <div style={{
+                                                width: 52, height: 52, borderRadius: 16, background: live ? '#10B98110' : 'var(--muted)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: live ? '#10B981' : 'var(--brand)',
+                                                border: '1px solid var(--muted)'
                                             }}>
                                                 <Cpu size={26} />
                                             </div>
                                             <div>
                                                 <div style={{ fontWeight: 800, color: 'var(--foreground)', fontSize: 16 }}>{m.name}</div>
-                                                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace', fontWeight: 600 }}>ID: {m.uuid.toUpperCase()}</div>
+                                                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace', fontWeight: 600 }}>ID: {(m.uuid ?? 'sin-uuid').toUpperCase()}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                                            <span style={{ 
+                                            <span style={{
                                                 padding: '5px 12px', borderRadius: 20, fontSize: 10, fontWeight: 900,
                                                 background: style.bg, color: style.color, textTransform: 'uppercase', letterSpacing: '0.05em'
                                             }}>
@@ -184,9 +184,9 @@ export default function AdminDevicesPage() {
                                     )}
 
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-                                        <button style={{ 
-                                            background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text-secondary)', 
-                                            padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700, 
+                                        <button style={{
+                                            background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text-secondary)',
+                                            padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700,
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s'
                                         }}>
                                             <Settings2 size={14} /> Mantenimiento

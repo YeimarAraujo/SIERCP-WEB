@@ -11,11 +11,12 @@ import { formatDate } from '@/lib/utils';
 import type { CourseModel, Enrollment } from '@/models/course';
 import type { SessionModel } from '@/models/session';
 import { CATEGORY_LABELS, CATEGORY_EMOJIS, type GuideModel } from '@/models/guide';
-import { 
-    Users, BookOpen, BarChart2, Clock, Plus, Trash2, FileText, 
-    ChevronRight, User, Mail, Settings, Save, AlertCircle, BarChart, 
+import {
+    Users, BookOpen, BarChart2, Clock, Plus, Trash2, FileText,
+    ChevronRight, User, Mail, Settings, Save, AlertCircle, BarChart,
     GraduationCap, TrendingUp, Target, Award, Download, Filter
 } from 'lucide-react';
+import { CourseQr } from '@/components/ui/course-qr';
 import toast from 'react-hot-toast';
 import { downloadSessionPdfReport, formatReportFilename } from '@/shared/lib/export-utils';
 
@@ -377,10 +378,12 @@ export default function InstructorCoursePage() {
                                         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>UMBRAL DE APROBACIÓN</div>
                                         <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--foreground)' }}>85% <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>(Estándar AHA 2025)</span></div>
                                     </div>
-                                    <div style={{ padding: '16px 20px', borderRadius: 16, background: 'var(--muted)', border: '1px solid var(--muted)' }}>
-                                        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>CÓDIGO DE INVITACIÓN</div>
-                                        <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.1em' }}>{course.inviteCode}</div>
-                                    </div>
+                                    {course.inviteCode && (
+                                        <CourseQr
+                                            inviteCode={course.inviteCode}
+                                            courseTitle={course.title}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>

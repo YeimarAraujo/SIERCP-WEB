@@ -19,6 +19,7 @@ import { AuditService } from '@/features/audit/services/audit.service';
 interface AuthStore {
     user: UserModel | null;
     firebaseUser: User | null;
+    membershipRole: string | null;   // rol del usuario en su org activa (de memberships collection)
     loading: boolean;
     initialized: boolean;
     error: string | null;
@@ -30,7 +31,7 @@ interface AuthStore {
         password: string;
         firstName: string;
         lastName: string;
-        identificacion?: string;
+        identification?: string;
         phoneNumber?: string;
         role?: string;
         institutionCode?: string;
@@ -63,7 +64,6 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
                 status: 'ACTIVE',
                 certVerification: 'NONE',
                 coursesCreated: 0,
-                memberships: [],
                 createdAt: new Date(),
                 updatedAt: new Date(),
             };
@@ -80,7 +80,7 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             country: d.country ?? 'Colombia',
             role: d.role ?? ROLE_STUDENT,
             avatarUrl: d.avatarUrl,
-            identificacion: d.identificacion,
+            identification: d.identification,
             phoneNumber: d.phoneNumber,
             isActive: d.isActive ?? true,
             institutionId: d.institutionId ?? uid,
@@ -88,7 +88,6 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             certVerification: d.certVerification ?? 'NONE',
             coursesCreated: d.coursesCreated ?? 0,
             stats: d.stats,
-            memberships: d.memberships ?? [],
             createdAt: d.createdAt?.toDate?.() ?? new Date(),
             updatedAt: d.updatedAt?.toDate?.() ?? new Date(),
         };
@@ -107,6 +106,7 @@ export const useAuthStore = create<AuthStore>()(
         (set, get) => ({
             user: null,
             firebaseUser: null,
+            membershipRole: null,
             loading: false,
             initialized: false,
             error: null,
@@ -131,7 +131,19 @@ export const useAuthStore = create<AuthStore>()(
                                 return;
                             }
 
-                            set({ user, firebaseUser, loading: false, initialized: true, error: null });
+                            // Cargar rol de membership para la org activa del usuario
+                            let membershipRole: string | null = null;
+                            if (user?.institutionId && user.institutionId !== user.uid) {
+                                try {
+                                    const memId = `${firebaseUser.uid}_${user.institutionId}`;
+                                    const memSnap = await getDoc(doc(db, 'memberships', memId));
+                                    if (memSnap.exists()) {
+                                        membershipRole = memSnap.data().role ?? null;
+                                    }
+                                } catch { /* sin membership no bloqueamos login */ }
+                            }
+
+                            set({ user, firebaseUser, membershipRole, loading: false, initialized: true, error: null });
 
                             // Escuchar cambios en tiempo real del documento del usuario
                             // Esto permite detectar desactivación de cuenta sin recargar
@@ -230,7 +242,7 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-            register: async ({ email, password, firstName, lastName, identificacion, phoneNumber, role, institutionCode, address, city, department, country }) => {
+            register: async ({ email, password, firstName, lastName, identification, phoneNumber, role, institutionCode, address, city, department, country }) => {
                 set({ loading: true, error: null });
                 try {
                     const roleValue = (role as UserModel['role']) ?? ROLE_STUDENT;
@@ -253,13 +265,13 @@ export const useAuthStore = create<AuthStore>()(
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
                     if (!finalInstitutionId) finalInstitutionId = cred.user.uid;
 
-                    const userModel: Omit<UserModel, 'createdAt' | 'updatedAt' | 'certVerification'> = {
+                    const userModel: Omit<UserModel, 'createdAt' | 'updatedAt'> = {
                         uid: cred.user.uid,
                         email,
                         firstName,
                         lastName,
                         role: roleValue,
-                        identificacion,
+                        identification,
                         ...(phoneNumber ? { phoneNumber } : {}),
                         ...(address ? { address } : {}),
                         ...(city ? { city } : {}),
@@ -269,6 +281,7 @@ export const useAuthStore = create<AuthStore>()(
                         institutionId: finalInstitutionId,
                         status: finalStatus,
                         coursesCreated: 0,
+                        certVerification: 'NONE',
                         stats: {
                             totalSessions: 0,
                             sessionsToday: 0,
@@ -332,7 +345,7 @@ export const useAuthStore = create<AuthStore>()(
                 } catch (error) {
                     console.error('Firebase signOut error:', error);
                 } finally {
-                    set({ user: null, firebaseUser: null, error: null, initialized: true, loading: false });
+                    set({ user: null, firebaseUser: null, membershipRole: null, error: null, initialized: true, loading: false });
                 }
             },
 
@@ -346,6 +359,7 @@ export const useAuthStore = create<AuthStore>()(
             name: 'siercp-auth',
             partialize: (state) => ({
                 user: state.user,
+                membershipRole: state.membershipRole,
                 initialized: state.initialized,
             }),
         },

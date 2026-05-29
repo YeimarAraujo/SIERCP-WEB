@@ -15,9 +15,13 @@ export function useAuth() {
   }, []);
 
   const role: UserRole | undefined = store.user?.role;
+  // Rol de la membership activa (org-específico). Puede ser diferente al rol global.
+  // Un usuario USUARIO globalmente puede ser INSTRUCTOR en una org concreta.
+  const membershipRole = store.membershipRole;
 
   return {
     user: store.user,
+    membershipRole,
     loading: store.loading,
     initialized: store.initialized,
     error: store.error,
@@ -31,7 +35,9 @@ export function useAuth() {
     // ── Role helpers ──────────────────────────────────────────────────
     isSuperAdmin: role === 'SUPER_ADMIN',
     isAdmin: role === 'ADMIN' || role === 'SUPER_ADMIN',
-    isInstructor: role === 'INSTRUCTOR' || role === 'ADMIN' || role === 'SUPER_ADMIN',
+    // Instructor por rol global O por membership de la org activa.
+    isInstructor: role === 'INSTRUCTOR' || role === 'ADMIN' || role === 'SUPER_ADMIN'
+                  || membershipRole === 'INSTRUCTOR',
     isUsuario: role === 'USUARIO' || role === 'USUARIO_PROFESIONAL' || role === 'USUARIO_SST',
     isUsuarioPro: role === 'USUARIO_PROFESIONAL',
     isUsuarioSST: role === 'USUARIO_SST',
