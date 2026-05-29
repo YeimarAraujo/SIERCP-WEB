@@ -622,6 +622,7 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
   const [adminDepartment, setAdminDepartment] = useState('');
   const [adminCountry, setAdminCountry] = useState('Colombia');
 
+
   const municipios = getMunicipalities(department);
 
 

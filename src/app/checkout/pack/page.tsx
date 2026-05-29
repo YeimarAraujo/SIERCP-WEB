@@ -82,9 +82,9 @@ function Step1({ selected, onSelect }: { selected: string; onSelect: (s: string)
 
 // ── Step 2: Personal data ─────────────────────────────────────────────────────
 
-interface PersonalForm { nombreCompleto: string; cedula: string; email: string; telefono: string; departamento: string; ciudad: string; }
+interface PersonalForm { nombreCompleto: string; tipoDocumento: string; cedula: string; email: string; telefono: string; departamento: string; ciudad: string; }
 type PersonalErrors = Partial<Record<keyof PersonalForm, string>>;
-const emptyPersonal: PersonalForm = { nombreCompleto: '', cedula: '', email: '', telefono: '', departamento: '', ciudad: '' };
+const emptyPersonal: PersonalForm = { nombreCompleto: '', tipoDocumento: 'CC', cedula: '', email: '', telefono: '', departamento: '', ciudad: '' };
 
 function validatePersonalForm(form: PersonalForm): PersonalErrors {
     const errs: PersonalErrors = {};
@@ -121,12 +121,29 @@ function Step2({ form, setForm, errors, accountData, setAccountData, accountErro
                         <Input value={form.nombreCompleto} onChange={s('nombreCompleto')} placeholder="María García López" />
                     </Field>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                        <Field label="Cédula de ciudadanía" required error={errors.cedula}>
-                            <Input value={form.cedula} onChange={s('cedula')} placeholder="1000000000" />
+                        <Field label="Tipo de documento" required error={errors.tipoDocumento}>
+                            <select
+                                value={form.tipoDocumento}
+                                onChange={e => setForm({ ...form, tipoDocumento: e.target.value })}
+                                style={{ width: '100%', height: 44, borderRadius: 10, border: '1px solid var(--clr-border,#e5e7eb)', background: 'var(--clr-bg,#fff)', padding: '0 12px', fontSize: 14 }}
+                            >
+                                <option value="CC">CC — Cédula de Ciudadanía</option>
+                                <option value="CE">CE — Cédula de Extranjería</option>
+                                <option value="TI">TI — Tarjeta de Identidad</option>
+                                <option value="PP">PP — Pasaporte</option>
+                                <option value="NIT">NIT</option>
+                                <option value="DIE">DIE — Doc. Identidad Extranjero</option>
+                            </select>
                         </Field>
+                        <Field label="Número de documento" required error={errors.cedula}>
+                            <Input value={form.cedula} onChange={s('cedula')} placeholder="Número" />
+                        </Field>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                         <Field label="Teléfono" required error={errors.telefono}>
                             <Input value={form.telefono} onChange={s('telefono')} placeholder="3001234567" />
                         </Field>
+                        <div />{/* espaciador */}
                     </div>
                     <Field label="Correo electrónico" required error={errors.email}>
                         <Input type="email" value={form.email} onChange={s('email')} placeholder="nombre@email.com" />

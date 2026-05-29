@@ -84,7 +84,9 @@ export default function NewInstructorPage() {
         if (!foundUser || !institutionId) return;
         setLoading(true);
         setError(null);
+
         try {
+
             await setDoc(doc(db, 'memberships', `${foundUser.uid}_${institutionId}`), {
                 userId: foundUser.uid,
                 institutionId,

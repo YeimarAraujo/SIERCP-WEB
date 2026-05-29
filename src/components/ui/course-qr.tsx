@@ -15,7 +15,11 @@ export function CourseQr({ inviteCode, courseTitle, compact = false }: CourseQrP
   const [copied, setCopied] = useState(false);
   const [showFull, setShowFull] = useState(false);
 
-  const qrValue = `${typeof window !== 'undefined' ? window.location.origin : ''}/join/${inviteCode}`;
+  // Formato canónico unificado: deep link compacto siercp://
+  // Misma URI que genera Flutter (_qrData en courses_screen.dart).
+  // Flutter scanner la parsea con Uri.queryParameters['code'].
+  // Más compacto que la URL completa → QR con módulos más grandes → más fácil de escanear.
+  const qrValue = `siercp://course?code=${inviteCode}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteCode);
