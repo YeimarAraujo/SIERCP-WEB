@@ -14,7 +14,7 @@ function RegisterContent() {
     const [step, setStep] = useState(1);
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
-        identificacion: '', password: '', confirm: '',
+        identification: '', password: '', confirm: '',
         role: 'USUARIO', institutionCode: '',
         phoneNumber: '',
         departamento: '', ciudad: '', direccion: '',
@@ -52,7 +52,7 @@ function RegisterContent() {
     }
 
     const validateStep1 = () => {
-        if (!form.firstName || !form.lastName || !form.identificacion) {
+        if (!form.firstName || !form.lastName || !form.identification) {
             setError('Por favor completa todos los campos personales');
             return false;
         }
@@ -81,7 +81,7 @@ function RegisterContent() {
                 password: form.password,
                 firstName: form.firstName,
                 lastName: form.lastName,
-                identificacion: form.identificacion,
+                identification: form.identification,
                 phoneNumber: form.phoneNumber || undefined,
                 role: form.role,
                 institutionCode: form.institutionCode || undefined,
@@ -172,7 +172,7 @@ function RegisterContent() {
                                     <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Documento de Identidad</label>
                                     <div className="position-relative">
                                         <i className="bi bi-card-heading position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
-                                        <input name="identificacion" required value={form.identificacion} onChange={handleChange} placeholder="DNI / Cédula" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
+                                        <input name="identification" required value={form.identification} onChange={handleChange} placeholder="DNI / Cédula" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
                                     </div>
                                 </div>
                                 <div className="col-12">

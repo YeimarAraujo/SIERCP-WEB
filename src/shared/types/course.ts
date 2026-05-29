@@ -18,7 +18,7 @@ export interface CourseModel {
     instructorId: string;
     instructorName: string;
     instructorEmail?: string;
-    institutionId?: string;
+    institutionId: string;
     institutionName?: string;
     createdBy?: string;
     inviteCode: string;
@@ -32,7 +32,7 @@ export interface CourseModel {
     isActive: boolean;
     studentCount: number;
     moduleCount: number;
-    completedModules: number;
+    completedModules?: number;
     nextDeadline?: Date;
     nextDeadlineTitle?: string;
     guideIds: string[];

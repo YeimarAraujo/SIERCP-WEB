@@ -13,6 +13,7 @@ const CSP = [
   `script-src 'self' 'unsafe-inline' 'unsafe-eval'
      https://apis.google.com
      https://www.gstatic.com
+     https://*.firebaseio.com
      https://www.googleapis.com
      https://cdn.wompi.co
      https://js.wompi.co
@@ -48,13 +49,15 @@ const CSP = [
      https://recaptcha.google.com
      https://sandbox.wompi.co
      https://production.wompi.co
+     https://*.gstatic.com
      wss://*.firebaseio.com`,
+
 
   /* Media: videos locales (RCP_Hero.mp4) */
   `media-src 'self' blob:`,
 
   /* Frames: Wompi (widget de pago PSE) + YouTube embeds sin cookies + reCAPTCHA */
-  `frame-src https://checkout.wompi.co https://www.youtube-nocookie.com https://www.recaptcha.net https://recaptcha.google.com`,
+  `frame-src https://checkout.wompi.co https://www.youtube-nocookie.com https://www.recaptcha.net https://recaptcha.google.com https://*.firebaseio.com`,
 
   /* Workers (Service Worker de PWA) */
   `worker-src 'self' blob:`,

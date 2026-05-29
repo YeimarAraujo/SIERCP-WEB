@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { CourseService } from '@/services/firestore.service';
 import { formatDate } from '@/lib/utils';
 import type { CourseModel } from '@/models/course';
+import { CourseQr } from '@/components/ui/course-qr';
 
 export default function CoursesPage() {
     const { user, isInstructor } = useAuth();
@@ -109,9 +110,11 @@ export default function CoursesPage() {
                                     </span>
                                 </div>
                                 <p className="text-xs text-muted-foreground">{course.certification}</p>
-                                <div className="flex justify-between text-xs text-muted-foreground">
+                                <div className="flex justify-between items-center text-xs text-muted-foreground">
                                     <span>{course.studentCount} estudiantes</span>
-                                    <span>Código: <span className="font-mono font-medium">{course.inviteCode}</span></span>
+                                    {course.inviteCode && (
+                                        <CourseQr inviteCode={course.inviteCode} courseTitle={course.title} compact />
+                                    )}
                                 </div>
                                 {course.nextDeadline && (
                                     <p className="text-xs text-muted-foreground">

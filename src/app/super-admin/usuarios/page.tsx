@@ -27,7 +27,7 @@ interface UserRow {
     status: string;
     isActive: boolean;
     institutionId?: string;
-    identificacion?: string;
+    identification?: string;
     phoneNumber?: string;
 }
 
@@ -69,14 +69,14 @@ interface UserFormData {
     firstName: string;
     lastName: string;
     role: Role;
-    identificacion: string;
+    identification: string;
     phoneNumber: string;
     institutionId: string;
 }
 
 const EMPTY_FORM: UserFormData = {
     email: '', password: '', firstName: '', lastName: '',
-    role: 'USUARIO', identificacion: '', phoneNumber: '', institutionId: '',
+    role: 'USUARIO', identification: '', phoneNumber: '', institutionId: '',
 };
 
 interface UserModalProps {
@@ -89,7 +89,7 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
     const isEdit = !!user;
     const [form, setForm] = useState<UserFormData>(
         user
-            ? { ...EMPTY_FORM, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, identificacion: user.identificacion ?? '', phoneNumber: user.phoneNumber ?? '', institutionId: user.institutionId ?? '' }
+            ? { ...EMPTY_FORM, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, identification: user.identification ?? user.uid ?? '', phoneNumber: user.phoneNumber ?? '', institutionId: user.institutionId ?? '' }
             : EMPTY_FORM,
     );
     const [saving, setSaving] = useState(false);
@@ -106,7 +106,7 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
                     firstName: form.firstName,
                     lastName: form.lastName,
                     role: form.role,
-                    identificacion: form.identificacion,
+                    identification: form.identification,
                     phoneNumber: form.phoneNumber,
                     institutionId: form.institutionId || user!.uid,
                     updatedAt: serverTimestamp(),
@@ -123,7 +123,7 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
                     firstName: form.firstName,
                     lastName: form.lastName,
                     role: form.role,
-                    identificacion: form.identificacion,
+                    identification: form.identification,
                     phoneNumber: form.phoneNumber,
                     institutionId: form.institutionId || cred.user.uid,
                     isActive: true,
@@ -182,7 +182,7 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
                     )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                         <Field label="Cédula / ID" icon={Hash}>
-                            <input value={form.identificacion} onChange={f('identificacion')} placeholder="1.000.000.000" style={inputSt} />
+                            <input value={form.identification} onChange={f('identification')} placeholder="1.000.000.000" style={inputSt} />
                         </Field>
                         <Field label="Teléfono" icon={Phone}>
                             <input value={form.phoneNumber} onChange={f('phoneNumber')} placeholder="+57 300 000 0000" style={inputSt} />
@@ -254,7 +254,7 @@ export default function SuperAdminUsuariosPage() {
 
     const filtered = users.filter(u => {
         const q = search.toLowerCase();
-        const matchQ = !q || `${u.firstName} ${u.lastName} ${u.email} ${u.identificacion ?? ''}`.toLowerCase().includes(q);
+        const matchQ = !q || `${u.firstName} ${u.lastName} ${u.email} ${u.identification ?? u.uid ?? ''}`.toLowerCase().includes(q);
         const matchR = !roleFilter || u.role === roleFilter;
         return matchQ && matchR;
     });
@@ -330,7 +330,7 @@ export default function SuperAdminUsuariosPage() {
                                     <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>{u.firstName} {u.lastName}</div>
                                 </td>
                                 <td style={tdSt}><span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{u.email}</span></td>
-                                <td style={tdSt}><span style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.identificacion || '—'}</span></td>
+                                <td style={tdSt}><span style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.identification || u.uid || '—'}</span></td>
                                 <td style={tdSt}><RoleBadge role={u.role as Role} /></td>
                                 <td style={tdSt}><StatusBadge active={u.isActive} /></td>
                                 <td style={tdSt}><span style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{u.institutionId || '—'}</span></td>
