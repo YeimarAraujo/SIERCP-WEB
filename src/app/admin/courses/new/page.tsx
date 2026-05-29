@@ -36,7 +36,7 @@ export default function NewCoursePage() {
         enrollmentStart: '',
         enrollmentEnd: '',
         classesStart: '',
-        maxStudents: 30,
+        maxStudents: 40,
         priceCOP: 0,
     });
 
