@@ -17,6 +17,7 @@ import {
     AlertCircle, ArrowLeft, Mail,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { convertServerPatchToFullTree } from 'next/dist/client/components/segment-cache/navigation';
 
 type Step = 'search' | 'found' | 'new';
 
@@ -37,7 +38,7 @@ export default function NewInstructorPage() {
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [identificacion, setIdentificacion] = useState('');
+    const [identification, setIdentificacion] = useState('');
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
@@ -50,13 +51,13 @@ export default function NewInstructorPage() {
 
     // ── Step 1: search by ID ──────────────────────────────────────────────────
     const handleSearch = async () => {
-        const id = identificacion.trim();
+        const id = identification.trim();
         if (!id) return;
         setSearching(true);
         setError(null);
         try {
             const snap = await getDocs(
-                query(collection(db, 'users'), where('identificacion', '==', id))
+                query(collection(db, 'users'), where('identification', '==', id))
             );
             if (!snap.empty) {
                 const d = snap.docs[0].data();
@@ -85,6 +86,7 @@ export default function NewInstructorPage() {
         setLoading(true);
         setError(null);
         try {
+            console.log('Linking user', foundUser.uid, 'to institution', institutionId);
             await setDoc(doc(db, 'memberships', `${foundUser.uid}_${institutionId}`), {
                 userId: foundUser.uid,
                 institutionId,
@@ -92,7 +94,7 @@ export default function NewInstructorPage() {
                 status: 'approved',
                 isActive: true,
                 createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
+                
             });
             toast.success('Instructor vinculado a tu institución');
             router.push('/admin/instructors');
@@ -126,7 +128,7 @@ export default function NewInstructorPage() {
             );
             const uid = cred.user.uid;
             await signOut(secondaryAuth);
-
+            console.log('Created user with UID:', uid);
             // Write Firestore docs with admin's authenticated session
             await setDoc(doc(db, 'users', uid), {
                 uid,
@@ -134,7 +136,7 @@ export default function NewInstructorPage() {
                 firstName: form.firstName,
                 lastName: form.lastName,
                 role: 'INSTRUCTOR',
-                identificacion: identificacion.trim(),
+                identificacion: identification.trim(),
                 phone: form.phone,
                 specialty: form.specialty,
                 isActive: true,
@@ -197,7 +199,7 @@ export default function NewInstructorPage() {
                                     <Fingerprint size={18} />
                                 </div>
                                 <input
-                                    value={identificacion}
+                                    value={identification}
                                     onChange={(e) => { setIdentificacion(e.target.value); setStep('search'); }}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                     placeholder="Número de cédula / documento"
@@ -207,8 +209,8 @@ export default function NewInstructorPage() {
                             <button
                                 type="button"
                                 onClick={handleSearch}
-                                disabled={searching || !identificacion.trim()}
-                                style={{ height: 52, padding: '0 28px', borderRadius: 14, background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: searching || !identificacion.trim() ? 0.6 : 1 }}
+                                disabled={searching || !identification.trim()}
+                                style={{ height: 52, padding: '0 28px', borderRadius: 14, background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: searching || !identification.trim() ? 0.6 : 1 }}
                             >
                                 <Search size={16} /> {searching ? 'Buscando…' : 'Buscar'}
                             </button>
