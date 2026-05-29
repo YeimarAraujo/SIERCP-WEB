@@ -8,6 +8,7 @@ import { CourseService, SessionService } from '@/services/firestore.service';
 import { formatDate } from '@/lib/utils';
 import type { CourseModel, Enrollment } from '@/models/course';
 import type { SessionModel } from '@/models/session';
+import { CourseQr } from '@/components/ui/course-qr';
 
 export default function CourseDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -39,11 +40,13 @@ export default function CourseDetailPage() {
 
                 {/* Course header */}
                 <div className="border-b border-border bg-card px-6 py-4">
-                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                         <span>Instructor: {course.instructorName}</span>
                         <span>Certificación: {course.certification}</span>
                         <span>Puntaje requerido: {course.minScore}pts</span>
-                        <span>Código: <span className="font-mono font-medium">{course.inviteCode}</span></span>
+                        {course.inviteCode && (
+                            <CourseQr inviteCode={course.inviteCode} courseTitle={course.title} compact />
+                        )}
                     </div>
                 </div>
 

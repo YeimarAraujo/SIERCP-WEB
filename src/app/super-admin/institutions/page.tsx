@@ -18,6 +18,7 @@ import { UserService } from '@/services/firestore.service';
 import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
 import { Field, SearchableSelect } from '@/app/checkout/_components/ui';
 import { TIPOS_INSTITUCION } from '@/data/institutions';
+import { MembershipService } from '@/services/memberships.service';
 
 const PLAN_META: Record<string, { label: string; bg: string; text: string }> = {
   pyme: { label: 'Pyme', bg: 'rgba(14,165,233,0.12)', text: '#0ea5e9' },
@@ -358,25 +359,35 @@ function EditModal({ institution, onClose, onSaved }: {
       const removedAdmins = previousAdmins.filter(id => !selectedAdmins.includes(id));
 
       for (const uid of addedAdmins) {
+        const user = await UserService.get(uid);
+        if (!user) continue;
+
         await UserService.update(uid, {
           role: 'ADMIN',
           institutionId: institution.id,
-          memberships: [institution.id],
+        });
+
+        await MembershipService.create({
+          userId: uid,
+          institutionId: institution.id,
+          role: 'ADMIN',
+          createdAt: Date.now(),
         });
       }
-
       for (const uid of removedAdmins) {
-        const user = await UserService.get(uid);
+        await MembershipService.deleteByUserAndInstitution(uid, institution.id);
 
+        const user = await UserService.get(uid);
         if (!user) continue;
-        const memberships = (user.memberships || []).filter(id => id !== institution.id);
+
+        // opcional: recalcular institución principal
+        const remaining = await MembershipService.getByUser(uid);
 
         await UserService.update(uid, {
-          memberships,
-          institutionId: memberships[0] || '',
+          institutionId: remaining[0]?.institutionId || '',
         });
-
       }
+
       toast.success('Institución actualizada');
       onSaved();
       onClose();

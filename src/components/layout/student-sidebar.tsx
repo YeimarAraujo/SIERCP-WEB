@@ -1,44 +1,102 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
 import { useAuthStore } from '@/stores/auth-store';
 import toast from 'react-hot-toast';
 import { useThemeStore } from '@/stores/theme-store';
 import {
     Home, BookOpen, Clock, BarChart2, Award, Trophy,
-    Radio, Smartphone, Cpu, User, LogOut,
-    Sun, Moon, Globe, ClipboardList, CalendarDays, GraduationCap, ShoppingBag,
+    User, LogOut, Sun, Moon, Globe, CalendarDays,
+    GraduationCap, ShoppingBag, Monitor, Radio,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface NavItem {
-    label: string;
-    href: string;
-    icon: LucideIcon;
+    label:      string;
+    href:       string;
+    icon:       LucideIcon;
+    highlight?: boolean;
+    pulse?:     boolean;
 }
 
-const navItems: NavItem[] = [
-    { label: 'Inicio', href: '/student/home', icon: Home },
-    { label: 'Mis cursos', href: '/student/courses', icon: BookOpen },
-    { label: 'Calendario', href: '/student/calendar', icon: CalendarDays },
-    { label: 'Historial', href: '/student/history', icon: Clock },
-    { label: 'Mis reportes', href: '/student/reports', icon: BarChart2 },
+const studentNavItems: NavItem[] = [
+    { label: 'Inicio',       href: '/student/home',         icon: Home },
+    { label: 'Mis cursos',   href: '/student/courses',      icon: BookOpen },
+    { label: 'Calendario',   href: '/student/calendar',     icon: CalendarDays },
+    { label: 'Historial',    href: '/student/history',      icon: Clock },
+    { label: 'Mis reportes', href: '/student/reports',      icon: BarChart2 },
     { label: 'Certificados', href: '/student/certificates', icon: Award },
-    { label: 'Ranking', href: '/student/ranking', icon: Trophy },
-    { label: 'Tienda', href: '/student/tienda', icon: ShoppingBag },
+    { label: 'Ranking',      href: '/student/ranking',      icon: Trophy },
+    { label: 'Tienda',       href: '/student/tienda',       icon: ShoppingBag },
 ];
 
-export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
+const instructorNavItems: NavItem[] = [
+    {
+        label:     'Cursos como instructor',
+        href:      '/student/instructor-courses',
+        icon:      GraduationCap,
+        highlight: true,
+    },
+    {
+        label:     'Sesiones en Vivo',
+        href:      '/student/live',
+        icon:      Monitor,
+        highlight: true,
+        pulse:     true,
+    },
+];
+
+/**
+ * Determina si el usuario es instructor en alguna organización.
+ * Usa memberships (no courses) para evitar 403: el usuario siempre puede leer sus propias memberships.
+ */
+async function checkIsInstructor(uid: string, role: string, membershipRole: string): Promise<boolean> {
+    // Chequeo rápido por rol — sin Firestore
+    if (['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN'].includes(role)) return true;
+    if (['INSTRUCTOR', 'ADMIN'].includes(membershipRole))       return true;
+
+    // Chequeo por membership en cualquier org
+    try {
+        const q = query(
+            collection(db, 'memberships'),
+            where('userId', '==', uid),
+            where('role', '==', 'INSTRUCTOR'),
+            where('isActive', '==', true),
+            limit(1),
+        );
+        const snap = await getDocs(q);
+        return !snap.empty;
+    } catch {
+        return false;
+    }
+}
+
+export function StudentSidebar({ collapsed }: { collapsed?: boolean }) {
     const pathname = usePathname();
-    const router = useRouter();
-    const user = useAuthStore((s) => s.user);
-    const logout = useAuthStore((s) => s.logout);
-    const [hovered, setHovered] = useState(false);
-    const { theme, toggleTheme } = useThemeStore();
+    const router   = useRouter();
+    const user         = useAuthStore((s) => s.user);
+    const membershipRole = useAuthStore((s) => s.membershipRole) ?? '';
+    const logout       = useAuthStore((s) => s.logout);
+    const [hovered, setHovered]           = useState(false);
+    const [isInstructor, setIsInstructor] = useState(false);
+    const { theme, toggleTheme }          = useThemeStore();
 
     const isCollapsed = collapsed && !hovered;
+
+    useEffect(() => {
+        if (!user) return;
+        checkIsInstructor(user.uid, user.role ?? '', membershipRole)
+            .then(setIsInstructor);
+    }, [user, membershipRole]);
+
+    const navItems: NavItem[] = [
+        ...studentNavItems,
+        ...(isInstructor ? instructorNavItems : []),
+    ];
 
     const isActive = (href: string) => {
         if (href === '/student/home' && pathname === '/student/home') return true;
@@ -56,54 +114,38 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
     const sidebarWidth = isCollapsed ? '68px' : '240px';
 
     return (
-        <aside style={{
-            width: sidebarWidth,
-            minWidth: sidebarWidth,
-            height: '100vh',
-            position: 'sticky',
-            top: 0,
-            background: 'var(--sidebar-bg)',
-            borderRight: '1px solid var(--sidebar-border)',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '0',
-            overflowY: 'auto',
-            transition: 'width 0.25s ease, min-width 0.25s ease',
-            zIndex: 50,
-        }}
+        <aside
+            style={{
+                width: sidebarWidth, minWidth: sidebarWidth,
+                height: '100vh', position: 'sticky', top: 0,
+                background: 'var(--sidebar-bg)', borderRight: '1px solid var(--sidebar-border)',
+                display: 'flex', flexDirection: 'column',
+                overflowY: 'auto',
+                transition: 'width 0.25s ease, min-width 0.25s ease',
+                zIndex: 50,
+            }}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
-
-            {/* Branding header */}
+            {/* Branding */}
             <div style={{
                 padding: '20px 20px 16px',
                 borderBottom: '1px solid var(--sidebar-border)',
-                display: 'flex',
-                alignItems: 'center',
+                display: 'flex', alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
                 gap: isCollapsed ? 0 : '10px',
             }}>
                 <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 32, height: 32,
-                    borderRadius: 'var(--radius-md)',
-                    background: 'rgba(255,255,255,0.15)',
-                    color: 'var(--sidebar-text)',
-                    flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 32, height: 32, borderRadius: 'var(--radius-md)',
+                    background: 'rgba(255,255,255,0.15)', color: 'var(--sidebar-text)', flexShrink: 0,
                 }}>
                     <GraduationCap size={18} />
                 </div>
                 <span style={{
-                    fontSize: '15px',
-                    fontWeight: '700',
-                    color: 'var(--sidebar-text)',
+                    fontSize: '15px', fontWeight: '700', color: 'var(--sidebar-text)',
                     letterSpacing: '-0.3px',
-                    opacity: isCollapsed ? 0 : 1,
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
+                    opacity: isCollapsed ? 0 : 1, overflow: 'hidden', whiteSpace: 'nowrap',
                     maxWidth: isCollapsed ? 0 : '160px',
                     transition: 'opacity 0.2s ease, max-width 0.2s ease',
                 }}>
@@ -111,224 +153,183 @@ export function StudentSidebar({ collapsed, onToggle }: { collapsed?: boolean; o
                 </span>
             </div>
 
-            <nav style={{ flex: 1, padding: '12px 12px' }}>
-                {navItems.map((item) => {
-                    const active = isActive(item.href);
-                    const Icon = item.icon;
+            {/* Nav */}
+            <nav style={{ flex: 1, padding: '12px' }}>
+                {/* Separador antes de los ítems de instructor */}
+                {isInstructor && !isCollapsed && (
+                    <div style={{
+                        fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.35)',
+                        letterSpacing: '0.1em', padding: '4px 12px 4px',
+                        marginTop: 8,
+                    }}>
+                        ESTUDIANTE
+                    </div>
+                )}
 
-                    return (
-                        <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+                {studentNavItems.map((item) => (
+                    <NavLink key={item.href} item={item} active={isActive(item.href)} isCollapsed={isCollapsed} />
+                ))}
+
+                {/* Bloque instructor */}
+                {isInstructor && (
+                    <>
+                        {!isCollapsed && (
                             <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: isCollapsed ? 'center' : 'flex-start',
-                                gap: isCollapsed ? 0 : '10px',
-                                padding: isCollapsed ? '10px' : '10px 12px',
-                                borderRadius: 'var(--radius-md)',
-                                marginBottom: '2px',
-                                background: active
-                                    ? 'var(--sidebar-active-bg)'
-                                    : 'transparent',
-                                color: active
-                                    ? 'var(--sidebar-active-text)'
-                                    : 'var(--sidebar-text)',
-                                fontWeight: active ? '600' : '500',
-                                fontSize: '14px',
-                                transition: 'all 0.15s ease',
-                                cursor: 'pointer',
-                                width: isCollapsed ? 44 : 'auto',
-                                marginLeft: isCollapsed ? 'auto' : 0,
-                                marginRight: isCollapsed ? 'auto' : 0,
-                            }}
-                                onMouseEnter={(e) => {
-                                    if (!active) {
-                                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!active) {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                                    }
-                                }}
-                            >
-                                <Icon
-                                    size={20}
-                                    strokeWidth={active ? 2.5 : 2}
-                                />
-                                <span style={{
-                                    opacity: isCollapsed ? 0 : 1,
-                                    overflow: 'hidden',
-                                    whiteSpace: 'nowrap',
-                                    maxWidth: isCollapsed ? 0 : '200px',
-                                    transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                                }}>{item.label}</span>
+                                fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.35)',
+                                letterSpacing: '0.1em', padding: '12px 12px 4px',
+                            }}>
+                                COMO INSTRUCTOR
                             </div>
-                        </Link>
-                    );
-                })}
+                        )}
+                        {isCollapsed && <div style={{ height: 8 }} />}
+                        {instructorNavItems.map((item) => (
+                            <NavLink key={item.href} item={item} active={isActive(item.href)} isCollapsed={isCollapsed} />
+                        ))}
+                    </>
+                )}
             </nav>
 
+            {/* Footer */}
             <div style={{
                 padding: isCollapsed ? '8px' : '12px',
                 borderTop: '1px solid var(--sidebar-border)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 4,
+                display: 'flex', flexDirection: 'column', gap: 4,
                 alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
-                <Link href="/" style={{ textDecoration: 'none' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: isCollapsed ? 'center' : 'flex-start',
-                        gap: isCollapsed ? 0 : '10px',
-                        padding: isCollapsed ? '10px' : '10px 12px',
-                        borderRadius: 'var(--radius-md)',
-                        cursor: 'pointer',
-                        color: 'var(--sidebar-text)',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        width: isCollapsed ? 44 : 'auto',
-                        marginLeft: isCollapsed ? 'auto' : 0,
-                        marginRight: isCollapsed ? 'auto' : 0,
-                        marginBottom: '4px',
-                    }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'var(--sidebar-text)';
-                        }}
-                        title={isCollapsed ? 'Volver al sitio' : undefined}
-                    >
-                        <Globe size={20} />
-                        <span style={{
-                            opacity: isCollapsed ? 0 : 1,
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap',
-                            maxWidth: isCollapsed ? 0 : '200px',
-                            transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                        }}>Volver al sitio</span>
-                    </div>
-                </Link>
-
-                <Link href="/student/profile" style={{ textDecoration: 'none' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: isCollapsed ? 'center' : 'flex-start',
-                        gap: isCollapsed ? 0 : '10px',
-                        padding: isCollapsed ? '10px' : '10px 12px',
-                        borderRadius: 'var(--radius-md)',
-                        cursor: 'pointer',
-                        color: 'var(--sidebar-text)',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        width: isCollapsed ? 44 : 'auto',
-                        marginLeft: isCollapsed ? 'auto' : 0,
-                        marginRight: isCollapsed ? 'auto' : 0,
-                    }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'var(--sidebar-text)';
-                        }}
-                        title={isCollapsed ? 'Mi perfil' : undefined}
-                    >
-                        <User size={20} />
-                        <span style={{
-                            opacity: isCollapsed ? 0 : 1,
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap',
-                            maxWidth: isCollapsed ? 0 : '200px',
-                            transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                        }}>Mi perfil</span>
-                    </div>
-                </Link>
-
-                <button
-                    onClick={toggleTheme}
-                    style={{
-                        width: isCollapsed ? 44 : '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: isCollapsed ? 'center' : 'flex-start',
-                        gap: isCollapsed ? 0 : '10px',
-                        padding: isCollapsed ? '10px' : '10px 12px',
-                        borderRadius: 'var(--radius-md)',
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: 'var(--sidebar-text)',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        marginLeft: isCollapsed ? 'auto' : 0,
-                        marginRight: isCollapsed ? 'auto' : 0,
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                    }}
-                    title={isCollapsed ? (theme === 'dark' ? 'Modo claro' : 'Modo oscuro') : undefined}
-                >
-                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                    <span style={{
-                        opacity: isCollapsed ? 0 : 1,
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        maxWidth: isCollapsed ? 0 : '200px',
-                        transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                    }}>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-                </button>
-
-                <button
-                    onClick={handleLogout}
-                    style={{
-                        width: isCollapsed ? 44 : '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: isCollapsed ? 'center' : 'flex-start',
-                        gap: isCollapsed ? 0 : '10px',
-                        padding: isCollapsed ? '10px' : '10px 12px',
-                        borderRadius: 'var(--radius-md)',
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: 'var(--sidebar-text)',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        marginLeft: isCollapsed ? 'auto' : 0,
-                        marginRight: isCollapsed ? 'auto' : 0,
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                    }}
-                    title={isCollapsed ? 'Cerrar sesión' : undefined}
-                >
-                    <LogOut size={20} />
-                    <span style={{
-                        opacity: isCollapsed ? 0 : 1,
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        maxWidth: isCollapsed ? 0 : '200px',
-                        transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                    }}>Cerrar sesión</span>
-                </button>
+                <SidebarLink href="/" icon={<Globe size={20} />} label="Volver al sitio" isCollapsed={isCollapsed} />
+                <SidebarLink href="/student/profile" icon={<User size={20} />} label="Mi perfil" isCollapsed={isCollapsed} />
+                <SidebarBtn onClick={toggleTheme} icon={theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />} label={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} isCollapsed={isCollapsed} />
+                <SidebarBtn onClick={handleLogout} icon={<LogOut size={20} />} label="Cerrar sesión" isCollapsed={isCollapsed} />
             </div>
+
+            <style jsx global>{`
+                @keyframes inst-pulse {
+                    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+                    50%       { opacity: 0.8; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+                }
+            `}</style>
         </aside>
     );
+}
+
+// ── NavLink ───────────────────────────────────────────────────────────────────
+function NavLink({ item, active, isCollapsed }: { item: NavItem; active: boolean; isCollapsed: boolean }) {
+    const Icon        = item.icon;
+    const isHighlight = item.highlight && !active;
+
+    const bgBase    = isHighlight ? 'rgba(16,185,129,0.12)' : 'transparent';
+    const colorBase = isHighlight ? '#10B981' : 'var(--sidebar-text)';
+    const bgHover   = isHighlight ? 'rgba(16,185,129,0.22)' : 'var(--sidebar-hover-bg)';
+    const colorHover= isHighlight ? '#059669' : 'var(--sidebar-hover-text)';
+
+    return (
+        <Link href={item.href} style={{ textDecoration: 'none' }}>
+            <div
+                style={{
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: isCollapsed ? 'center' : 'flex-start',
+                    gap: isCollapsed ? 0 : '10px',
+                    padding: isCollapsed ? '10px' : '10px 12px',
+                    borderRadius: 'var(--radius-md)', marginBottom: '2px',
+                    background: active ? 'var(--sidebar-active-bg)' : bgBase,
+                    color: active ? 'var(--sidebar-active-text)' : colorBase,
+                    fontWeight: active ? '600' : '500',
+                    fontSize: '14px', transition: 'all 0.15s ease', cursor: 'pointer',
+                    width: isCollapsed ? 44 : 'auto',
+                    marginLeft: isCollapsed ? 'auto' : 0,
+                    marginRight: isCollapsed ? 'auto' : 0,
+                    border: isHighlight && !active
+                        ? '1px solid rgba(16,185,129,0.25)'
+                        : '1px solid transparent',
+                    animation: item.pulse && !active ? 'inst-pulse 3s ease-in-out infinite' : 'none',
+                }}
+                onMouseEnter={(e) => {
+                    if (!active) {
+                        e.currentTarget.style.background = bgHover;
+                        e.currentTarget.style.color      = colorHover;
+                    }
+                }}
+                onMouseLeave={(e) => {
+                    if (!active) {
+                        e.currentTarget.style.background = bgBase;
+                        e.currentTarget.style.color      = colorBase;
+                    }
+                }}
+                title={isCollapsed ? item.label : undefined}
+            >
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+                    {item.pulse && !active && (
+                        <span style={{
+                            position: 'absolute', top: -2, right: -2,
+                            width: 7, height: 7, borderRadius: '50%',
+                            background: '#10B981',
+                            boxShadow: '0 0 5px rgba(16,185,129,0.7)',
+                        }} />
+                    )}
+                </div>
+                <span style={{
+                    opacity: isCollapsed ? 0 : 1, overflow: 'hidden', whiteSpace: 'nowrap',
+                    maxWidth: isCollapsed ? 0 : '200px',
+                    transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                }}>
+                    {item.label}
+                </span>
+            </div>
+        </Link>
+    );
+}
+
+// ── Footer helpers ────────────────────────────────────────────────────────────
+function SidebarLink({ href, icon, label, isCollapsed }: { href: string; icon: React.ReactNode; label: string; isCollapsed: boolean }) {
+    return (
+        <Link href={href} style={{ textDecoration: 'none' }}>
+            <div style={footerItemStyle(isCollapsed)}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--sidebar-hover-bg)'; e.currentTarget.style.color = 'var(--sidebar-hover-text)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--sidebar-text)'; }}
+                title={isCollapsed ? label : undefined}
+            >
+                {icon}
+                <FadeLabel label={label} isCollapsed={isCollapsed} />
+            </div>
+        </Link>
+    );
+}
+
+function SidebarBtn({ onClick, icon, label, isCollapsed }: { onClick: () => void; icon: React.ReactNode; label: string; isCollapsed: boolean }) {
+    return (
+        <button onClick={onClick} style={{ ...footerItemStyle(isCollapsed), border: 'none', cursor: 'pointer' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--sidebar-hover-bg)'; e.currentTarget.style.color = 'var(--sidebar-hover-text)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--sidebar-text)'; }}
+            title={isCollapsed ? label : undefined}
+        >
+            {icon}
+            <FadeLabel label={label} isCollapsed={isCollapsed} />
+        </button>
+    );
+}
+
+function FadeLabel({ label, isCollapsed }: { label: string; isCollapsed: boolean }) {
+    return (
+        <span style={{
+            opacity: isCollapsed ? 0 : 1, overflow: 'hidden', whiteSpace: 'nowrap',
+            maxWidth: isCollapsed ? 0 : '200px',
+            transition: 'opacity 0.2s ease, max-width 0.2s ease',
+        }}>{label}</span>
+    );
+}
+
+function footerItemStyle(isCollapsed: boolean): React.CSSProperties {
+    return {
+        display: 'flex', alignItems: 'center',
+        justifyContent: isCollapsed ? 'center' : 'flex-start',
+        gap: isCollapsed ? 0 : '10px',
+        padding: isCollapsed ? '10px' : '10px 12px',
+        borderRadius: 'var(--radius-md)', cursor: 'pointer',
+        background: 'transparent', color: 'var(--sidebar-text)',
+        fontSize: '14px', fontWeight: 500,
+        width: isCollapsed ? 44 : '100%',
+        marginLeft: isCollapsed ? 'auto' : 0,
+        marginRight: isCollapsed ? 'auto' : 0,
+    };
 }

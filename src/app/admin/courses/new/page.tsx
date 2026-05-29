@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
+import { collection, doc, getDocs, getDoc, query, where } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
+import { useAuth } from '@/hooks/use-auth';
 import {
-    Plus, Save, BookOpen, Type, FileText,
+    Save, BookOpen, Type, FileText,
     Hash, Users, Award, AlignLeft, Calendar,
     Layers, ArrowLeft, CheckCircle
 } from 'lucide-react';
@@ -13,8 +16,10 @@ import toast from 'react-hot-toast';
 
 export default function NewCoursePage() {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { user, loading: authLoading } = useAuth();
+    const [instructors, setInstructors] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         title: '',
         certification: 'BLS',
@@ -23,6 +28,8 @@ export default function NewCoursePage() {
         moduleCount: 1,
         inviteCode: '',
         isActive: true,
+        instructorId: '',
+        instructorName: '',
     });
     const [cohortData, setCohortData] = useState({
         scheduleLabel: 'Grupo 1',
@@ -33,13 +40,47 @@ export default function NewCoursePage() {
         priceCOP: 0,
     });
 
+    const institutionId: string | null = user?.institutionId ?? null;
+
     const setField = (key: string) => (v: string | number | boolean) => {
         setFormData(prev => ({ ...prev, [key]: v }));
     };
 
+    useEffect(() => {
+        if (authLoading) return;
+        if (!institutionId) { setLoading(false); return; }
+
+        const fetchInstructors = async () => {
+            try {
+                const memSnap = await getDocs(query(
+                    collection(db, 'memberships'),
+                    where('institutionId', '==', institutionId),
+                    where('role', '==', 'INSTRUCTOR'),
+                    where('isActive', '==', true),
+                ));
+
+                const userDocs = await Promise.all(
+                    memSnap.docs.map(m => getDoc(doc(db, 'users', m.data().userId)))
+                );
+                const enriched = userDocs
+                    .filter(s => s.exists())
+                    .map(s => ({ ...s.data(), uid: s.id }));
+
+                setInstructors(enriched);
+            } catch (err) {
+                console.error('Error fetching instructors:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchInstructors();
+    }, [institutionId, authLoading]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+
         try {
             setLoading(true);
 
@@ -73,6 +114,7 @@ export default function NewCoursePage() {
                     regulations: [],
                     tags: [],
                     modules: [],
+                    instructorId: formData.instructorId || undefined,
                 }),
             });
 
@@ -104,10 +146,11 @@ export default function NewCoursePage() {
 
             toast.success('Curso y grupo creados exitosamente');
             router.push('/admin/courses');
-        } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : 'Error al crear curso';
-            setError(msg);
-            toast.error(msg);
+
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message);
+            toast.error(err.message);
         } finally {
             setLoading(false);
         }
@@ -173,6 +216,37 @@ export default function NewCoursePage() {
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Código de Invitación" icon={Hash} placeholder="Auto-generado si se deja vacío" value={formData.inviteCode} onChange={(v: string) => setField('inviteCode')(v)} />
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                                            Instructor
+                                        </label>
+                                        <select
+                                            value={formData.instructorId}
+                                            onChange={(e) => {
+                                                const selected = instructors.find(i => i.uid === e.target.value);
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    instructorId: selected?.uid || '',
+                                                    instructorName: selected
+                                                        ? `${selected.firstName ?? ''} ${selected.lastName ?? ''}`.trim()
+                                                        : '',
+                                                }));
+                                            }}
+                                            style={{
+                                                width: '100%', height: 52, borderRadius: 14,
+                                                border: '1px solid var(--border)', background: 'var(--muted)',
+                                                padding: '0 16px', fontSize: 15,
+                                                color: 'var(--foreground)', fontWeight: 600,
+                                            }}
+                                        >
+                                            <option value="">Selecciona un instructor</option>
+                                            {instructors.map((i) => (
+                                                <option key={i.uid} value={i.uid}>
+                                                    {i.identification} - {i.firstName} {i.lastName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                                 <div style={{ marginTop: 20 }}>
                                     <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>

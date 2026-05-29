@@ -100,7 +100,7 @@ export default function Hero() {
           onCanPlay={() => setVideoReady(true)}
           className={`hero-video ${videoReady ? "hero-video--ready" : ""}`}
         >
-          <source src="/assets/RCP_Hero.mp4" type="video/mp4" />
+          <source src="/assets/RCP_Hero.webm" type="video/webm" />
         </video>
 
         {/* Overlay en capas: oscurecimiento + gradiente brand */}

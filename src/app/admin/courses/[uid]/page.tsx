@@ -5,16 +5,18 @@ import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { CourseService } from '@/services/firestore.service';
 import type { CourseModel, Enrollment } from '@/models/course';
-import { 
-    ArrowLeft, BookOpen, Users, Clock, Award, FileText, 
+import {
+    ArrowLeft, BookOpen, Users, Clock, Award, FileText,
     Settings, Trash2, Edit2, Download, Search, Calendar,
-    CheckCircle, XCircle, AlertCircle
+    CheckCircle, XCircle, AlertCircle,
+    QrCode, Copy
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import toast from 'react-hot-toast';
-import { 
-    collection, getDocs, query, where, orderBy, limit 
+import {
+    collection, getDocs, query, where, orderBy, limit
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -22,7 +24,7 @@ export default function AdminCourseDetailPage() {
     const params = useParams();
     const router = useRouter();
     const courseId = params.uid as string;
-    
+
     const [course, setCourse] = useState<CourseModel | null>(null);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -30,20 +32,20 @@ export default function AdminCourseDetailPage() {
 
     useEffect(() => {
         if (!courseId) return;
-        
+
         Promise.all([
             CourseService.get(courseId, true),
             getEnrollments(courseId)
         ])
-        .then(([courseData, enrollData]) => {
-            setCourse(courseData);
-            setEnrollments(enrollData);
-        })
-        .catch((err) => {
-            console.error(err);
-            toast.error('Error al cargar el curso');
-        })
-        .finally(() => setLoading(false));
+            .then(([courseData, enrollData]) => {
+                setCourse(courseData);
+                setEnrollments(enrollData);
+            })
+            .catch((err) => {
+                console.error(err);
+                toast.error('Error al cargar el curso');
+            })
+            .finally(() => setLoading(false));
     }, [courseId]);
 
     const getEnrollments = async (cid: string): Promise<Enrollment[]> => {
@@ -62,10 +64,10 @@ export default function AdminCourseDetailPage() {
 
     if (loading) {
         return (
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 height: '100vh',
                 background: 'var(--muted)'
             }}>
@@ -82,11 +84,11 @@ export default function AdminCourseDetailPage() {
 
     if (!course) {
         return (
-            <div style={{ 
-                display: 'flex', 
+            <div style={{
+                display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center', 
-                justifyContent: 'center', 
+                alignItems: 'center',
+                justifyContent: 'center',
                 height: '100vh',
                 background: 'var(--muted)',
                 gap: 16
@@ -98,7 +100,7 @@ export default function AdminCourseDetailPage() {
                 <p style={{ color: 'var(--text-secondary)' }}>
                     El curso con ID {courseId} no existe o fue eliminado.
                 </p>
-                <button 
+                <button
                     onClick={() => router.push('/admin/courses')}
                     style={{
                         marginTop: 16,
@@ -127,8 +129,8 @@ export default function AdminCourseDetailPage() {
 
     const activeCount = enrollments.filter(e => e.status === 'active').length;
     const completedCount = enrollments.filter(e => e.status === 'completed').length;
-    const avgScore = enrollments.length > 0 
-        ? enrollments.reduce((sum, e) => sum + (e.avgScore || 0), 0) / enrollments.length 
+    const avgScore = enrollments.length > 0
+        ? enrollments.reduce((sum, e) => sum + (e.avgScore || 0), 0) / enrollments.length
         : 0;
 
     const columns = [
@@ -137,9 +139,9 @@ export default function AdminCourseDetailPage() {
             label: 'Estudiante',
             render: (_: any, row: Enrollment) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ 
-                        width: 36, height: 36, borderRadius: '50%', 
-                        background: 'var(--muted)', display: 'flex', 
+                    <div style={{
+                        width: 36, height: 36, borderRadius: '50%',
+                        background: 'var(--muted)', display: 'flex',
                         alignItems: 'center', justifyContent: 'center',
                         color: 'var(--brand)', fontWeight: 700, fontSize: 14
                     }}>
@@ -171,12 +173,12 @@ export default function AdminCourseDetailPage() {
                 const pct = Math.round((row.completedModules / total) * 100);
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ 
-                            width: 80, height: 6, borderRadius: 3, 
-                            background: 'var(--border)', overflow: 'hidden' 
+                        <div style={{
+                            width: 80, height: 6, borderRadius: 3,
+                            background: 'var(--border)', overflow: 'hidden'
                         }}>
-                            <div style={{ 
-                                width: `${pct}%`, height: '100%', 
+                            <div style={{
+                                width: `${pct}%`, height: '100%',
                                 background: pct >= 100 ? '#10B981' : 'var(--brand)',
                                 borderRadius: 3
                             }} />
@@ -192,7 +194,7 @@ export default function AdminCourseDetailPage() {
             key: 'avgScore',
             label: 'Promedio',
             render: (val: any) => (
-                <span style={{ 
+                <span style={{
                     fontWeight: 700, fontSize: 14,
                     color: val >= (course.requiredScore || 70) ? '#10B981' : '#F59E0B'
                 }}>
@@ -214,7 +216,7 @@ export default function AdminCourseDetailPage() {
             key: 'status',
             label: 'Estado',
             render: (val: any) => (
-                <span style={{ 
+                <span style={{
                     fontSize: 10, fontWeight: 900, padding: '4px 10px', borderRadius: 20,
                     background: val === 'completed' ? '#DCFCE7' : '#FEF3C7',
                     color: val === 'completed' ? '#166534' : '#92400E',
@@ -229,28 +231,28 @@ export default function AdminCourseDetailPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Gestión Académica" />
-            
+
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-                <PageHero 
+                <PageHero
                     title={course.title}
                     subtitle={`Certificación: ${course.certification}`}
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
                         <div style={{ display: 'flex', gap: 12 }}>
-                            <button 
+                            <button
                                 onClick={() => router.push(`/admin/courses/${courseId}/edit`)}
                                 style={{
-                                    padding: '10px 16px', borderRadius: 12, 
+                                    padding: '10px 16px', borderRadius: 12,
                                     background: 'var(--card)', color: 'var(--text-secondary)',
-                                    border: '1px solid var(--border)', fontSize: 13, 
-                                    fontWeight: 600, cursor: 'pointer', display: 'flex', 
+                                    border: '1px solid var(--border)', fontSize: 13,
+                                    fontWeight: 600, cursor: 'pointer', display: 'flex',
                                     alignItems: 'center', gap: 8
                                 }}
                             >
                                 <Edit2 size={16} /> Editar
                             </button>
-                            <button 
+                            <button
                                 onClick={() => {
                                     if (enrollments.length === 0) return toast.error('No hay inscripciones');
                                     const csv = [
@@ -271,10 +273,10 @@ export default function AdminCourseDetailPage() {
                                     toast.success('Inscripciones exportadas');
                                 }}
                                 style={{
-                                    padding: '10px 16px', borderRadius: 12, 
+                                    padding: '10px 16px', borderRadius: 12,
                                     background: 'var(--brand)', color: 'var(--text-on-brand)',
-                                    border: 'none', fontSize: 13, 
-                                    fontWeight: 600, cursor: 'pointer', display: 'flex', 
+                                    border: 'none', fontSize: 13,
+                                    fontWeight: 600, cursor: 'pointer', display: 'flex',
                                     alignItems: 'center', gap: 8,
                                     boxShadow: '0 4px 12px rgba(24, 0, 173, 0.2)'
                                 }}
@@ -285,18 +287,18 @@ export default function AdminCourseDetailPage() {
                     }
                 />
 
-                <div style={{ 
-                    display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', 
-                    gap: 20, marginBottom: 24 
+                <div style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
+                    gap: 20, marginBottom: 24
                 }}>
-                    <div style={{ 
+                    <div style={{
                         background: 'var(--card)', borderRadius: 16, padding: 20,
                         border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                            <div style={{ 
-                                width: 40, height: 40, borderRadius: 10, 
-                                background: 'var(--accent)', display: 'flex', 
+                            <div style={{
+                                width: 40, height: 40, borderRadius: 10,
+                                background: 'var(--accent)', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center',
                                 color: 'var(--brand)'
                             }}>
@@ -309,14 +311,14 @@ export default function AdminCourseDetailPage() {
                         </div>
                     </div>
 
-                    <div style={{ 
+                    <div style={{
                         background: 'var(--card)', borderRadius: 16, padding: 20,
                         border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                            <div style={{ 
-                                width: 40, height: 40, borderRadius: 10, 
-                                background: '#DCFCE7', display: 'flex', 
+                            <div style={{
+                                width: 40, height: 40, borderRadius: 10,
+                                background: '#DCFCE7', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center',
                                 color: '#10B981'
                             }}>
@@ -329,14 +331,14 @@ export default function AdminCourseDetailPage() {
                         </div>
                     </div>
 
-                    <div style={{ 
+                    <div style={{
                         background: 'var(--card)', borderRadius: 16, padding: 20,
                         border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                            <div style={{ 
-                                width: 40, height: 40, borderRadius: 10, 
-                                background: '#FEF3C7', display: 'flex', 
+                            <div style={{
+                                width: 40, height: 40, borderRadius: 10,
+                                background: '#FEF3C7', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center',
                                 color: '#F59E0B'
                             }}>
@@ -348,15 +350,14 @@ export default function AdminCourseDetailPage() {
                             {completedCount}
                         </div>
                     </div>
-
-                    <div style={{ 
+                    <div style={{
                         background: 'var(--card)', borderRadius: 16, padding: 20,
                         border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                            <div style={{ 
-                                width: 40, height: 40, borderRadius: 10, 
-                                background: 'var(--muted)', display: 'flex', 
+                            <div style={{
+                                width: 40, height: 40, borderRadius: 10,
+                                background: 'var(--muted)', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center',
                                 color: 'var(--text-secondary)'
                             }}>
@@ -368,24 +369,59 @@ export default function AdminCourseDetailPage() {
                             {avgScore.toFixed(1)}%
                         </div>
                     </div>
+                    <div style={{
+                        background: 'var(--card)', borderRadius: 16, padding: 20,
+                        border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, alignSelf: 'flex-start' }}>
+                            <QrCode size={16} color="var(--brand)" />
+                            <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>Código de Acceso</span>
+                        </div>
+                        {course.inviteCode && (
+                            <QRCodeSVG
+                                value={`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/join/${course.inviteCode}`}
+                                size={140}
+                                level="M"
+                                style={{ borderRadius: 8, padding: 8, background: '#fff' }}
+                            />
+                        )}
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: 8,
+                            background: 'var(--muted)', borderRadius: 8, padding: '6px 14px'
+                        }}>
+                            <span style={{ fontFamily: 'monospace', fontSize: 20, fontWeight: 800, color: 'var(--brand)', letterSpacing: 3 }}>
+                                {course.inviteCode}
+                            </span>
+                            <button
+                                onClick={() => { navigator.clipboard.writeText(course.inviteCode ?? ''); }}
+                                title="Copiar código"
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}
+                            >
+                                <Copy size={14} />
+                            </button>
+                        </div>
+                    </div>
+
+
                 </div>
 
-                <div style={{ 
-                    background: 'var(--card)', border: '1px solid var(--border)', 
-                    borderRadius: 24, padding: 24, 
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)' 
+                <div style={{
+                    background: 'var(--card)', border: '1px solid var(--border)',
+                    borderRadius: 24, padding: 24,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                 }}>
-                    <div style={{ 
-                        display: 'flex', justifyContent: 'space-between', 
-                        alignItems: 'center', marginBottom: 24, gap: 20 
+                    <div style={{
+                        display: 'flex', justifyContent: 'space-between',
+                        alignItems: 'center', marginBottom: 24, gap: 20
                     }}>
                         <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--foreground)', margin: 0 }}>
                             Inscripciones
                         </h3>
                         <div style={{ position: 'relative', maxWidth: 300 }}>
-                            <Search size={18} style={{ 
-                                position: 'absolute', left: 16, top: '50%', 
-                                transform: 'translateY(-50%)', color: 'var(--text-muted)' 
+                            <Search size={18} style={{
+                                position: 'absolute', left: 16, top: '50%',
+                                transform: 'translateY(-50%)', color: 'var(--text-muted)'
                             }} />
                             <input
                                 type="text"
@@ -393,7 +429,7 @@ export default function AdminCourseDetailPage() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{
-                                    width: '100%', height: 44, padding: '0 16px 0 48px', 
+                                    width: '100%', height: 44, padding: '0 16px 0 48px',
                                     borderRadius: 12, border: '1px solid var(--border)',
                                     fontSize: 14, outline: 'none', background: 'var(--muted)'
                                 }}
@@ -401,7 +437,7 @@ export default function AdminCourseDetailPage() {
                         </div>
                     </div>
 
-                    <DataTable 
+                    <DataTable
                         columns={columns}
                         data={filteredEnrollments}
                         loading={loading}

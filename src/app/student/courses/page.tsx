@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/layout/header';
 import { useAuth } from '@/hooks/use-auth';
 import { StudentEnrollmentService } from '@/services/student-enrollment.service';
+import { CourseService } from '@/services/firestore.service';
 import type { StudentCourseCard } from '@/shared/types/student-course-card';
-import Link from 'next/link';
+import type { CourseModel } from '@/models/course';
 import {
   BookOpen, Users, ChevronRight, GraduationCap, ArrowRight,
-  Lock, Building2, AlertTriangle, Shield, RefreshCw, Search, Plus,
+  Lock, Building2, AlertTriangle, RefreshCw, Search, Plus,
+  Monitor, Radio, UserCheck,
 } from 'lucide-react';
 import { PageHero } from '@/components/ui/page-hero';
 
@@ -219,17 +222,22 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 
 export default function StudentCoursesPage() {
   const { user, coursesLeft } = useAuth();
-  const [state, setState] = useState<PageState>({ kind: 'loading' });
-  const [search, setSearch] = useState('');
-  const coursesCreated = user?.coursesCreated ?? 0;
-  const LIMIT = 3;
+  const [state, setState]               = useState<PageState>({ kind: 'loading' });
+  const [search, setSearch]             = useState('');
+  const [instructorCourses, setInstCourses] = useState<CourseModel[]>([]);
 
   const load = useCallback(async () => {
     if (!user) return;
     setState({ kind: 'loading' });
     try {
+      // Cursos como estudiante
       const courses = await StudentEnrollmentService.getStudentCourses(user.uid);
       setState(courses.length === 0 ? { kind: 'empty' } : { kind: 'ready', courses });
+
+      // Cursos como instructor (en paralelo, sin bloquear la UI)
+      CourseService.getByInstructor(user.uid)
+        .then(setInstCourses)
+        .catch(() => {});
     } catch (err) {
       setState({
         kind: 'error',
@@ -342,6 +350,109 @@ export default function StudentCoursesPage() {
             {filtered.map((course, i) => (
               <CourseCard key={course.id} card={course} index={i} />
             ))}
+          </div>
+        )}
+
+        {/* ── Cursos como instructor ───────────────────────────────────── */}
+        {instructorCourses.length > 0 && (
+          <div style={{ marginTop: 32 }}>
+            {/* Encabezado sección */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              marginBottom: 16,
+            }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: 'rgba(16,185,129,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <UserCheck size={16} style={{ color: '#10B981' }} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-main)' }}>
+                  Mis cursos como instructor
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>
+                  {instructorCourses.length} curso{instructorCourses.length !== 1 ? 's' : ''} asignado{instructorCourses.length !== 1 ? 's' : ''}
+                </div>
+              </div>
+              <Link
+                href="/student/live"
+                style={{
+                  marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '7px 14px', borderRadius: 10,
+                  background: 'rgba(16,185,129,0.1)',
+                  border: '1px solid rgba(16,185,129,0.25)',
+                  color: '#10B981', fontSize: 12, fontWeight: 700,
+                  textDecoration: 'none',
+                }}
+              >
+                <Monitor size={13} /> Ver monitor en vivo
+              </Link>
+            </div>
+
+            {/* Cards de cursos como instructor */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 12 }}>
+              {instructorCourses.map(course => (
+                <Link
+                  key={course.id}
+                  href={`/student/instructor-courses/${course.id}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div style={{
+                    background: 'var(--card)',
+                    border: '1.5px solid rgba(16,185,129,0.2)',
+                    borderRadius: 18, padding: '16px 18px',
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer',
+                  }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.borderColor = '#10B981';
+                      (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(16,185,129,0.12)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(16,185,129,0.2)';
+                      (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                    }}
+                  >
+                    {/* Icono */}
+                    <div style={{
+                      width: 42, height: 42, borderRadius: 12, flexShrink: 0,
+                      background: 'rgba(16,185,129,0.1)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <BookOpen size={18} style={{ color: '#10B981' }} />
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontWeight: 700, fontSize: 14, color: 'var(--text-main)',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {course.title}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                          <Users size={11} /> {course.studentCount ?? 0} estudiantes
+                        </span>
+                        <span style={{
+                          fontSize: 9, fontWeight: 800, color: '#10B981',
+                          background: 'rgba(16,185,129,0.08)',
+                          padding: '2px 7px', borderRadius: 6,
+                          border: '1px solid rgba(16,185,129,0.2)',
+                        }}>
+                          INSTRUCTOR
+                        </span>
+                      </div>
+                    </div>
+
+                    <ChevronRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 

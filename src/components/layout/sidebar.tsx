@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
+import { useAuthStore } from '@/features/auth/store/auth-store';
 
 type NavItem = { label: string; href: string; icon: string };
 type NavGroup = { group?: string; items: NavItem[] };
@@ -54,20 +55,20 @@ const NAV_GROUPS: Record<string, NavGroup[]> = {
     INSTRUCTOR: [
         {
             items: [
-                { label: 'Mi panel',           href: '/instructor/dashboard', icon: '▦' },
-                { label: 'Monitor en vivo',    href: '/instructor/monitor',   icon: '◉' },
-                { label: 'Mis cursos',         href: '/instructor/courses',   icon: '📚' },
-                { label: 'Historial del grupo', href: '/instructor/history',  icon: '📋' },
+                { label: 'Mi panel',            href: '/instructor/dashboard', icon: '▦' },
+                { label: 'Sesiones en vivo',    href: '/instructor/monitor',   icon: '◉' },
+                { label: 'Gestionar cursos',    href: '/instructor/courses',   icon: '📚' },
+                { label: 'Historial del grupo', href: '/instructor/history',   icon: '📋' },
             ],
         },
     ],
     USUARIO: [
         {
             items: [
-                { label: 'Inicio',        href: '/home',    icon: '⌂' },
-                { label: 'Mis sesiones',  href: '/history', icon: '📋' },
-                { label: 'Cursos',        href: '/courses', icon: '📚' },
-                { label: 'Mi dispositivo', href: '/device', icon: '⊡' },
+                { label: 'Inicio',         href: '/home',    icon: '⌂' },
+                { label: 'Mis sesiones',   href: '/history', icon: '📋' },
+                { label: 'Cursos',         href: '/courses', icon: '📚' },
+                { label: 'Mi dispositivo', href: '/device',  icon: '⊡' },
             ],
         },
     ],
@@ -77,8 +78,16 @@ export function Sidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
     const router = useRouter();
+    const membershipRole = useAuthStore((s) => s.membershipRole);
 
-    const groups = user ? (NAV_GROUPS[user.role] ?? []) : [];
+    // Un USUARIO con membership INSTRUCTOR ve la nav de instructor completa
+    const isInstructorByMembership = membershipRole === 'INSTRUCTOR';
+
+    const groups = (() => {
+        if (!user) return [];
+        if (user.role === 'USUARIO' && isInstructorByMembership) return NAV_GROUPS['INSTRUCTOR'] ?? [];
+        return NAV_GROUPS[user.role] ?? [];
+    })();
 
     const handleLogout = async () => {
         try {
