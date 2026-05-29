@@ -3,80 +3,163 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/shared/lib/firebase';
-import { useAuth } from '@/hooks/use-auth';
-import type { CourseModel } from '@/models/course';
-import { Plus, BookOpen, User, Users, ChevronRight, Search, FileText } from 'lucide-react';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
 import { downloadCsv } from '@/shared/lib/export-utils';
 import toast from 'react-hot-toast';
+import { Plus, BookOpen, Users, ChevronRight, Search, FileText, Layers } from 'lucide-react';
+
+interface TemplateWithCohorts {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    level: string;
+    isActive: boolean;
+    icon: string;
+    modules: any[];
+    cohorts: any[];
+    priceCOP: number;
+    isAutomated: boolean;
+}
 
 export default function AdminCoursesPage() {
     const router = useRouter();
-    const { user, loading: authLoading } = useAuth();
-    const [courses, setCourses] = useState<CourseModel[]>([]);
+    const [templates, setTemplates] = useState<TemplateWithCohorts[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const institutionId: string | null = user?.institutionId ?? null;
+    const fetchTemplates = async () => {
+        try {
+            setLoading(true);
+            const { getAuth } = await import('firebase/auth');
+            const auth = getAuth();
+            const idToken = await auth.currentUser?.getIdToken();
+            if (!idToken) return;
+
+            const res = await fetch('/api/admin/courses', {
+                headers: { Authorization: `Bearer ${idToken}` },
+            });
+            const data = await res.json();
+
+            if (data.templates) {
+                const cohortsRes = await fetch('/api/admin/cohorts', {
+                    headers: { Authorization: `Bearer ${idToken}` },
+                });
+                const cohortsData = await cohortsRes.json();
+                const cohortsByTemplate: Record<string, any[]> = {};
+                for (const c of cohortsData.cohorts || []) {
+                    if (!cohortsByTemplate[c.templateId]) cohortsByTemplate[c.templateId] = [];
+                    cohortsByTemplate[c.templateId].push(c);
+                }
+
+                setTemplates(
+                    data.templates.map((t: any) => ({
+                        ...t,
+                        cohorts: cohortsByTemplate[t.id] || [],
+                    })),
+                );
+            }
+        } catch (err) {
+            console.error('Error fetching templates:', err);
+            toast.error('Error al cargar los cursos');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (authLoading) return;
-        if (!institutionId) { setLoading(false); return; }
+        fetchTemplates();
+    }, []);
 
-        getDocs(query(
-            collection(db, 'courses'),
-            where('institutionId', '==', institutionId),
-        ))
-            .then(snap => setCourses(snap.docs.map(d => ({ ...d.data(), id: d.id } as CourseModel))))
-            .catch(err => console.error('Error fetching courses:', err))
-            .finally(() => setLoading(false));
-    }, [institutionId, authLoading]);
-
-    const filtered = courses.filter(c =>
+    const filtered = templates.filter(c =>
         searchTerm === '' ||
         (c.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.instructorName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.certification || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (c.slug || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const totalEnrolled = templates.reduce(
+        (sum, t) => sum + t.cohorts.reduce((s: number, c: any) => s + (c.enrolledCount || 0), 0),
+        0,
+    );
+    const openCohorts = templates.reduce(
+        (sum, t) => sum + t.cohorts.filter((c: any) => c.status === 'OPEN').length,
+        0,
     );
 
     const columns = [
         {
             key: 'title',
             label: 'Curso / Programa',
-            render: (_: any, row: CourseModel) => (
+            render: (_: any, row: TemplateWithCohorts) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)' }}>
+                    <div style={{
+                        width: 44, height: 44, borderRadius: 12,
+                        background: row.isAutomated ? '#EEF2FF' : 'var(--muted)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: row.isAutomated ? '#6366F1' : 'var(--brand)',
+                    }}>
                         <BookOpen size={22} />
                     </div>
                     <div>
                         <div style={{ fontWeight: 800, color: 'var(--foreground)', fontSize: 15 }}>{row.title}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{row.certification}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                            {row.isAutomated && (
+                                <span style={{
+                                    fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 20,
+                                    background: '#EEF2FF', color: '#4338CA', letterSpacing: '0.05em',
+                                }}>
+                                    AUTO
+                                </span>
+                            )}
+                            <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>
+                                {row.modules?.length || 0} módulos
+                            </span>
+                        </div>
                     </div>
                 </div>
             )
         },
         {
-            key: 'instructorName',
-            label: 'Instructor',
-            render: (val: any) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <User size={14} style={{ color: 'var(--text-muted)' }} />
-                    <div style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{val}</div>
-                </div>
-            )
+            key: 'cohorts',
+            label: 'Grupos',
+            render: (_: any, row: TemplateWithCohorts) => {
+                const open = row.cohorts.filter((c: any) => c.status === 'OPEN').length;
+                const total = row.cohorts.length;
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Layers size={14} style={{ color: 'var(--text-muted)' }} />
+                        <div>
+                            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--foreground)' }}>{total}</div>
+                            <div style={{ fontSize: 10, color: open > 0 ? '#10B981' : 'var(--text-muted)', fontWeight: 700 }}>
+                                {open} abierto{open !== 1 ? 's' : ''}
+                            </div>
+                        </div>
+                    </div>
+                );
+            },
         },
         {
-            key: 'studentCount',
-            label: 'Matrícula',
+            key: 'enrolledCount',
+            label: 'Inscritos',
+            render: (_: any, row: TemplateWithCohorts) => {
+                const enrolled = row.cohorts.reduce((s: number, c: any) => s + (c.enrolledCount || 0), 0);
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                        <Users size={14} style={{ color: 'var(--text-muted)' }} />
+                        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--foreground)' }}>{enrolled}</div>
+                    </div>
+                );
+            },
+        },
+        {
+            key: 'priceCOP',
+            label: 'Precio',
             render: (val: any) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-                    <Users size={14} style={{ color: 'var(--text-muted)' }} />
-                    <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--foreground)' }}>{val}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--foreground)' }}>
+                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val || 0)}
                 </div>
-            )
+            ),
         },
         {
             key: 'isActive',
@@ -109,7 +192,7 @@ export default function AdminCoursesPage() {
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
                 <PageHero
                     title="Oferta Formativa"
-                    subtitle={`Control centralizado de programas y cohortes (${courses.length} cursos activos)`}
+                    subtitle={`Control centralizado de programas y grupos (${templates.length} cursos, ${openCohorts} grupos abiertos)`}
                     parentTitle="Admin"
                     parentHref="/admin/dashboard"
                     actions={
@@ -129,7 +212,7 @@ export default function AdminCoursesPage() {
                             <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
                                 type="text"
-                                placeholder="Buscar por título, instructor o certificación..."
+                                placeholder="Buscar por título o slug..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{
@@ -139,13 +222,14 @@ export default function AdminCoursesPage() {
                             />
                         </div>
                         <button onClick={() => {
-                            if (courses.length === 0) return toast.error('No hay cursos para exportar');
-                            downloadCsv(courses.map(c => ({
-                                Curso: c.title,
-                                Instructor: c.instructorName,
-                                Certificación: c.certification,
-                                Matrícula: c.studentCount ?? 0,
-                                Estado: c.isActive ? 'Activo' : 'Inactivo'
+                            if (templates.length === 0) return toast.error('No hay cursos para exportar');
+                            downloadCsv(templates.map(t => ({
+                                Curso: t.title,
+                                Slug: t.slug,
+                                'Grupos': t.cohorts.length,
+                                'Inscritos': t.cohorts.reduce((s: number, c: any) => s + (c.enrolledCount || 0), 0),
+                                'Precio COP': t.priceCOP || 0,
+                                Estado: t.isActive ? 'Activo' : 'Inactivo'
                             })), 'oferta-formativa');
                             toast.success('Reporte exportado');
                         }} style={{
@@ -161,7 +245,7 @@ export default function AdminCoursesPage() {
                         data={filtered}
                         loading={loading}
                         onRowClick={(row) => router.push(`/admin/courses/${row.id}`)}
-                        emptyMessage="No se han encontrado cursos que coincidan con los criterios de búsqueda."
+                        emptyMessage="No se han encontrado cursos. Crea uno nuevo."
                     />
                 </div>
             </div>

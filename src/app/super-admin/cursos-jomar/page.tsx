@@ -109,6 +109,23 @@ function newGrupo(): Grupo {
     };
 }
 
+function autoSlug(name: string, existingSlugs: string[] = []): string {
+    const base = name
+        .toLowerCase()
+        .replace(/[áàäâ]/g, 'a').replace(/[éèëê]/g, 'e').replace(/[íìïî]/g, 'i')
+        .replace(/[óòöô]/g, 'o').replace(/[úùüû]/g, 'u').replace(/[ñ]/g, 'n')
+        .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
+        .trim();
+    
+    if (!existingSlugs.includes(base)) return base;
+    
+    let counter = 2;
+    while (existingSlugs.includes(`${base}-${counter}`)) {
+        counter++;
+    }
+    return `${base}-${counter}`;
+}
+
 function newModulo(): Modulo {
     return { nombre: '', temas: [''], duracion: '2 horas' };
 }
@@ -291,7 +308,7 @@ function ModulosEditor({ modulos, onChange }: { modulos: Modulo[]; onChange: (m:
 
 // ── Course Modal ──────────────────────────────────────────────────────────────
 
-function CourseModal({ curso, onClose, onSaved }: { curso: JomarCurso | null; onClose: () => void; onSaved: () => void }) {
+function CourseModal({ curso, onClose, onSaved, existingSlugs = [] }: { curso: JomarCurso | null; onClose: () => void; onSaved: () => void; existingSlugs?: string[] }) {
     const isEdit = !!curso;
     const [form, setForm] = useState<Omit<JomarCurso, 'id' | 'createdAt'>>(
         curso
@@ -315,7 +332,8 @@ function CourseModal({ curso, onClose, onSaved }: { curso: JomarCurso | null; on
         if (!form.nombre.trim()) { toast.error('El nombre es requerido'); return; }
         setSaving(true);
         try {
-            const payload = { ...form, institutionId: 'JOMAR', updatedAt: serverTimestamp() };
+            const finalSlug = form.slug || autoSlug(form.nombre, existingSlugs);
+            const payload = { ...form, slug: finalSlug, institutionId: 'JOMAR', updatedAt: serverTimestamp() };
             if (isEdit) {
                 await updateDoc(doc(db, 'jomarCourses', curso!.id), payload);
                 toast.success('Curso actualizado');
@@ -350,11 +368,14 @@ function CourseModal({ curso, onClose, onSaved }: { curso: JomarCurso | null; on
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <label style={labelSt}>Nombre *</label>
-                                <input value={form.nombre} onChange={s('nombre')} required placeholder="Ej: RCP Básico" style={{ ...inputSt, marginTop: 4 }} />
+                                <input value={form.nombre} onChange={e => {
+                                    const val = e.target.value;
+                                    setForm(p => ({ ...p, nombre: val, slug: p.slug || autoSlug(val, existingSlugs) }));
+                                }} required placeholder="Ej: RCP Básico" style={{ ...inputSt, marginTop: 4 }} />
                             </div>
                             <div>
-                                <label style={labelSt}>Slug (URL)</label>
-                                <input value={form.slug} onChange={s('slug')} placeholder="rcp-basico" style={{ ...inputSt, marginTop: 4 }} />
+                                <label style={labelSt}>Slug (URL) <span style={{fontSize:9, color:'var(--text-muted)'}}>(auto)</span></label>
+                                <input value={form.slug} onChange={e => setForm(p => ({ ...p, slug: e.target.value }))} placeholder="rcp-basico" style={{ ...inputSt, marginTop: 4 }} />
                             </div>
                             <div>
                                 <label style={labelSt}>Icono Bootstrap</label>
@@ -675,7 +696,12 @@ export default function SuperAdminCursosJomarPage() {
 
             {/* Modals */}
             {(modal === 'create' || (modal && typeof modal !== 'string')) && (
-                <CourseModal curso={modal === 'create' ? null : modal as JomarCurso} onClose={() => setModal(null)} onSaved={() => setModal(null)} />
+                <CourseModal 
+                    curso={modal === 'create' ? null : modal as JomarCurso} 
+                    onClose={() => setModal(null)} 
+                    onSaved={() => setModal(null)}
+                    existingSlugs={courses.map(c => c.slug)} 
+                />
             )}
 
             {confirmDelete && (
