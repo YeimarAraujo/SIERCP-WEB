@@ -3,18 +3,66 @@ import {
     query, where, orderBy, limit, serverTimestamp, Timestamp, increment,
     type QueryConstraint, collectionGroup, getCountFromServer
 } from 'firebase/firestore';
-import { db } from './firebase';
-import type { UserModel } from '@/shared/types/user';
+import { auth, db } from './firebase';
+import type { UserModel, CreateUserDTO, } from '@/shared/types/user';
 import type { SessionModel } from '@/shared/types/session';
 import type { CourseModel, Enrollment } from '@/shared/types/course';
 import type { ManiquiModel } from '@/shared/types/device';
 import type { GuideModel } from '@/shared/types/guide';
 import { AuditService } from '@/features/audit/services/audit.service';
+import {
+    createUserWithEmailAndPassword
+} from 'firebase/auth';
+import {
+    arrayUnion,
+} from 'firebase/firestore';
 
 function tsToDate(val: unknown): Date {
     if (val instanceof Timestamp) return val.toDate();
     if (val instanceof Date) return val;
     return new Date();
+}
+function buildUserModel(
+    uid: string,
+    data: CreateUserDTO
+): UserModel {
+    return {
+        uid,
+
+        email: data.email,
+
+        firstName: data.firstName,
+        lastName: data.lastName,
+        identification: data.identification,
+        phoneNumber: data.phoneNumber,
+        role: data.role,
+
+        institutionId: data.institutionId,
+
+        isActive: true,
+
+        status: 'ACTIVE',
+
+        certVerification: 'NONE',
+
+        coursesCreated: 0,
+
+        courses: [],
+
+        stats: {
+            totalSessions: 0,
+            sessionsToday: 0,
+            averageScore: 0,
+            bestScore: 0,
+            streakDays: 0,
+            totalHours: 0,
+            averageDepthMm: 0,
+            averageRatePerMin: 0,
+        },
+
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
 }
 
 export const UserService = {
@@ -31,8 +79,43 @@ export const UserService = {
             const d = s.data();
             return { ...d, uid: s.id, createdAt: tsToDate(d.createdAt), updatedAt: tsToDate(d.updatedAt) } as UserModel;
         });
-    },
 
+    },
+    async create(data: CreateUserDTO): Promise<UserModel> {
+
+        const cred = await createUserWithEmailAndPassword(
+            auth,
+            data.email,
+            data.password
+        );
+
+        const userData = buildUserModel(
+            cred.user.uid,
+            data
+        );
+
+        await setDoc(
+            doc(db, 'users', userData.uid),
+            {
+                ...userData,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+            }
+        );
+
+        await AuditService.record({
+            action: 'create',
+            resource: 'user',
+            resourceId: userData.uid,
+            institutionId: data.institutionId,
+            metadata: {
+                role: data.role,
+                email: data.email,
+            },
+        });
+
+        return userData;
+    },
     async update(uid: string, data: Partial<UserModel>): Promise<void> {
         await updateDoc(doc(db, 'users', uid), { ...data, updatedAt: serverTimestamp() });
         await AuditService.record({
@@ -78,7 +161,7 @@ export const SessionService = {
             limit(limitN),
         ];
         const snaps = await getDocs(query(collection(db, 'sessions'), ...constraints));
-        return snaps.docs.map((s) => parseSession(s.id, s.data() as Record<string, unknown>)); 
+        return snaps.docs.map((s) => parseSession(s.id, s.data() as Record<string, unknown>));
     },
 
     async getCountByStudent(studentId: string): Promise<number> {
@@ -181,7 +264,7 @@ export const CourseService = {
         // Esto es 100% compatible con las reglas locales actuales.
         const allCourses = await this.getAll(false);
         const enrolledCourses: CourseModel[] = [];
-        
+
         await Promise.all(allCourses.map(async (course) => {
             try {
                 const snap = await getDoc(doc(db, 'courses', course.id, 'enrollments', studentId));
@@ -192,7 +275,7 @@ export const CourseService = {
                 // Ignore errors
             }
         }));
-        
+
         return enrolledCourses;
     },
 
@@ -210,20 +293,79 @@ export const CourseService = {
             return parseCourse(s.id, { ...data, studentCount });
         }));
     },
-
     async create(course: Omit<CourseModel, 'id'>): Promise<string> {
+
         const ref = doc(collection(db, 'courses'));
-        const createdBy = course.createdBy || course.instructorId;
-        await setDoc(ref, { ...course, createdBy, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-        if (course.instructorId) {
-            await updateDoc(doc(db, 'users', course.instructorId), { coursesCreated: increment(1) });
+
+        // ── Instructor final ─────────────────────────────
+        const instructorId =
+            course.instructorId || course.createdBy;
+
+        if (!instructorId) {
+            throw new Error('El curso debe tener un creador');
         }
+
+        // ── Obtener instructor ───────────────────────────
+        const instructorRef = doc(db, 'users', instructorId);
+
+        const instructorSnap = await getDoc(instructorRef);
+
+        if (!instructorSnap.exists()) {
+            throw new Error('Instructor no encontrado');
+        }
+
+        const instructor = instructorSnap.data();
+
+        // ── Datos finales del curso ──────────────────────
+        const courseData = {
+            ...course,
+
+            instructorId,
+
+            instructorName:
+                course.instructorName ||
+                `${instructor.firstName} ${instructor.lastName}`,
+
+            instructorEmail:
+                course.instructorEmail ||
+                instructor.email,
+
+            createdBy:
+                course.createdBy || instructorId,
+
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+        };
+
+        // ── Crear curso ──────────────────────────────────
+        await setDoc(ref, courseData);
+
+        // ── Actualizar instructor ────────────────────────
+        await updateDoc(instructorRef, {
+
+            coursesCreated: increment(1),
+
+            courses: arrayUnion(ref.id),
+
+            memberships: arrayUnion(
+                course.institutionId
+            ),
+
+            updatedAt: serverTimestamp(),
+        });
+
+        // ── Audit ────────────────────────────────────────
         await AuditService.record({
             action: 'create',
             resource: 'course',
             resourceId: ref.id,
-            metadata: { title: course.title, instructorId: course.instructorId },
+            institutionId: course.institutionId,
+            metadata: {
+                title: course.title,
+                instructorId,
+            },
         });
+
         return ref.id;
     },
 
@@ -349,11 +491,11 @@ export const GuideService = {
 
     async create(guide: Omit<GuideModel, 'id'>): Promise<string> {
         const ref = doc(collection(db, 'guides'));
-        await setDoc(ref, { 
-            ...guide, 
+        await setDoc(ref, {
+            ...guide,
             uploadedAt: serverTimestamp(),
-            createdAt: serverTimestamp(), 
-            updatedAt: serverTimestamp() 
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
         });
         await AuditService.record({
             action: 'create',
@@ -388,7 +530,7 @@ export const NotificationService = {
     async getByUser(userId: string, limitN = 10): Promise<any[]> {
         const snaps = await getDocs(
             query(
-                collection(db, 'notifications'), 
+                collection(db, 'notifications'),
                 where('userId', '==', userId),
                 orderBy('createdAt', 'desc'),
                 limit(limitN)
@@ -437,8 +579,8 @@ export const SearchService = {
         if (!searchTerm || searchTerm.length < 2) return [];
         const term = searchTerm.toLowerCase();
         const courses = await CourseService.getByInstructor(instructorId);
-        const filteredCourses = courses.filter(c => 
-            c.title.toLowerCase().includes(term) || 
+        const filteredCourses = courses.filter(c =>
+            c.title.toLowerCase().includes(term) ||
             (c.certification && c.certification.toLowerCase().includes(term))
         ).map(c => ({
             id: c.id,
@@ -450,8 +592,8 @@ export const SearchService = {
         const enrollmentsPromises = courses.map(c => CourseService.getEnrollments(c.id));
         const allEnrollments = (await Promise.all(enrollmentsPromises)).flat();
         const uniqueStudents = Array.from(new Map(allEnrollments.map(e => [e.studentId, e])).values());
-        const filteredStudents = uniqueStudents.filter(s => 
-            s.studentName.toLowerCase().includes(term) || 
+        const filteredStudents = uniqueStudents.filter(s =>
+            s.studentName.toLowerCase().includes(term) ||
             s.studentEmail.toLowerCase().includes(term)
         ).map(s => ({
             id: s.studentId,
