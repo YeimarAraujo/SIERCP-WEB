@@ -13,9 +13,10 @@ import { db, getSecondaryAuth } from '@/shared/lib/firebase';
 import { useAuthStore } from '@/stores/auth-store';
 import {
     UserPlus, User, Fingerprint, Phone, Key,
-    Mail, Search, CheckCircle, AlertCircle, ArrowLeft, Link2,
+    Mail, Search, CheckCircle, AlertCircle, ArrowLeft, Link2, Eye, EyeOff,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DOCUMENT_TYPE_OPTIONS } from '@/shared/constants/document_types';
 
 type Step = 'search' | 'found' | 'new';
 
@@ -41,7 +42,10 @@ export default function NewStudentPage() {
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
         password: '', confirmPassword: '', phone: '',
+        documentType: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const setField = (k: keyof typeof form) => (v: string) =>
         setForm((p) => ({ ...p, [k]: v }));
@@ -105,6 +109,10 @@ export default function NewStudentPage() {
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        if (!form.documentType) {
+            setError('Selecciona el tipo de documento');
+            return;
+        }
         if (form.password.length < 6) {
             setError('La contraseña debe tener mínimo 6 caracteres');
             return;
@@ -131,6 +139,7 @@ export default function NewStudentPage() {
                 lastName: form.lastName,
                 role: 'USUARIO',
                 identificacion: identificacion.trim(),
+                documentType: form.documentType,
                 phone: form.phone,
                 isActive: true,
                 institutionId,
@@ -260,6 +269,23 @@ export default function NewStudentPage() {
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <FormInput label="Nombres" icon={User} required value={form.firstName} onChange={setField('firstName')} placeholder="Juan Andrés" />
                                         <FormInput label="Apellidos" icon={User} required value={form.lastName} onChange={setField('lastName')} placeholder="Pérez García" />
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                                                Tipo de documento <span style={{ color: '#EF4444' }}>*</span>
+                                            </label>
+                                            <select
+                                                value={form.documentType}
+                                                onChange={(e) => setField('documentType')(e.target.value)}
+                                                style={{ width: '100%', height: 50, padding: '0 14px', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 14, color: 'var(--foreground)', fontWeight: 600, outline: 'none', cursor: 'pointer' }}
+                                            >
+                                                <option value="">Seleccionar...</option>
+                                                {DOCUMENT_TYPE_OPTIONS.map((opt) => (
+                                                    <option key={opt.value} value={opt.value}>
+                                                        {opt.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                         <FormInput label="Teléfono" icon={Phone} value={form.phone} onChange={setField('phone')} placeholder="+57 300 000 0000" />
                                     </div>
                                 </div>
@@ -269,8 +295,20 @@ export default function NewStudentPage() {
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <FormInput label="Correo Electrónico" icon={Mail} required type="email" value={form.email} onChange={setField('email')} placeholder="estudiante@siercp.edu.co" />
                                         <div />
-                                        <FormInput label="Contraseña Temporal" icon={Key} required type="password" value={form.password} onChange={setField('password')} placeholder="••••••••" />
-                                        <FormInput label="Confirmar Contraseña" icon={Key} required type="password" value={form.confirmPassword} onChange={setField('confirmPassword')} placeholder="••••••••" />
+                                        <PasswordInput
+                                            label="Contraseña Temporal"
+                                            value={form.password}
+                                            onChange={setField('password')}
+                                            show={showPassword}
+                                            toggleShow={() => setShowPassword(p => !p)}
+                                        />
+                                        <PasswordInput
+                                            label="Confirmar Contraseña"
+                                            value={form.confirmPassword}
+                                            onChange={setField('confirmPassword')}
+                                            show={showConfirmPassword}
+                                            toggleShow={() => setShowConfirmPassword(p => !p)}
+                                        />
                                     </div>
                                 </div>
                                 {error && <ErrorBox message={error} />}
@@ -286,6 +324,51 @@ export default function NewStudentPage() {
                         </form>
                     )}
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function PasswordInput({ label, value, onChange, show, toggleShow }: {
+    label: string; value: string; onChange: (v: string) => void; show: boolean; toggleShow: () => void;
+}) {
+    return (
+        <div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                {label} <span style={{ color: '#EF4444' }}>*</span>
+            </label>
+            <div style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+                    <Key size={17} />
+                </div>
+                <input
+                    type={show ? 'text' : 'password'}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder="********"
+                    required
+                    style={{ width: '100%', height: 50, padding: '0 44px 0 44px', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 14, color: 'var(--foreground)', fontWeight: 600, outline: 'none' }}
+                />
+                <button
+                    type="button"
+                    onClick={toggleShow}
+                    style={{
+                        position: 'absolute',
+                        right: 12,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-muted)',
+                    }}
+                >
+                    {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
             </div>
         </div>
     );
