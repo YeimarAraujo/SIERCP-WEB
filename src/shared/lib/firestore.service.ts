@@ -3,7 +3,7 @@ import {
     query, where, orderBy, limit, serverTimestamp, Timestamp, increment,
     type QueryConstraint, collectionGroup, getCountFromServer
 } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { auth, db, getSecondaryAuth } from './firebase';
 import type { UserModel, CreateUserDTO, } from '@/shared/types/user';
 import type { SessionModel } from '@/shared/types/session';
 import type { CourseModel, Enrollment } from '@/shared/types/course';
@@ -11,7 +11,7 @@ import type { ManiquiModel } from '@/shared/types/device';
 import type { GuideModel } from '@/shared/types/guide';
 import { AuditService } from '@/features/audit/services/audit.service';
 import {
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword, signOut
 } from 'firebase/auth';
 import {
     arrayUnion,
@@ -82,12 +82,15 @@ export const UserService = {
 
     },
     async create(data: CreateUserDTO): Promise<UserModel> {
+        const secondaryAuth = getSecondaryAuth();
+        if (!secondaryAuth) throw new Error('Auth no disponible');
 
         const cred = await createUserWithEmailAndPassword(
-            auth,
+            secondaryAuth,
             data.email,
             data.password
         );
+        await signOut(secondaryAuth);
 
         const userData = buildUserModel(
             cred.user.uid,

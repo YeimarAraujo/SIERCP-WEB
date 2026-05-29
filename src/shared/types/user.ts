@@ -78,6 +78,7 @@ export interface UserModel {
   role: UserRole;
   avatarUrl?: string;
   identification?: string;
+  documentType?: string;
   isActive: boolean;
   institutionId: string;
   phoneNumber?: string;
@@ -100,6 +101,7 @@ export type CreateUserDTO = {
   firstName: string;
   lastName: string;
   identification: string;
+  documentType?: string;
   phoneNumber?: string;
   address?: string;
   city?: string;
@@ -132,6 +134,7 @@ function buildUserModel(
     department: data.department,
     country: data.country,
     identification: data.identification,
+    documentType: data.documentType,
     institutionId: data.institutionId,
     isActive: true,
     status: 'ACTIVE',

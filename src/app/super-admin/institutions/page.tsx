@@ -10,7 +10,7 @@ import { PageHero } from '@/components/ui/page-hero';
 import {
   Building2, Plus, Users, Cpu, GraduationCap,
   CheckCircle2, AlertCircle, Clock, Zap, Settings, Search,
-  X, CreditCard, ChevronDown, Pencil, Trash2,
+  X, CreditCard, ChevronDown, Pencil, Trash2, UserPlus, Eye, EyeOff,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { UserModel } from '@/models';
@@ -19,6 +19,8 @@ import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
 import { Field, SearchableSelect } from '@/app/checkout/_components/ui';
 import { TIPOS_INSTITUCION } from '@/data/institutions';
 import { MembershipService } from '@/services/memberships.service';
+import { CreateAdminModal } from '@/features/super-admin/components/create-admin-modal';
+import { DOCUMENT_TYPE_OPTIONS } from '@/shared/constants/document_types';
 
 const PLAN_META: Record<string, { label: string; bg: string; text: string }> = {
   pyme: { label: 'Pyme', bg: 'rgba(14,165,233,0.12)', text: '#0ea5e9' },
@@ -255,15 +257,7 @@ function EditModal({ institution, onClose, onSaved }: {
   const [maxInstructors, setMaxInstructors] = useState(String(institution.maxInstructors ?? 5));
   const [maxDevices, setMaxDevices] = useState(String(institution.maxDevices ?? 10));
   const [saving, setSaving] = useState(false);
-  const [showCreateAdmin, setShowCreateAdmin] = useState(false);
-  const [adminFirstName, setAdminFirstName] = useState('');
-  const [adminLastName, setAdminLastName] = useState('');
-  const [adminEmail, setAdminEmail] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminIdentification, setAdminIdentification] = useState('');
-  const [adminPhone, setAdminPhone] = useState('');
-  const [adminStatus, setAdminStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
-  const [adminCertVerification, setAdminCertVerification] = useState<'NONE' | 'PENDING' | 'VERIFIED'>('NONE');
+  const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
 
   useEffect(() => {
     UserService.getAll().then(users => {
@@ -273,56 +267,6 @@ function EditModal({ institution, onClose, onSaved }: {
       setAdmins(adminsOnly);
     });
   }, [institution]);
-
-  const handleCreateAdmin = async () => {
-    if (
-      !adminFirstName.trim() ||
-      !adminLastName.trim() ||
-      !adminEmail.trim() ||
-      !adminPassword.trim() ||
-      !adminIdentification.trim() ||
-      !adminPhone.trim()
-    ) {
-      toast.error('Completa todos los campos');
-      return;
-    }
-
-    try {
-      const newAdmin = await UserService.create({
-        firstName: adminFirstName.trim(),
-        lastName: adminLastName.trim(),
-        email: adminEmail.trim(),
-        password: adminPassword,
-        role: 'ADMIN',
-        institutionId: institution.id,
-        identification: adminIdentification.trim(),
-        phoneNumber: adminPhone,
-
-      });
-
-      setAdmins(prev => [...prev, newAdmin]);
-
-      setSelectedAdmins(prev => [
-        ...prev,
-        newAdmin.uid,
-      ]);
-
-      setAdminFirstName('');
-      setAdminLastName('');
-      setAdminEmail('');
-      setAdminPassword('');
-
-      setShowCreateAdmin(false);
-
-      toast.success('Administrador creado');
-    } catch (e) {
-      toast.error(
-        e instanceof Error
-          ? e.message
-          : 'Error al crear administrador'
-      );
-    }
-  };
 
   const removeAdmin = (uid: string) => {
     setAdmins(prev =>
@@ -424,7 +368,7 @@ function EditModal({ institution, onClose, onSaved }: {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, }}>
                 <label style={labelStyle}>Administradores</label>
-                <button type="button" onClick={() => setShowCreateAdmin(!showCreateAdmin)} style={{ ...btnPrimary, padding: '6px 12px', fontSize: 12, }}><Plus size={14} /> Crear admin</button>
+                <button type="button" onClick={() => setShowCreateAdminModal(true)} style={{ ...btnPrimary, padding: '6px 12px', fontSize: 12, }}><Plus size={14} /> Crear admin</button>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {admins.map(admin => (
@@ -441,29 +385,16 @@ function EditModal({ institution, onClose, onSaved }: {
                 ))}
               </div>
             </div>
-            {showCreateAdmin && (
-              <div style={{ border: '1px solid var(--border)', borderRadius: 16, padding: 16, background: 'var(--bg-surface-2)', }}>
-                <h4 style={{ marginTop: 0, marginBottom: 14, fontSize: 14, fontWeight: 800, }}>Nuevo administrador</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                  <input placeholder='Nombre' value={adminFirstName} onChange={e => setAdminFirstName(e.target.value)} style={inputStyle} />
-                  <input placeholder='Apellido' value={adminLastName} onChange={e => setAdminLastName(e.target.value)} style={inputStyle} />
-                  <input placeholder='Identificación' value={adminIdentification} onChange={e => setAdminIdentification(e.target.value)} style={inputStyle} />
-                  <input
-                    placeholder="Teléfono"
-                    value={adminPhone}
-                    onChange={e => setAdminPhone(e.target.value)}
-                    style={inputStyle}
-                  />
-
-                  <input type='email' placeholder='Correo' value={adminEmail} onChange={e => setAdminEmail(e.target.value)} style={inputStyle} />
-                  <input type='password' placeholder='Contraseña' value={adminPassword} onChange={e => setAdminPassword(e.target.value)} style={inputStyle} />
-                </div>
-
-
-                <button type='button' onClick={handleCreateAdmin} style={{ ...btnPrimary, width: '100%', marginTop: 14, }}>
-                  Crear administrador
-                </button>
-              </div>
+            {showCreateAdminModal && (
+              <CreateAdminModal
+                institutionId={institution.id}
+                institutionName={institution.name}
+                onClose={() => setShowCreateAdminModal(false)}
+                onCreated={(newAdmin) => {
+                  setAdmins(prev => [...prev, newAdmin]);
+                  setSelectedAdmins(prev => [...prev, newAdmin.uid]);
+                }}
+              />
             )}
             <div>
               <label style={labelStyle}>Modo de operación</label>
@@ -614,13 +545,16 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
   const [adminFirstName, setAdminFirstName] = useState('');
   const [adminLastName, setAdminLastName] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState('');
   const [adminIdentification, setAdminIdentification] = useState('');
+  const [adminDocumentType, setAdminDocumentType] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPhone, setAdminPhone] = useState('');
   const [adminAddress, setAdminAddress] = useState('');
   const [adminCity, setAdminCity] = useState('');
   const [adminDepartment, setAdminDepartment] = useState('');
   const [adminCountry, setAdminCountry] = useState('Colombia');
+  const [showPassword, setShowPassword] = useState(false);
 
   const municipios = getMunicipalities(department);
 
@@ -651,8 +585,16 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
       toast.error('Contraseña del administrador requerida');
       return;
     }
+    if (adminPassword !== adminConfirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
     if (!adminIdentification.trim()) {
       toast.error('Identificación requerida');
+      return;
+    }
+    if (!adminDocumentType.trim()) {
+      toast.error('Tipo de identificación requerido');
       return;
     }
     setCreating(true);
@@ -690,6 +632,7 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
         firstName: adminFirstName.trim(),
         lastName: adminLastName.trim(),
         identification: adminIdentification.trim(),
+        documentType: adminDocumentType,
         phoneNumber: adminPhone.trim(),
         role: 'ADMIN',
         address: adminAddress,
@@ -857,8 +800,22 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
                     style={inputStyle}
                   />
                 </div>
-
-
+                <div>
+                  <label style={labelStyle}>Tipo de identificación *</label>
+                  <select
+                    required
+                    value={adminDocumentType}
+                    onChange={e => setAdminDocumentType(e.target.value)}
+                    style={inputStyle}
+                  >
+                    <option value="">Seleccionar...</option>
+                    {DOCUMENT_TYPE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label style={labelStyle}>Teléfono</label>
                   <input placeholder="+57 300 000 0000" value={adminPhone} onChange={e => setAdminPhone(e.target.value)} style={inputStyle} />
@@ -910,14 +867,70 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
 
                 <div>
                   <label style={labelStyle}>Contraseña *</label>
-                  <input
-                    required
-                    type="password"
-                    value={adminPassword}
-                    onChange={e => setAdminPassword(e.target.value)}
-                    placeholder="********"
-                    style={inputStyle}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      required
+                      type={showPassword ? 'text' : 'password'}
+                      value={adminPassword}
+                      onChange={e => setAdminPassword(e.target.value)}
+                      placeholder="********"
+                      style={{ ...inputStyle, paddingRight: 40 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(p => !p)}
+                      style={{
+                        position: 'absolute',
+                        right: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Confirmar contraseña *</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      required
+                      type={showPassword ? 'text' : 'password'}
+                      value={adminConfirmPassword}
+                      onChange={e => setAdminConfirmPassword(e.target.value)}
+                      placeholder="********"
+                      style={{ ...inputStyle, paddingRight: 40 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(p => !p)}
+                      style={{
+                        position: 'absolute',
+                        right: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -985,6 +998,7 @@ export default function InstitutionsPage() {
   const [changeStatusTarget, setChangeStatusTarget] = useState<Institution | null>(null);
   const [editTarget, setEditTarget] = useState<Institution | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Institution | null>(null);
+  const [createAdminTarget, setCreateAdminTarget] = useState<Institution | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -1129,6 +1143,13 @@ export default function InstitutionsPage() {
                           <Pencil size={13} />
                         </button>
                         <button
+                          onClick={() => setCreateAdminTarget(inst)}
+                          title="Crear administrador"
+                          style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)', background: 'rgba(99,102,241,0.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366F1' }}
+                        >
+                          <UserPlus size={13} />
+                        </button>
+                        <button
                           onClick={() => setDeleteTarget(inst)}
                           title="Eliminar institución"
                           style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}
@@ -1184,6 +1205,14 @@ export default function InstitutionsPage() {
       {changeStatusTarget && <ChangeStatusModal institution={changeStatusTarget} onClose={() => setChangeStatusTarget(null)} onSaved={handleStatusSaved} />}
       {editTarget && <EditModal institution={editTarget} onClose={() => setEditTarget(null)} onSaved={loadData} />}
       {deleteTarget && <DeleteModal institution={deleteTarget} onClose={() => setDeleteTarget(null)} onDeleted={handleDeleted} />}
+      {createAdminTarget && (
+        <CreateAdminModal
+          institutionId={createAdminTarget.id}
+          institutionName={createAdminTarget.name}
+          onClose={() => setCreateAdminTarget(null)}
+          onCreated={() => setCreateAdminTarget(null)}
+        />
+      )}
     </div>
   );
 }
