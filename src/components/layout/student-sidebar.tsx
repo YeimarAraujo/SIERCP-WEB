@@ -16,48 +16,44 @@ import {
 import type { LucideIcon } from 'lucide-react';
 
 interface NavItem {
-    label:      string;
-    href:       string;
-    icon:       LucideIcon;
+    label: string;
+    href: string;
+    icon: LucideIcon;
     highlight?: boolean;
-    pulse?:     boolean;
+    pulse?: boolean;
 }
 
 const studentNavItems: NavItem[] = [
-    { label: 'Inicio',       href: '/student/home',         icon: Home },
-    { label: 'Mis cursos',   href: '/student/courses',      icon: BookOpen },
-    { label: 'Calendario',   href: '/student/calendar',     icon: CalendarDays },
-    { label: 'Historial',    href: '/student/history',      icon: Clock },
-    { label: 'Mis reportes', href: '/student/reports',      icon: BarChart2 },
+    { label: 'Inicio', href: '/student/home', icon: Home },
+    { label: 'Mis cursos', href: '/student/courses', icon: BookOpen },
+    { label: 'Calendario', href: '/student/calendar', icon: CalendarDays },
+    { label: 'Historial', href: '/student/history', icon: Clock },
+    { label: 'Mis reportes', href: '/student/reports', icon: BarChart2 },
     { label: 'Certificados', href: '/student/certificates', icon: Award },
-    { label: 'Ranking',      href: '/student/ranking',      icon: Trophy },
-    { label: 'Tienda',       href: '/student/tienda',       icon: ShoppingBag },
+    { label: 'Ranking', href: '/student/ranking', icon: Trophy },
+    { label: 'Tienda', href: '/student/tienda', icon: ShoppingBag },
 ];
 
 const instructorNavItems: NavItem[] = [
     {
-        label:     'Cursos como instructor',
-        href:      '/student/instructor-courses',
-        icon:      GraduationCap,
-        highlight: true,
+        label: 'Cursos como instructor',
+        href: '/student/instructor-courses',
+        icon: GraduationCap,
+        highlight: false,
     },
     {
-        label:     'Sesiones en Vivo',
-        href:      '/student/live',
-        icon:      Monitor,
-        highlight: true,
-        pulse:     true,
+        label: 'Sesiones en Vivo',
+        href: '/student/live',
+        icon: Monitor,
+        highlight: false,
+        pulse: true,
     },
 ];
 
-/**
- * Determina si el usuario es instructor en alguna organización.
- * Usa memberships (no courses) para evitar 403: el usuario siempre puede leer sus propias memberships.
- */
 async function checkIsInstructor(uid: string, role: string, membershipRole: string): Promise<boolean> {
     // Chequeo rápido por rol — sin Firestore
     if (['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN'].includes(role)) return true;
-    if (['INSTRUCTOR', 'ADMIN'].includes(membershipRole))       return true;
+    if (['INSTRUCTOR', 'ADMIN'].includes(membershipRole)) return true;
 
     // Chequeo por membership en cualquier org
     try {
@@ -77,15 +73,15 @@ async function checkIsInstructor(uid: string, role: string, membershipRole: stri
 
 export function StudentSidebar({ collapsed }: { collapsed?: boolean }) {
     const pathname = usePathname();
-    const router   = useRouter();
-    const user         = useAuthStore((s) => s.user);
+    const router = useRouter();
+    const user = useAuthStore((s) => s.user);
     const membershipRole = useAuthStore((s) => s.membershipRole) ?? '';
-    const logout       = useAuthStore((s) => s.logout);
-    const [hovered, setHovered]           = useState(false);
+    const logout = useAuthStore((s) => s.logout);
+    const [hovered, setHovered] = useState(false);
     const [isInstructor, setIsInstructor] = useState(false);
-    const { theme, toggleTheme }          = useThemeStore();
+    const { theme, toggleTheme } = useThemeStore();
 
-    const isCollapsed = collapsed && !hovered;
+    const isCollapsed: boolean = !!collapsed && !hovered;
 
     useEffect(() => {
         if (!user) return;
@@ -155,16 +151,6 @@ export function StudentSidebar({ collapsed }: { collapsed?: boolean }) {
 
             {/* Nav */}
             <nav style={{ flex: 1, padding: '12px' }}>
-                {/* Separador antes de los ítems de instructor */}
-                {isInstructor && !isCollapsed && (
-                    <div style={{
-                        fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.35)',
-                        letterSpacing: '0.1em', padding: '4px 12px 4px',
-                        marginTop: 8,
-                    }}>
-                        ESTUDIANTE
-                    </div>
-                )}
 
                 {studentNavItems.map((item) => (
                     <NavLink key={item.href} item={item} active={isActive(item.href)} isCollapsed={isCollapsed} />
@@ -173,15 +159,8 @@ export function StudentSidebar({ collapsed }: { collapsed?: boolean }) {
                 {/* Bloque instructor */}
                 {isInstructor && (
                     <>
-                        {!isCollapsed && (
-                            <div style={{
-                                fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.35)',
-                                letterSpacing: '0.1em', padding: '12px 12px 4px',
-                            }}>
-                                COMO INSTRUCTOR
-                            </div>
-                        )}
-                        {isCollapsed && <div style={{ height: 8 }} />}
+
+                        {isCollapsed}
                         {instructorNavItems.map((item) => (
                             <NavLink key={item.href} item={item} active={isActive(item.href)} isCollapsed={isCollapsed} />
                         ))}
@@ -214,13 +193,13 @@ export function StudentSidebar({ collapsed }: { collapsed?: boolean }) {
 
 // ── NavLink ───────────────────────────────────────────────────────────────────
 function NavLink({ item, active, isCollapsed }: { item: NavItem; active: boolean; isCollapsed: boolean }) {
-    const Icon        = item.icon;
+    const Icon = item.icon;
     const isHighlight = item.highlight && !active;
 
-    const bgBase    = isHighlight ? 'rgba(16,185,129,0.12)' : 'transparent';
+    const bgBase = isHighlight ? 'rgba(16,185,129,0.12)' : 'transparent';
     const colorBase = isHighlight ? '#10B981' : 'var(--sidebar-text)';
-    const bgHover   = isHighlight ? 'rgba(16,185,129,0.22)' : 'var(--sidebar-hover-bg)';
-    const colorHover= isHighlight ? '#059669' : 'var(--sidebar-hover-text)';
+    const bgHover = isHighlight ? 'rgba(16,185,129,0.22)' : 'var(--sidebar-hover-bg)';
+    const colorHover = isHighlight ? '#059669' : 'var(--sidebar-hover-text)';
 
     return (
         <Link href={item.href} style={{ textDecoration: 'none' }}>
@@ -246,13 +225,13 @@ function NavLink({ item, active, isCollapsed }: { item: NavItem; active: boolean
                 onMouseEnter={(e) => {
                     if (!active) {
                         e.currentTarget.style.background = bgHover;
-                        e.currentTarget.style.color      = colorHover;
+                        e.currentTarget.style.color = colorHover;
                     }
                 }}
                 onMouseLeave={(e) => {
                     if (!active) {
                         e.currentTarget.style.background = bgBase;
-                        e.currentTarget.style.color      = colorBase;
+                        e.currentTarget.style.color = colorBase;
                     }
                 }}
                 title={isCollapsed ? item.label : undefined}

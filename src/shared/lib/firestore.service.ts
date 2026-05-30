@@ -3,7 +3,7 @@ import {
     query, where, orderBy, limit, serverTimestamp, Timestamp, increment,
     type QueryConstraint, collectionGroup, getCountFromServer
 } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { auth, db, getSecondaryAuth } from './firebase';
 import type { UserModel, CreateUserDTO, } from '@/shared/types/user';
 import type { SessionModel } from '@/shared/types/session';
 import type { CourseModel, Enrollment } from '@/shared/types/course';
@@ -11,7 +11,7 @@ import type { ManiquiModel } from '@/shared/types/device';
 import type { GuideModel } from '@/shared/types/guide';
 import { AuditService } from '@/features/audit/services/audit.service';
 import {
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword, signOut
 } from 'firebase/auth';
 import {
     arrayUnion,
@@ -82,12 +82,15 @@ export const UserService = {
 
     },
     async create(data: CreateUserDTO): Promise<UserModel> {
+        const secondaryAuth = getSecondaryAuth();
+        if (!secondaryAuth) throw new Error('Auth no disponible');
 
         const cred = await createUserWithEmailAndPassword(
-            auth,
+            secondaryAuth,
             data.email,
             data.password
         );
+        await signOut(secondaryAuth);
 
         const userData = buildUserModel(
             cred.user.uid,
@@ -536,15 +539,16 @@ export const NotificationService = {
     },
 
     async getByUser(userId: string, limitN = 10): Promise<any[]> {
+        // Consultamos solo por userId (índice de campo único, siempre disponible) y
+        // ordenamos en memoria. Evita requerir un índice compuesto userId+createdAt
+        // cuya ausencia hacía fallar la consulta → notificaciones vacías.
         const snaps = await getDocs(
-            query(
-                collection(db, 'notifications'),
-                where('userId', '==', userId),
-                orderBy('createdAt', 'desc'),
-                limit(limitN)
-            )
+            query(collection(db, 'notifications'), where('userId', '==', userId))
         );
-        return snaps.docs.map(s => ({ id: s.id, ...s.data(), createdAt: tsToDate(s.data().createdAt) }));
+        return snaps.docs
+            .map(s => ({ id: s.id, ...s.data(), createdAt: tsToDate(s.data().createdAt) }))
+            .sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime())
+            .slice(0, limitN);
     },
 
     async markAsRead(id: string): Promise<void> {

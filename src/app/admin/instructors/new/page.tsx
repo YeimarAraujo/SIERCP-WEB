@@ -4,12 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
-import {
-    collection, query, where, getDocs,
-    doc, setDoc, serverTimestamp,
-} from 'firebase/firestore';
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { db, getSecondaryAuth } from '@/shared/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
 import { useAuthStore } from '@/stores/auth-store';
 import {
     UserPlus, User, Fingerprint, Phone, Key,
@@ -17,6 +13,7 @@ import {
     AlertCircle, ArrowLeft, Mail,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAuth } from 'firebase/auth';
 
 type Step = 'search' | 'found' | 'new';
 
@@ -37,7 +34,7 @@ export default function NewInstructorPage() {
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [identification, setidentification] = useState('');
+    const [identification, setIdentification] = useState('');
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
@@ -47,6 +44,13 @@ export default function NewInstructorPage() {
 
     const setField = (k: keyof typeof form) => (v: string) =>
         setForm((p) => ({ ...p, [k]: v }));
+
+    const getIdToken = async () => {
+        const auth = getAuth();
+        const token = await auth.currentUser?.getIdToken();
+        if (!token) throw new Error('No autenticado');
+        return token;
+    };
 
     // ── Step 1: search by ID ──────────────────────────────────────────────────
     const handleSearch = async () => {
@@ -79,23 +83,30 @@ export default function NewInstructorPage() {
         }
     };
 
-    // ── Step 2a: link existing user ───────────────────────────────────────────
+    // ── Step 2a: link existing user via API (Admin SDK server-side) ───────────
     const handleLink = async () => {
-        if (!foundUser || !institutionId) return;
+        if (!foundUser) return;
+        if (!institutionId) {
+            setError('No se encontró el ID de tu institución. Recarga la página e intenta de nuevo.');
+            return;
+        }
         setLoading(true);
         setError(null);
 
         try {
-
-            await setDoc(doc(db, 'memberships', `${foundUser.uid}_${institutionId}`), {
-                userId: foundUser.uid,
-                institutionId,
-                role: 'INSTRUCTOR',
-                status: 'approved',
-                isActive: true,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
+            const idToken = await getIdToken();
+            const res = await fetch('/api/admin/instructors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ action: 'link', userId: foundUser.uid }),
             });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Error al vincular instructor');
+
             toast.success('Instructor vinculado a tu institución');
             router.push('/admin/instructors');
         } catch (e: any) {
@@ -105,10 +116,11 @@ export default function NewInstructorPage() {
         }
     };
 
-    // ── Step 2b: create new user ──────────────────────────────────────────────
+    // ── Step 2b: create new instructor via API (Admin SDK server-side) ────────
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+
         if (form.password.length < 6) {
             setError('La contraseña debe tener mínimo 6 caracteres');
             return;
@@ -117,58 +129,39 @@ export default function NewInstructorPage() {
             setError('Las contraseñas no coinciden');
             return;
         }
+        if (!institutionId) {
+            setError('No se encontró el ID de tu institución. Recarga la página e intenta de nuevo.');
+            return;
+        }
+
         setLoading(true);
         try {
-            const secondaryAuth = getSecondaryAuth();
-            if (!secondaryAuth) throw new Error('Auth no disponible');
-
-            // Create auth user via secondary app — admin session stays intact
-            const cred = await createUserWithEmailAndPassword(
-                secondaryAuth, form.email, form.password
-            );
-            const uid = cred.user.uid;
-            await signOut(secondaryAuth);
-
-            // Write Firestore docs with admin's authenticated session
-            await setDoc(doc(db, 'users', uid), {
-                uid,
-                email: form.email,
-                firstName: form.firstName,
-                lastName: form.lastName,
-                role: 'INSTRUCTOR',
-                identification: identification.trim(),
-                phone: form.phone,
-                specialty: form.specialty,
-                isActive: true,
-                institutionId,
-                status: 'approved',
-                certVerification: 'NONE',
-                coursesCreated: 0,
-                stats: {
-                    totalSessions: 0, sessionsToday: 0, averageScore: 0, bestScore: 0,
-                    streakDays: 0, totalHours: 0, averageDepthMm: 0, averageRatePerMin: 0,
+            const idToken = await getIdToken();
+            const res = await fetch('/api/admin/instructors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${idToken}`,
                 },
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
+                body: JSON.stringify({
+                    action: 'create',
+                    email: form.email,
+                    password: form.password,
+                    firstName: form.firstName,
+                    lastName: form.lastName,
+                    phone: form.phone,
+                    specialty: form.specialty,
+                    identification: identification.trim(),
+                }),
             });
 
-            await setDoc(doc(db, 'memberships', `${uid}_${institutionId}`), {
-                userId: uid,
-                institutionId,
-                role: 'INSTRUCTOR',
-                status: 'approved',
-                isActive: true,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Error al crear instructor');
 
             toast.success('Instructor registrado y vinculado exitosamente');
             router.push('/admin/instructors');
         } catch (e: any) {
-            const msg = e?.code === 'auth/email-already-in-use'
-                ? 'Este correo ya está registrado. Búscalo por número de cédula.'
-                : (e.message || 'Error al crear instructor');
-            setError(msg);
+            setError(e.message || 'Error al crear instructor');
         } finally {
             setLoading(false);
         }
@@ -200,7 +193,7 @@ export default function NewInstructorPage() {
                                 </div>
                                 <input
                                     value={identification}
-                                    onChange={(e) => { setidentification(e.target.value); setStep('search'); }}
+                                    onChange={(e) => { setIdentification(e.target.value); setStep('search'); }}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                     placeholder="Número de cédula / documento"
                                     style={{ width: '100%', height: 52, padding: '0 16px 0 46px', borderRadius: 14, border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 15, color: 'var(--foreground)', fontWeight: 600, outline: 'none' }}
@@ -290,7 +283,7 @@ export default function NewInstructorPage() {
                                     <SectionTitle icon={Key} label="Credenciales de Acceso" />
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <FormInput label="Correo Corporativo" icon={Mail} required type="email" value={form.email} onChange={setField('email')} placeholder="instructor@siercp.edu.co" />
-                                        <div /> {/* empty cell */}
+                                        <div />
                                         <FormInput label="Contraseña Temporal" icon={Key} required type="password" value={form.password} onChange={setField('password')} placeholder="••••••••" />
                                         <FormInput label="Confirmar Contraseña" icon={Key} required type="password" value={form.confirmPassword} onChange={setField('confirmPassword')} placeholder="••••••••" />
                                     </div>
