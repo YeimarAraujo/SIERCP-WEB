@@ -248,6 +248,7 @@ interface AdminForm {
     firstName: string;
     lastName: string;
     email: string;
+    documentType: string;
     identification: string;
     phone: string;
     city: string;
@@ -255,7 +256,7 @@ interface AdminForm {
     address: string;
 }
 type AdminErrors = Partial<Record<keyof AdminForm, string>>;
-const emptyFormA: AdminForm = { firstName: '', lastName: '', email: '', identification: '', phone: '', city: '', department: '', address: '' };
+const emptyFormA: AdminForm = { firstName: '', lastName: '', email: '', documentType: 'CC', identification: '', phone: '', city: '', department: '', address: '' };
 
 function validateAdminForm(form: AdminForm): AdminErrors {
     const errs: AdminErrors = {};
@@ -298,8 +299,22 @@ function Step3({ adminForm, setAdminForm, adminErrors, accountData, setAccountDa
 
 
 
-                <Field label="Identificación" required error={adminErrors.identification}>
-                    <Input value={adminForm.identification} onChange={e => setAdminForm({ ...adminForm, identification: e.target.value })} />
+                <Field label="Tipo de documento" required error={adminErrors.documentType}>
+                    <select
+                        value={adminForm.documentType}
+                        onChange={e => setAdminForm({ ...adminForm, documentType: e.target.value })}
+                        style={{ width: '100%', height: 44, borderRadius: 10, border: '1px solid var(--clr-border,#e5e7eb)', background: 'var(--clr-bg,#fff)', padding: '0 12px', fontSize: 14 }}
+                    >
+                        <option value="CC">CC — Cédula de Ciudadanía</option>
+                        <option value="CE">CE — Cédula de Extranjería</option>
+                        <option value="TI">TI — Tarjeta de Identidad</option>
+                        <option value="PP">PP — Pasaporte</option>
+                        <option value="NIT">NIT</option>
+                        <option value="DIE">DIE — Doc. Identidad Extranjero</option>
+                    </select>
+                </Field>
+                <Field label="Número de documento" required error={adminErrors.identification}>
+                    <Input value={adminForm.identification} onChange={e => setAdminForm({ ...adminForm, identification: e.target.value })} placeholder="Número" />
                 </Field>
 
                 <Field label="Teléfono">
@@ -500,6 +515,7 @@ async function provisionClientSide(uid: string, company: CompanyForm, admin: Adm
         email: admin.email.toLowerCase(),
         firstName: admin.firstName,
         lastName: admin.lastName,
+        documentType: admin.documentType || undefined,
         identification: admin.identification,
         phoneNumber: admin.phone,
         address: admin.address,

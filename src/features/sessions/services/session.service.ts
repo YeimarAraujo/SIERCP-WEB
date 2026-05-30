@@ -54,7 +54,8 @@ export const SessionManager = {
             rateScore: metrics.rateScore ?? 0,
             recoilScore: metrics.recoilScore ?? 0,
             interruptionScore: metrics.interruptionScore ?? 0,
-            qualityScore: score,
+            score: score,        // canonical (Flutter-compatible)
+            qualityScore: score, // alias (Web backward-compat)
             approved: isApproved(score),
             violations: metrics.violations ?? [],
         };

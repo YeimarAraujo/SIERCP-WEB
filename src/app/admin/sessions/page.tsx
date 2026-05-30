@@ -128,12 +128,12 @@ export default function AdminSessionsPage() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
-            <Header title="Sesiones en Vivo" />
+            <Header title="Historial de Sesiones" />
 
             <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
                 <PageHero
-                    title="Monitor de Sesiones"
-                    subtitle="Historial reciente y sesiones activas en toda la plataforma"
+                    title="Historial de Sesiones"
+                    subtitle="Registro histórico de sesiones completadas en la institución"
                     parentTitle="Panel de Control"
                     parentHref="/admin/dashboard"
                     actions={

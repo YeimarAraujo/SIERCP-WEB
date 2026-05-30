@@ -2,9 +2,9 @@
 
 import { useEffect, useState, use } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { getAuth } from 'firebase/auth';
 import { Header } from '@/components/layout/header';
 import { useAuth } from '@/shared/hooks/use-auth';
-import { CourseService } from '@/shared/lib/firestore.service';
 import { BookOpen, PlayCircle, CheckCircle, ChevronLeft, FileText, Video } from 'lucide-react';
 import Link from 'next/link';
 
@@ -32,22 +32,46 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
 
     useEffect(() => {
         if (!user || !courseId || !moduleId) return;
+        let cancelled = false;
 
-        Promise.all([
-            CourseService.getModules(courseId),
-            CourseService.getStudentProgress(courseId, user.uid),
-        ]).then(([modules, progress]) => {
-            const found = modules.find((m: Module) => m.id === moduleId);
-            setModule(found || null);
-            setCompleted(progress.has(moduleId));
-        }).finally(() => setLoading(false));
+        const load = async () => {
+            try {
+                const token = await getAuth().currentUser?.getIdToken();
+                if (!token) return;
+                const res = await fetch(`/api/student/courses/${courseId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (cancelled) return;
+                const found = (data.modules || []).find((m: Module) => m.id === moduleId);
+                setModule(found || null);
+                setCompleted(Array.isArray(data.progress) && data.progress.includes(moduleId));
+            } catch (e) {
+                console.error('Error cargando módulo:', e);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        };
+
+        load();
+        return () => { cancelled = true; };
     }, [user, courseId, moduleId]);
 
     const handleMarkComplete = async () => {
         if (!user || !courseId || !moduleId || marking) return;
         setMarking(true);
         try {
-            await CourseService.markModuleComplete(courseId, user.uid, moduleId);
+            const token = await getAuth().currentUser?.getIdToken();
+            const res = await fetch(`/api/student/courses/${courseId}/complete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ moduleId }),
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'No se pudo marcar como completado');
+            }
             setCompleted(true);
         } catch (e) {
             console.error('Error marking complete:', e);

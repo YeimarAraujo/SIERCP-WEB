@@ -176,7 +176,8 @@ export const F_SESSION = {
   currentRatePerMin:   'currentRatePerMin',
   totalCompressions:   'totalCompressions',
   correctCompressions: 'correctCompressions',
-  qualityScore:        'qualityScore',
+  score:               'score',        // canonical — use this
+  qualityScore:        'qualityScore', // alias — kept for backward compat
   lastBatchAt:         'lastBatchAt',
   createdAt:           'createdAt',
   updatedAt:           'updatedAt',

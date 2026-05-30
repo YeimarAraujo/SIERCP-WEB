@@ -11,11 +11,6 @@ export type InstitutionPlan =
     | 'sstConLicencia'
     | string;
 
-/**
- * Institution operation mode:
- * - AUTOMATED: Courses are pre-configured with auto-cycling cohorts (e.g. Jomar Seguridad)
- * - MANUAL: Institution admins create and manage courses/cohorts manually
- */
 export type InstitutionMode = 'AUTOMATED' | 'MANUAL';
 export type CreateInstitutionInput =
     Omit<Institution, 'id'>;

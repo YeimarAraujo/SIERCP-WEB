@@ -539,15 +539,16 @@ export const NotificationService = {
     },
 
     async getByUser(userId: string, limitN = 10): Promise<any[]> {
+        // Consultamos solo por userId (índice de campo único, siempre disponible) y
+        // ordenamos en memoria. Evita requerir un índice compuesto userId+createdAt
+        // cuya ausencia hacía fallar la consulta → notificaciones vacías.
         const snaps = await getDocs(
-            query(
-                collection(db, 'notifications'),
-                where('userId', '==', userId),
-                orderBy('createdAt', 'desc'),
-                limit(limitN)
-            )
+            query(collection(db, 'notifications'), where('userId', '==', userId))
         );
-        return snaps.docs.map(s => ({ id: s.id, ...s.data(), createdAt: tsToDate(s.data().createdAt) }));
+        return snaps.docs
+            .map(s => ({ id: s.id, ...s.data(), createdAt: tsToDate(s.data().createdAt) }))
+            .sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime())
+            .slice(0, limitN);
     },
 
     async markAsRead(id: string): Promise<void> {
