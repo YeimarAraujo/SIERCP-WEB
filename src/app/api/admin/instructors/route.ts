@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
         // ── Create new instructor ──────────────────────────────────────────
         if (action === 'create') {
-            const { email, password, firstName, lastName, phone, specialty, identification } = body;
+            const { email, password, firstName, lastName, documentType, phone, specialty, identification } = body;
 
             if (!email || !password || !firstName || !lastName) {
                 return NextResponse.json(
@@ -117,6 +117,7 @@ export async function POST(req: NextRequest) {
                 lastName,
                 role: 'INSTRUCTOR',
                 identification: identification?.trim() || '',
+                documentType: documentType || null,
                 phone: phone || '',
                 specialty: specialty || 'Instructor',
                 isActive: true,
