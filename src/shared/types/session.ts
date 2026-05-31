@@ -22,8 +22,8 @@ export interface SessionMetrics {
     rateScore: number;
     recoilScore: number;
     interruptionScore: number;
-    qualityScore: number;
-    score?: number; // Alias for qualityScore (for backward compatibility)
+    score: number;        // canonical field (Flutter & Web write this)
+    qualityScore: number; // alias kept for backward-compat; parseSession normalises both
     approved: boolean;
     violations: AhaViolation[];
 }

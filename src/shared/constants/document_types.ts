@@ -1,12 +1,8 @@
-/**
- * Tipos de documento de identidad válidos en Colombia.
- * Reutilizable en todos los formularios de registro.
- */
 
 export const DOCUMENT_TYPES = {
-  CC:  'CC',
-  CE:  'CE',
-  TI:  'TI',
+  CC: 'CC',
+  CE: 'CE',
+  TI: 'TI',
   PAS: 'PAS',
   NIT: 'NIT',
 } as const;
@@ -14,9 +10,9 @@ export const DOCUMENT_TYPES = {
 export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES];
 
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
-  CC:  'Cédula de Ciudadanía',
-  CE:  'Cédula de Extranjería',
-  TI:  'Tarjeta de Identidad',
+  CC: 'Cédula de Ciudadanía',
+  CE: 'Cédula de Extranjería',
+  TI: 'Tarjeta de Identidad',
   PAS: 'Pasaporte',
   NIT: 'NIT',
 };

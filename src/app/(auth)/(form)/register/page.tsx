@@ -14,7 +14,7 @@ function RegisterContent() {
     const [step, setStep] = useState(1);
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
-        identification: '', password: '', confirm: '',
+        documentType: 'CC', identification: '', password: '', confirm: '',
         role: 'USUARIO', institutionCode: '',
         phoneNumber: '',
         departamento: '', ciudad: '', direccion: '',
@@ -81,6 +81,7 @@ function RegisterContent() {
                 password: form.password,
                 firstName: form.firstName,
                 lastName: form.lastName,
+                documentType: form.documentType || undefined,
                 identification: form.identification,
                 phoneNumber: form.phoneNumber || undefined,
                 role: form.role,
@@ -168,11 +169,22 @@ function RegisterContent() {
                                         <input name="lastName" required value={form.lastName} onChange={handleChange} placeholder="Ej: Pérez" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
                                     </div>
                                 </div>
-                                <div className="col-12">
-                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Documento de Identidad</label>
+                                <div className="col-md-5">
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Tipo de documento</label>
+                                    <select name="documentType" value={form.documentType} onChange={handleChange} style={{ ...inputStyle, height: '46px', fontSize: '0.9rem' }}>
+                                        <option value="CC">CC — Cédula de Ciudadanía</option>
+                                        <option value="CE">CE — Cédula de Extranjería</option>
+                                        <option value="TI">TI — Tarjeta de Identidad</option>
+                                        <option value="PP">PP — Pasaporte</option>
+                                        <option value="NIT">NIT</option>
+                                        <option value="DIE">DIE — Doc. Identidad Extranjero</option>
+                                    </select>
+                                </div>
+                                <div className="col-md-7">
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-head)', marginBottom: '6px', display: 'block' }}>Número de documento</label>
                                     <div className="position-relative">
                                         <i className="bi bi-card-heading position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />
-                                        <input name="identification" required value={form.identification} onChange={handleChange} placeholder="DNI / Cédula" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
+                                        <input name="identification" required value={form.identification} onChange={handleChange} placeholder="Número" style={{ ...inputStyle, paddingLeft: '45px', height: '46px', fontSize: '0.9rem' }} />
                                     </div>
                                 </div>
                                 <div className="col-12">

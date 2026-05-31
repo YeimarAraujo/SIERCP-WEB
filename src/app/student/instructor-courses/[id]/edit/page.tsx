@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { CourseEditView } from '@/components/course/course-edit-view';
 
-export default function EditCoursePage() {
+export default function StudentInstructorCourseEditPage() {
     const { id } = useParams() as { id: string };
-    return <CourseEditView courseId={id} basePath="/instructor/courses" />;
+    return <CourseEditView courseId={id} basePath="/student/instructor-courses" />;
 }

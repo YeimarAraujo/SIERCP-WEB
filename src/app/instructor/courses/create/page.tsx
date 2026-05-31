@@ -6,14 +6,14 @@ import { Header } from '@/components/layout/header';
 import { PageHeader } from '@/components/ui/page-header';
 import { useAuth } from '@/hooks/use-auth';
 import { CourseService } from '@/services/firestore.service';
-import type { CourseModel } from '@/models/course';
-import { Save, X, BookOpen, Key, Award, Info, Upload, Users, CheckCircle2, QrCode } from 'lucide-react';
+import { Save, Key, Award, Info, Upload, Users, CheckCircle2, Plus, Layers } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/shared/lib/firebase';
 import { isAdmin } from '@/models/user';
+import { ModuleFormCard, DEFAULT_MODULE, type ModuleForm } from '@/components/course/module-form-card';
 
 export default function CreateCoursePage() {
     const { user } = useAuth();
@@ -22,7 +22,10 @@ export default function CreateCoursePage() {
     const [csvStudents, setCsvStudents] = useState<any[]>([]);
     const [memberships, setMemberships] = useState<any[]>([]);
     const [instructors, setInstructors] = useState<any[]>([]);
-    
+    const [modules, setModules] = useState<ModuleForm[]>([
+        { ...DEFAULT_MODULE, order: 1 },
+    ]);
+
     const [formData, setFormData] = useState<any>({
         title: '',
         description: '',
@@ -43,6 +46,18 @@ export default function CreateCoursePage() {
         createdAt: new Date(),
         updatedAt: new Date(),
     });
+
+    const addModule = () => {
+        setModules(prev => [...prev, { ...DEFAULT_MODULE, order: prev.length + 1 }]);
+    };
+
+    const handleModuleChange = (idx: number, updated: ModuleForm) => {
+        setModules(prev => prev.map((m, i) => i === idx ? updated : m));
+    };
+
+    const removeModule = (idx: number) => {
+        setModules(prev => prev.filter((_, i) => i !== idx).map((m, i) => ({ ...m, order: i + 1 })));
+    };
 
     useEffect(() => {
         if (user) {
@@ -75,7 +90,6 @@ export default function CreateCoursePage() {
                         id: d.data().userId,
                         name: d.data().userName || d.data().userEmail || 'Instructor'
                     }));
-                    // Also add the admin themselves if they want to be the instructor
                     if (!insts.find(i => i.id === user?.uid)) {
                         insts.unshift({ id: user?.uid, name: `${user?.firstName} ${user?.lastName}` });
                     }
@@ -123,9 +137,8 @@ export default function CreateCoursePage() {
                 const students = results.data.map((row: any) => ({
                     studentName: row.nombre || row.name || row.Name,
                     studentEmail: row.email || row.correo || row.Email,
-                    studentId: Math.random().toString(36).substring(7) // Placeholder ID
-                })).filter(s => s.studentName && s.studentEmail);
-                
+                    studentId: Math.random().toString(36).substring(7)
+                })).filter((s: any) => s.studentName && s.studentEmail);
                 setCsvStudents(students);
             }
         });
@@ -134,18 +147,23 @@ export default function CreateCoursePage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user) return;
-        
+
         try {
             setLoading(true);
+            const validModules = modules
+                .filter(m => m.title.trim())
+                .map(m => ({ ...m, topics: m.topics.filter(Boolean) }));
+
             const courseId = await CourseService.create({
                 ...formData,
+                modules: validModules,
+                moduleCount: validModules.length || formData.moduleCount,
                 createdBy: user.uid,
                 studentCount: csvStudents.length
             });
 
-            // Enroll CSV students
             if (csvStudents.length > 0) {
-                await Promise.all(csvStudents.map(s => 
+                await Promise.all(csvStudents.map((s: any) =>
                     CourseService.enroll(courseId, {
                         ...s,
                         courseId,
@@ -166,6 +184,12 @@ export default function CreateCoursePage() {
         }
     };
 
+    const inputStyle: React.CSSProperties = {
+        width: '100%', padding: '14px 16px', borderRadius: 12,
+        border: '1px solid var(--border)', outline: 'none', fontSize: 15,
+        background: 'var(--card)',
+    };
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--muted)' }}>
             <Header title="Crear Nuevo Curso" />
@@ -177,7 +201,7 @@ export default function CreateCoursePage() {
                     </div>
 
                     <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32, alignItems: 'start' }}>
-                        
+
                         <div style={{ display: 'grid', gap: 24 }}>
                             {/* Información General */}
                             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
@@ -196,7 +220,7 @@ export default function CreateCoursePage() {
                                             value={formData.institutionId}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15, background: 'var(--card)' }}
+                                            style={inputStyle}
                                         >
                                             <option value="">Seleccione una institución...</option>
                                             {memberships.map(m => (
@@ -218,7 +242,7 @@ export default function CreateCoursePage() {
                                                 value={formData.instructorId}
                                                 onChange={handleChange}
                                                 required
-                                                style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15, background: 'var(--card)' }}
+                                                style={inputStyle}
                                             >
                                                 <option value="">Seleccione un instructor...</option>
                                                 {instructors.map(i => (
@@ -238,7 +262,7 @@ export default function CreateCoursePage() {
                                             onChange={handleChange}
                                             required
                                             placeholder="Ej. Soporte Vital Avanzado 2026"
-                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15 }}
+                                            style={inputStyle}
                                         />
                                     </div>
 
@@ -251,10 +275,39 @@ export default function CreateCoursePage() {
                                             required
                                             rows={5}
                                             placeholder="Define los objetivos y competencias a desarrollar..."
-                                            style={{ width: '100%', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border)', outline: 'none', fontSize: 15, resize: 'none' }}
+                                            style={{ ...inputStyle, resize: 'none' }}
                                         />
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Módulos del Curso */}
+                            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)' }}>
+                                        <Layers size={20} />
+                                    </div>
+                                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--foreground)' }}>Plan de Estudios (Módulos)</h3>
+                                </div>
+
+                                {modules.map((mod, mIdx) => (
+                                    <ModuleFormCard
+                                        key={mIdx}
+                                        module={mod}
+                                        index={mIdx}
+                                        showRemove={modules.length > 1}
+                                        onChange={handleModuleChange}
+                                        onRemove={removeModule}
+                                    />
+                                ))}
+
+                                <button type="button" onClick={addModule} style={{
+                                    width: '100%', padding: '13px', borderRadius: 12, border: '2px dashed var(--border)',
+                                    background: 'transparent', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 700,
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                }}>
+                                    <Plus size={16} /> Agregar Módulo
+                                </button>
                             </div>
 
                             {/* Carga Masiva de Estudiantes */}
@@ -267,9 +320,9 @@ export default function CreateCoursePage() {
                                 </div>
 
                                 <div style={{ border: '2px dashed var(--border)', borderRadius: 20, padding: 32, textAlign: 'center', cursor: 'pointer', position: 'relative' }}>
-                                    <input 
-                                        type="file" 
-                                        accept=".csv" 
+                                    <input
+                                        type="file"
+                                        accept=".csv"
                                         onChange={handleCsvUpload}
                                         style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
                                     />

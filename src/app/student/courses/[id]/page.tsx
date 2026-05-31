@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { getAuth } from 'firebase/auth';
 import { Header } from '@/components/layout/header';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { StudentEnrollmentService } from '@/shared/lib/student-enrollment.service';
@@ -41,9 +42,38 @@ export default function StudentCourseDetailPage() {
 
     useEffect(() => {
         if (!user || !courseId) return;
+        let cancelled = false;
 
-        StudentEnrollmentService.getCourseDetails(courseId, user.uid)
-            .then((data) => {
+        const load = async () => {
+            try {
+                // 1) Intentar vía API server-side (Admin SDK) — fuente canónica de
+                //    módulos (courses/{id}/modules) y progreso por curso. Evita los
+                //    problemas de reglas Firestore que ocultaban los módulos.
+                const token = await getAuth().currentUser?.getIdToken();
+                if (token) {
+                    const res = await fetch(`/api/student/courses/${courseId}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (cancelled) return;
+                        setCourse(data.course);
+                        setModules(data.modules || []);
+                        setCompletedModules(new Set<string>(data.progress || []));
+                        setIsCourseLocked(false);
+                        setLockedReason(null);
+                        return;
+                    }
+                    // 404 → no es un curso de institución por docId; sigue al fallback.
+                    if (res.status !== 404) {
+                        const err = await res.json().catch(() => ({}));
+                        console.error('Error API student course:', err.error);
+                    }
+                }
+
+                // 2) Fallback: cursos de plataforma (por slug) y catálogo legacy.
+                const data = await StudentEnrollmentService.getCourseDetails(courseId, user.uid);
+                if (cancelled) return;
                 if (data) {
                     setCourse(data.course);
                     setModules(data.modules);
@@ -53,8 +83,15 @@ export default function StudentCourseDetailPage() {
                 } else {
                     setCourse(null);
                 }
-            })
-            .finally(() => setLoading(false));
+            } catch (e) {
+                if (!cancelled) console.error('Error cargando curso:', e);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        };
+
+        load();
+        return () => { cancelled = true; };
     }, [user, courseId]);
 
     const completedCount = completedModules.size;

@@ -9,7 +9,7 @@ import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Monitor, GraduationCap, Users, Cpu,
     BookOpen, BarChart2, FileText, Settings, Shield, User, LogOut,
-    Sun, Moon, Globe, Award, Zap, CalendarDays, ShoppingBag, Building2,
+    Sun, Moon, Globe, Award, Zap, CalendarDays, ShoppingBag, Building2, Clock,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -21,7 +21,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { label: 'Panel de control', href: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Sesiones en vivo', href: '/admin/sessions', icon: Monitor },
+    { label: 'Sesiones en vivo', href: '/admin/live', icon: Monitor },
+    { label: 'Historial de sesiones', href: '/admin/sessions', icon: Clock },
     { label: 'Sedes', href: '/admin/sedes', icon: Building2 },
     { label: 'Instructores', href: '/admin/instructors', icon: GraduationCap },
     { label: 'Estudiantes', href: '/admin/students', icon: Users },

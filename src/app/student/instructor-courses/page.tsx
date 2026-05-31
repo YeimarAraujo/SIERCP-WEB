@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { CourseService } from '@/services/firestore.service';
+import { getAuth } from 'firebase/auth';
 import { subscribeLiveSessions } from '@/shared/lib/rtdb-telemetry';
 import { useAuth } from '@/hooks/use-auth';
 import type { CourseModel } from '@/models/course';
@@ -22,20 +22,31 @@ import { CourseQr } from '@/components/ui/course-qr';
 import { formatDate } from '@/lib/utils';
 
 export default function StudentInstructorCoursesPage() {
-    const { user }                                  = useAuth();
-    const [courses, setCourses]                     = useState<CourseModel[]>([]);
-    const [loading, setLoading]                     = useState(true);
+    const { user } = useAuth();
+    const [courses, setCourses] = useState<CourseModel[]>([]);
+    const [loading, setLoading] = useState(true);
     // courseId → número de sesiones activas (de RTDB, sin 403)
-    const [liveCounts, setLiveCounts]               = useState<Record<string, number>>({});
-    const unsubsRef                                 = useRef<(() => void)[]>([]);
+    const [liveCounts, setLiveCounts] = useState<Record<string, number>>({});
+    const unsubsRef = useRef<(() => void)[]>([]);
 
     useEffect(() => {
         if (!user) return;
         let cancelled = false;
 
-        CourseService.getByInstructor(user.uid)
-            .then(data => {
+        const load = async () => {
+            try {
+                const token = await getAuth().currentUser?.getIdToken();
+                if (!token) { setLoading(false); return; }
+
+                // API server-side: cursos por instructorId + por membership de institución
+                const res = await fetch('/api/instructor/courses', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const json = await res.json();
                 if (cancelled) return;
+                if (!res.ok) { console.error(json.error); setLoading(false); return; }
+
+                const data: CourseModel[] = json.courses || [];
                 setCourses(data);
                 setLoading(false);
 
@@ -53,8 +64,12 @@ export default function StudentInstructorCoursesPage() {
                     });
                     unsubsRef.current.push(unsub);
                 });
-            })
-            .catch(() => { if (!cancelled) setLoading(false); });
+            } catch (e) {
+                if (!cancelled) setLoading(false);
+            }
+        };
+
+        load();
 
         return () => {
             cancelled = true;
@@ -118,7 +133,7 @@ function InstructorCourseCard({ course, liveCount }: { course: CourseModel; live
 
     return (
         <Link
-            href={`/instructor/courses/${course.id}`}
+            href={`/student/instructor-courses/${course.id}`}
             style={{ textDecoration: 'none' }}
         >
             <div
