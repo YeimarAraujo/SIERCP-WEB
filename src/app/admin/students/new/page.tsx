@@ -13,10 +13,12 @@ import { db, getSecondaryAuth } from '@/shared/lib/firebase';
 import { useAuthStore } from '@/stores/auth-store';
 import {
     UserPlus, User, Fingerprint, Phone, Key,
-    Mail, Search, CheckCircle, AlertCircle, ArrowLeft, Link2, Eye, EyeOff,
+    Mail, Search, CheckCircle, AlertCircle, ArrowLeft, Link2, Eye, EyeOff, MapPin,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DOCUMENT_TYPE_OPTIONS } from '@/shared/constants/document_types';
+import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
+import { SearchableSelect } from '@/app/checkout/_components/ui';
 
 type Step = 'search' | 'found' | 'new';
 
@@ -42,10 +44,12 @@ export default function NewStudentPage() {
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
         password: '', confirmPassword: '', phone: '',
-        documentType: '',
+        documentType: '', address: '', city: '', department: '', country: 'Colombia',
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const studentMunicipios = getMunicipalities(form.department);
 
     const setField = (k: keyof typeof form) => (v: string) =>
         setForm((p) => ({ ...p, [k]: v }));
@@ -113,6 +117,10 @@ export default function NewStudentPage() {
             setError('Selecciona el tipo de documento');
             return;
         }
+        if (!identificacion.trim()) {
+            setError('Ingresa el número de identificación');
+            return;
+        }
         if (form.password.length < 6) {
             setError('La contraseña debe tener mínimo 6 caracteres');
             return;
@@ -141,6 +149,10 @@ export default function NewStudentPage() {
                 identificacion: identificacion.trim(),
                 documentType: form.documentType,
                 phone: form.phone,
+                address: form.address || null,
+                city: form.city || null,
+                department: form.department || null,
+                country: 'Colombia',
                 isActive: true,
                 institutionId,
                 status: 'ACTIVE',
@@ -269,6 +281,7 @@ export default function NewStudentPage() {
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <FormInput label="Nombres" icon={User} required value={form.firstName} onChange={setField('firstName')} placeholder="Juan Andrés" />
                                         <FormInput label="Apellidos" icon={User} required value={form.lastName} onChange={setField('lastName')} placeholder="Pérez García" />
+                                        <FormInput label="Identificación" icon={Fingerprint} required value={identificacion} onChange={v => setIdentificacion(v)} placeholder="123456789" />
                                         <div>
                                             <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
                                                 Tipo de documento <span style={{ color: '#EF4444' }}>*</span>
@@ -287,6 +300,36 @@ export default function NewStudentPage() {
                                             </select>
                                         </div>
                                         <FormInput label="Teléfono" icon={Phone} value={form.phone} onChange={setField('phone')} placeholder="+57 300 000 0000" />
+                                    </div>
+                                </div>
+                                <Divider />
+                                <div>
+                                    <SectionTitle icon={MapPin} label="Dirección" />
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                                                Departamento
+                                            </label>
+                                            <SearchableSelect
+                                                value={form.department}
+                                                onChange={(v) => setForm(p => ({ ...p, department: v, city: '' }))}
+                                                options={COLOMBIA_DEPARTMENTS}
+                                                placeholder="Buscar departamento..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                                                Ciudad / Municipio
+                                            </label>
+                                            <SearchableSelect
+                                                value={form.city}
+                                                onChange={(v) => setForm(p => ({ ...p, city: v }))}
+                                                options={studentMunicipios}
+                                                placeholder={form.department ? 'Buscar municipio...' : 'Selecciona un departamento'}
+                                                disabled={!form.department}
+                                            />
+                                        </div>
+                                        <FormInput label="Dirección" icon={MapPin} value={form.address} onChange={setField('address')} placeholder="Dirección" />
                                     </div>
                                 </div>
                                 <Divider />

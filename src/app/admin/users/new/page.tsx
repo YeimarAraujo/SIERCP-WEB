@@ -10,9 +10,10 @@ import { db, getSecondaryAuth } from '@/shared/lib/firebase';
 import { ROLE_STUDENT, ROLE_INSTRUCTOR } from '@/shared/lib/constants';
 import {
     UserPlus, Mail, Shield, Save,
-    User, Fingerprint, Phone, Key,
+    User, Fingerprint, Phone, Key, Eye, EyeOff,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DOCUMENT_TYPE_OPTIONS } from '@/shared/constants/document_types';
 
 export default function NewUserPage() {
     const router = useRouter();
@@ -23,16 +24,26 @@ export default function NewUserPage() {
         lastName: '',
         email: '',
         password: '',
+        confirmPassword: '',
         identificacion: '',
+        documentType: '',
         phone: '',
         role: 'USUARIO' as string,
         institutionId: 'SIERCP-GENERAL',
         isActive: true,
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+
+        if (formData.password !== formData.confirmPassword) {
+            setError('Las contraseñas no coinciden');
+            return;
+        }
+
         try {
             setLoading(true);
 
@@ -50,6 +61,8 @@ export default function NewUserPage() {
                 lastName: formData.lastName,
                 role: formData.role,
                 identificacion: formData.identificacion,
+                documentType: formData.documentType || null,
+                phone: formData.phone,
                 isActive: formData.isActive,
                 institutionId: formData.institutionId,
                 status: formData.role === ROLE_INSTRUCTOR ? 'PENDING' : 'ACTIVE',
@@ -106,7 +119,26 @@ export default function NewUserPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Nombres" icon={User} placeholder="Ej. Juan Andrés" required value={formData.firstName} onChange={(v: string) => setFormData({...formData, firstName: v})} />
                                     <FormInput label="Apellidos" icon={User} placeholder="Ej. Pérez García" required value={formData.lastName} onChange={(v: string) => setFormData({...formData, lastName: v})} />
-                                    <FormInput label="Identificación" icon={Fingerprint} placeholder="C.C. 1.000.000.000" value={formData.identificacion} onChange={(v: string) => setFormData({...formData, identificacion: v})} />
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                                            Identificación <span style={{ color: '#EF4444' }}>*</span>
+                                        </label>
+                                        <div style={{ position: 'relative' }}>
+                                            <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+                                                <Fingerprint size={18} />
+                                            </div>
+                                            <input value={formData.identificacion} onChange={e => setFormData({...formData, identificacion: e.target.value})} placeholder="C.C. 1.000.000.000" required style={{ width: '100%', height: 52, padding: '0 16px 0 46px', borderRadius: 14, border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 15, color: 'var(--foreground)', fontWeight: 600, outline: 'none' }} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                                            Tipo doc. <span style={{ color: '#EF4444' }}>*</span>
+                                        </label>
+                                        <select value={formData.documentType} onChange={e => setFormData({...formData, documentType: e.target.value})} style={{ width: '100%', height: 52, padding: '0 14px', borderRadius: 14, border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 15, color: 'var(--foreground)', fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+                                            <option value="">Seleccionar...</option>
+                                            {DOCUMENT_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                        </select>
+                                    </div>
                                     <FormInput label="Teléfono" icon={Phone} placeholder="+57 300 000 0000" value={formData.phone} onChange={(v: string) => setFormData({...formData, phone: v})} />
                                 </div>
                             </div>
@@ -119,7 +151,9 @@ export default function NewUserPage() {
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Correo Electrónico" icon={Mail} placeholder="usuario@siercp.edu.co" required type="email" value={formData.email} onChange={(v: string) => setFormData({...formData, email: v})} />
-                                    <FormInput label="Contraseña" icon={Key} placeholder="••••••••" required type="password" value={formData.password} onChange={(v: string) => setFormData({...formData, password: v})} />
+                                    <PasswordInput label="Contraseña" value={formData.password} onChange={(v: string) => setFormData({...formData, password: v})} show={showPassword} toggleShow={() => setShowPassword(p => !p)} />
+                                    <div />
+                                    <PasswordInput label="Confirmar Contraseña" value={formData.confirmPassword} onChange={(v: string) => setFormData({...formData, confirmPassword: v})} show={showConfirmPassword} toggleShow={() => setShowConfirmPassword(p => !p)} />
                                 </div>
                                 <div style={{ marginTop: 20 }}>
                                     <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
@@ -177,6 +211,42 @@ export default function NewUserPage() {
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function PasswordInput({ label, value, onChange, show, toggleShow }: {
+    label: string; value: string; onChange: (v: string) => void; show: boolean; toggleShow: () => void;
+}) {
+    return (
+        <div>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                {label} <span style={{ color: '#EF4444' }}>*</span>
+            </label>
+            <div style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+                    <Key size={18} />
+                </div>
+                <input
+                    type={show ? 'text' : 'password'}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    style={{ width: '100%', height: 52, padding: '0 46px 0 46px', borderRadius: 14, border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 15, color: 'var(--foreground)', fontWeight: 600, outline: 'none' }}
+                />
+                <button
+                    type="button"
+                    onClick={toggleShow}
+                    style={{
+                        position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
+                    }}
+                >
+                    {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
             </div>
         </div>
     );
