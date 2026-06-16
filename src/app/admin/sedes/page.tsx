@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { db } from '@/shared/lib/firebase';
 import { useAuth } from '@/hooks/use-auth';
 import { Plus, Building2, MapPin, User, ChevronRight, X, Search } from 'lucide-react';
@@ -55,18 +56,20 @@ function CreateSedeModal({
         if (!name.trim() || !city.trim()) return toast.error('Nombre y ciudad son obligatorios');
         try {
             setSaving(true);
-            const ref = await addDoc(collection(db, 'sedes'), {
-                institutionId,
-                name: name.trim(),
-                city: city.trim(),
-                address: address.trim() || null,
-                adminId: null,
-                adminName: null,
-                isActive: true,
-                createdAt: serverTimestamp(),
+            const idToken = await getAuth().currentUser?.getIdToken();
+            if (!idToken) { toast.error('Sesión expirada. Vuelve a iniciar sesión.'); return; }
+
+            // El límite de sedes por plan se valida EN EL SERVIDOR.
+            const res = await fetch('/api/admin/sedes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                body: JSON.stringify({ name: name.trim(), city: city.trim(), address: address.trim() || undefined }),
             });
+            const data = await res.json();
+            if (!res.ok) { toast.error(data?.error || 'Error al crear la sede'); return; }
+
             const newSede: SedeModel = {
-                id: ref.id,
+                id: data.id,
                 institutionId,
                 name: name.trim(),
                 city: city.trim(),

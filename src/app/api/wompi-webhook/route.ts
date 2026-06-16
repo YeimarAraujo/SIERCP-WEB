@@ -18,6 +18,7 @@ import { isValidAmountCents } from '@/lib/utils';
 import { auditLog } from '@/lib/audit-logger';
 import { getClientIp } from '@/lib/rate-limiter';
 import { WompiWebhookSchema, type WompiWebhookPayload } from '@/lib/schemas';
+import { reactivateInstitution } from '@/lib/plan-enforcement';
 import admin from 'firebase-admin';
 import type { DocumentReference, DocumentData } from 'firebase-admin/firestore';
 
@@ -430,16 +431,44 @@ async function activatePlanSubscription(
   const now = admin.firestore.FieldValue.serverTimestamp();
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 30); // 30-day subscription period
+  const expiresTs = admin.firestore.Timestamp.fromDate(expiresAt);
 
-  await adminDb.collection('institutions').doc(institutionId).update({
-    'planMembership.plan': planType,
-    'planMembership.status': 'active',
-    'planMembership.activatedAt': now,
-    'planMembership.expiresAt': admin.firestore.Timestamp.fromDate(expiresAt),
-    'planMembership.activatedBy': userId,
-    'planMembership.lastPaymentCents': amountCents,
-    updatedAt: now,
-  });
+  // 1. Subcolección canónica (la que lee el cron de enforcement): renueva la
+  //    expiración y la deja activa, de modo que el plan deje de estar vencido.
+  await adminDb.doc(`institutions/${institutionId}/planMembership/current`).set(
+    {
+      planType,
+      isActive: true,
+      status: 'approved',
+      planExpiresAt: expiresTs,
+      activatedBy: userId,
+      lastPaymentCents: amountCents,
+      updatedAt: now,
+    },
+    { merge: true },
+  );
+
+  // 2. Doc de institución: campos top-level + map de compatibilidad.
+  await adminDb.collection('institutions').doc(institutionId).set(
+    {
+      planType,
+      planExpiresAt: expiresTs,
+      planMembership: {
+        plan: planType,
+        status: 'active',
+        activatedAt: now,
+        expiresAt: expiresTs,
+        activatedBy: userId,
+        lastPaymentCents: amountCents,
+      },
+      updatedAt: now,
+    },
+    { merge: true },
+  );
+
+  // 3. Si la institución estaba suspendida/past_due por vencimiento previo,
+  //    reactiva SOLO lo que la suspensión apagó (idempotente si no había nada).
+  await reactivateInstitution(adminDb, institutionId);
 }
 
 // ── Create enrollment from verified transaction data ───────────────────────

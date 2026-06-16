@@ -20,6 +20,9 @@ export type AuditEventType =
   | 'logout'
   | 'role_change'
   | 'data_export'
+  | 'certificate_issued'
+  | 'certificate_revoked'
+  | 'attendance_marked'
   | 'suspicious_activity'
   | 'idor_attempt'
   | 'debug_access_blocked'
@@ -31,6 +34,7 @@ export type AuditEventType =
   | 'transaction_forced_approved'
   | 'refund_issued'
   | 'plan_subscription_activated'
+  | 'plan_limit_reached'
   | 'institution_created'
   | 'new_institution_checkout_started';
 
