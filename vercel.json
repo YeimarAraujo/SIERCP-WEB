@@ -1,3 +1,0 @@
-{
-  "$comment": "Cron movido a Cloudflare Workers (Vercel Hobby limita cron a 1/día). Ver cloudflare-worker/wrangler.toml. generate-certificates eliminado (certificados Tipo A retirados, S6.2)."
-}
