@@ -39,7 +39,7 @@ export default function NewStudentPage() {
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [identification, setIdentificacion] = useState('');
+    const [identification, setIdentification] = useState('');
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
@@ -117,7 +117,7 @@ export default function NewStudentPage() {
             setError('Selecciona el tipo de documento');
             return;
         }
-        if (!identificacion.trim()) {
+        if (!identification.trim()) {
             setError('Ingresa el número de identificación');
             return;
         }
@@ -214,7 +214,7 @@ export default function NewStudentPage() {
                                 </div>
                                 <input
                                     value={identification}
-                                    onChange={(e) => { setIdentificacion(e.target.value); setStep('search'); }}
+                                    onChange={(e) => { setIdentification(e.target.value); setStep('search'); }}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                     placeholder="Número de cédula / documento"
                                     style={{ width: '100%', height: 52, padding: '0 16px 0 46px', borderRadius: 14, border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 15, color: 'var(--foreground)', fontWeight: 600, outline: 'none' }}
@@ -281,7 +281,7 @@ export default function NewStudentPage() {
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <FormInput label="Nombres" icon={User} required value={form.firstName} onChange={setField('firstName')} placeholder="Juan Andrés" />
                                         <FormInput label="Apellidos" icon={User} required value={form.lastName} onChange={setField('lastName')} placeholder="Pérez García" />
-                                        <FormInput label="Identificación" icon={Fingerprint} required value={identificacion} onChange={v => setIdentificacion(v)} placeholder="123456789" />
+                                        <FormInput label="Identificación" icon={Fingerprint} required value={identification} onChange={v => setIdentification(v)} placeholder="123456789" />
                                         <div>
                                             <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
                                                 Tipo de documento <span style={{ color: '#EF4444' }}>*</span>
