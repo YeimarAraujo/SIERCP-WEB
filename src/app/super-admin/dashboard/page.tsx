@@ -19,6 +19,7 @@ import { useSuperAdminAnalytics } from '@/features/analytics/hooks/use-super-adm
 import type { AnalyticsActivityItem, AnalyticsRankingItem } from '@/features/analytics/services/super-admin-analytics.service';
 import { DEFAULT_PLANS } from '@/shared/types/plan';
 import { Header } from '@/components/layout/header';
+import { SkillsKpiRow } from './skills-kpi-row';
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 
@@ -357,35 +358,38 @@ export default function SuperAdminDashboard() {
             )}
 
             {/* ── KPIs principales ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                 <StatCard label="Instituciones" loading={loading} accent="#4f46e5"
                     value={`${fmt(totals?.activeInstitutions || 0)}/${fmt(totals?.institutions || 0)}`}
                     detail="Tenants operativos" icon={Building2}
-                    href="/super-admin/institutions" trend={8} />
+                    href="/super-admin/institutions" />
                 <StatCard label="Usuarios" loading={loading} accent="#0f766e"
                     value={fmt(totals?.users || 0)}
                     detail={`${fmt(totals?.students || 0)} estudiantes`}
-                    icon={Users} href="/super-admin/usuarios" trend={12} />
+                    icon={Users} href="/super-admin/usuarios" />
                 <StatCard label="Instructores" loading={loading} accent="#0ea5e9"
                     value={fmt(totals?.instructors || 0)}
                     detail="Activos en plataforma" icon={GraduationCap}
-                    href="/super-admin/instructores" trend={5} />
+                    href="/super-admin/instructores" />
                 <StatCard label="Cursos plataforma" loading={loading} accent="#0369a1"
                     value={fmt(totals?.activeCourses || 0)}
                     detail="Cursos activos" icon={BookOpen}
-                    href="/super-admin/cursos" trend={3} />
+                    href="/super-admin/cursos" />
                 <StatCard label="Cursos Jomar" loading={loading} accent="#059669"
                     value={fmt(totals?.jomarCourses || 0)}
                     detail="Publicados en plataforma" icon={BookMarked}
-                    href="/super-admin/cursos-jomar" trend={0} />
+                    href="/super-admin/cursos-jomar" />
                 <StatCard label="Sesiones clínicas" loading={loading} accent="#ea580c"
                     value={fmt(totals?.sessions || 0)}
-                    detail="Entrenamientos totales" icon={Activity} trend={22} />
+                    detail="Entrenamientos totales" icon={Activity} />
                 <StatCard label="Certificados" loading={loading} accent="#7c3aed"
                     value={fmt(totals?.certificates || 0)}
-                    detail="Folios emitidos" icon={Award} trend={18} />
+                    detail="Folios emitidos" icon={Award} />
 
             </div>
+
+            {/* ── KPIs de Skills, Badges e Ingresos (S5) ── */}
+            <SkillsKpiRow />
 
             {/* ── Gráfica de tendencias (fuera de cards) ── */}
             <div>

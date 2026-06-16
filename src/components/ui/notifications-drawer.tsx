@@ -21,7 +21,10 @@ export function NotificationsDrawer({ isOpen, onClose }: { isOpen: boolean, onCl
         if (!user) return;
         setLoading(true);
         try {
-            const data = await ActivityService.getRecentActivity(user.uid);
+            const data = await ActivityService.getRecentActivity(user.uid, {
+                role: user.role,
+                institutionId: user.institutionId,
+            });
             setNotifications(data);
         } catch (error) {
             console.error('Error fetching activity:', error);

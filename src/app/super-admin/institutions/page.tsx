@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import { InstitutionService } from '@/services/institution.service';
+import { OrderService } from '@/services/order.service';
 import { PlanService } from '@/features/super-admin/services/plan.service';
 import type { Institution, InstitutionMode, InstitutionStatus, InstitutionPlan, CreateInstitutionInput } from '@/shared/types/institution';
 import type { Plan } from '@/shared/types/plan';
@@ -622,6 +623,10 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
         contactPhone: phone.trim() || undefined,
         config: {},
         adminIds: [],
+        // Modelo de 3 niveles: nuevas instituciones nacen como CLIENT.
+        // El Super Admin puede promoverlas a PARTNER/OWNER luego.
+        tier: 'CLIENT',
+        showcase: false,
       };
       await InstitutionService.create(
         InstitutionData.code,
@@ -645,6 +650,21 @@ function CreateModal({ plans, onClose, onCreated }: { plans: Plan[]; onClose: ()
       await InstitutionService.update(institutionId, {
         primaryAdminId: admin.uid,
         adminIds: [admin.uid],
+      });
+
+      // Como la institución se da de alta con pago manual, registramos el
+      // pedido correspondiente para que aparezca en super-admin/pedidos.
+      const selectedPlan = plans.find((p) => p.slug === plan);
+      await OrderService.createManualInstitutionOrder({
+        institutionId,
+        institutionName: InstitutionData.name,
+        userId: admin.uid,
+        planSlug: plan,
+        planName: selectedPlan?.name ?? plan,
+        total: selectedPlan?.priceCOP ?? 0,
+        contactEmail: email.trim() || adminEmail.trim(),
+        nit,
+        createdBy: 'SuperAdmin',
       });
 
       toast.success('Institución creada exitosamente');

@@ -37,7 +37,7 @@ export default function NewStudentPage() {
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [identificacion, setIdentificacion] = useState('');
+    const [identification, setIdentificacion] = useState('');
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '',
@@ -52,13 +52,13 @@ export default function NewStudentPage() {
 
     // ── Step 1: search by ID ──────────────────────────────────────────────────
     const handleSearch = async () => {
-        const id = identificacion.trim();
+        const id = identification.trim();
         if (!id) return;
         setSearching(true);
         setError(null);
         try {
             const snap = await getDocs(
-                query(collection(db, 'users'), where('identificacion', '==', id))
+                query(collection(db, 'users'), where('identification', '==', id))
             );
             if (!snap.empty) {
                 const d = snap.docs[0].data();
@@ -138,7 +138,7 @@ export default function NewStudentPage() {
                 firstName: form.firstName,
                 lastName: form.lastName,
                 role: 'USUARIO',
-                identificacion: identificacion.trim(),
+                identification: identification.trim(),
                 documentType: form.documentType,
                 phone: form.phone,
                 isActive: true,
@@ -201,7 +201,7 @@ export default function NewStudentPage() {
                                     <Fingerprint size={18} />
                                 </div>
                                 <input
-                                    value={identificacion}
+                                    value={identification}
                                     onChange={(e) => { setIdentificacion(e.target.value); setStep('search'); }}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                     placeholder="Número de cédula / documento"
@@ -211,8 +211,8 @@ export default function NewStudentPage() {
                             <button
                                 type="button"
                                 onClick={handleSearch}
-                                disabled={searching || !identificacion.trim()}
-                                style={{ height: 52, padding: '0 28px', borderRadius: 14, background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: searching || !identificacion.trim() ? 0.6 : 1 }}
+                                disabled={searching || !identification.trim()}
+                                style={{ height: 52, padding: '0 28px', borderRadius: 14, background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: searching || !identification.trim() ? 0.6 : 1 }}
                             >
                                 <Search size={16} /> {searching ? 'Buscando…' : 'Buscar'}
                             </button>

@@ -17,7 +17,7 @@ const appFeatures = [
   {
     icon: "bi-bluetooth",
     title: "Conexión BLE con maniquí",
-    text: "Empareja el SIERCP en segundos. Los datos de compresión llegan en tiempo real durante el curso.",
+    text: "Empareja el SICAP en segundos. Los datos de compresión llegan en tiempo real durante el curso.",
     color: "#3b82f6",
   },
   {
@@ -25,12 +25,6 @@ const appFeatures = [
     title: "Dashboard de métricas",
     text: "Frecuencia, profundidad y retroceso torácico visualizados en tiempo real. Tu progreso, siempre disponible.",
     color: "var(--clr-primary)",
-  },
-  {
-    icon: "bi-patch-check-fill",
-    title: "Certificados digitales",
-    text: "Descarga tu constancia al finalizar el curso. Generada automáticamente desde los datos del maniquí.",
-    color: "#10b981",
   },
   {
     icon: "bi-clock-history",
@@ -425,7 +419,7 @@ export default function DownloadApp() {
         {/* ── Header ── */}
         <Row className="mb-5">
           <Col lg={8} className={`fade-up ${isVisible ? "visible" : ""}`} style={{ margin: "0 auto", textAlign: "center" }}>
-            <span className="badge-pill-white mb-3">Ecosistema Digital SIERCP</span>
+            <span className="badge-pill-white mb-3">Ecosistema Digital SICAP</span>
             <h2 className="on-dark-title" style={{
               fontSize: "clamp(2rem, 5vw, 3.2rem)",
               fontWeight: 900,
@@ -442,7 +436,7 @@ export default function DownloadApp() {
               maxWidth: "560px",
               margin: "0 auto",
             }}>
-              La app móvil es la extensión digital de nuestros cursos. Conecta con el maniquí SIERCP
+              La app móvil es la extensión digital de nuestros cursos. Conecta con el maniquí SICAP
               durante las prácticas, guarda tus métricas y descarga tu certificado al finalizar.
             </p>
           </Col>
@@ -672,7 +666,7 @@ export default function DownloadApp() {
           </Col>
         </Row>
 
-        {/* ── Bottom context bar ── */}
+        {/*         
         <div
           className={`fade-up ${isVisible ? "visible" : ""}`}
           style={{
@@ -717,7 +711,7 @@ export default function DownloadApp() {
             Ver cursos disponibles
             <i className="bi bi-arrow-right" />
           </a>
-        </div>
+        </div> */}
 
       </Container>
     </section >

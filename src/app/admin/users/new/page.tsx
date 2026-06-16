@@ -23,7 +23,7 @@ export default function NewUserPage() {
         lastName: '',
         email: '',
         password: '',
-        identificacion: '',
+        identification: '',
         phone: '',
         role: 'USUARIO' as string,
         institutionId: 'SIERCP-GENERAL',
@@ -49,7 +49,7 @@ export default function NewUserPage() {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 role: formData.role,
-                identificacion: formData.identificacion,
+                identification: formData.identification,
                 isActive: formData.isActive,
                 institutionId: formData.institutionId,
                 status: formData.role === ROLE_INSTRUCTOR ? 'PENDING' : 'ACTIVE',
@@ -106,7 +106,7 @@ export default function NewUserPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Nombres" icon={User} placeholder="Ej. Juan Andrés" required value={formData.firstName} onChange={(v: string) => setFormData({...formData, firstName: v})} />
                                     <FormInput label="Apellidos" icon={User} placeholder="Ej. Pérez García" required value={formData.lastName} onChange={(v: string) => setFormData({...formData, lastName: v})} />
-                                    <FormInput label="Identificación" icon={Fingerprint} placeholder="C.C. 1.000.000.000" value={formData.identificacion} onChange={(v: string) => setFormData({...formData, identificacion: v})} />
+                                    <FormInput label="Identificación" icon={Fingerprint} placeholder="C.C. 1.000.000.000" value={formData.identification} onChange={(v: string) => setFormData({...formData, identification: v})} />
                                     <FormInput label="Teléfono" icon={Phone} placeholder="+57 300 000 0000" value={formData.phone} onChange={(v: string) => setFormData({...formData, phone: v})} />
                                 </div>
                             </div>

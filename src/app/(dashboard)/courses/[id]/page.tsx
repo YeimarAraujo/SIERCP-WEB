@@ -9,6 +9,7 @@ import { formatDate } from '@/lib/utils';
 import type { CourseModel, Enrollment } from '@/models/course';
 import type { SessionModel } from '@/models/session';
 import { CourseQr } from '@/components/ui/course-qr';
+import VideoLoader from '@/components/video-loader';
 
 export default function CourseDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -30,7 +31,7 @@ export default function CourseDetailPage() {
         }).finally(() => setLoading(false));
     }, [id]);
 
-    if (loading) return <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>;
+    if (loading) return <VideoLoader />;
     if (!course) return <div className="flex h-full items-center justify-center"><p className="text-muted-foreground">Curso no encontrado.</p></div>;
 
     return (

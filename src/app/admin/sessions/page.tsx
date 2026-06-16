@@ -15,14 +15,24 @@ export default function AdminSessionsPage() {
     const { user, loading: authLoading } = useAuth();
     const [sessions, setSessions] = useState<SessionModel[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const institutionId: string | null = user?.institutionId ?? null;
 
     useEffect(() => {
         if (authLoading) return;
-        if (!institutionId) { setLoading(false); return; }
+        // El admin debe pertenecer a una institución para ver sesiones de su org.
+        // Antes esto retornaba en silencio y la tabla quedaba vacía sin explicación.
+        if (!institutionId) {
+            setLoading(false);
+            setError('Tu cuenta no tiene una institución asignada (institutionId). '
+                + 'Las sesiones se filtran por institución, por lo que no hay nada que mostrar. '
+                + 'Pide a un super admin que asigne tu institutionId.');
+            return;
+        }
 
         const fetchSessions = async () => {
+            setError(null);
             try {
                 const snap = await getDocs(query(
                     collection(db, 'sessions'),
@@ -39,7 +49,23 @@ export default function AdminSessionsPage() {
                     } as SessionModel;
                 }));
             } catch (err) {
+                // Antes solo se hacía console.error → fallo silencioso. Ahora la causa
+                // real es visible. Si falta el índice compuesto, Firestore incluye un
+                // enlace directo para crearlo dentro de este mensaje.
+                const code = (err as { code?: string })?.code ?? '';
+                const raw = err instanceof Error ? err.message : String(err);
                 console.error('Error fetching sessions:', err);
+                if (code === 'failed-precondition' || /index/i.test(raw)) {
+                    setError('Falta el índice compuesto de Firestore para sessions '
+                        + '(institutionId, startedAt desc). Despliégalo con '
+                        + '"firebase deploy --only firestore:indexes" o usa el enlace del error: '
+                        + raw);
+                } else if (code === 'permission-denied') {
+                    setError('Permiso denegado por las reglas de Firestore al leer sesiones '
+                        + 'de esta institución. Verifica isAdminOf(institutionId). ' + raw);
+                } else {
+                    setError('No se pudieron cargar las sesiones: ' + raw);
+                }
             } finally {
                 setLoading(false);
             }
@@ -53,8 +79,12 @@ export default function AdminSessionsPage() {
         return diff < 1000 * 60 * 30;
     }).length;
 
+    // `score` es el campo canónico que escribe Flutter; `qualityScore` es alias
+    // legado. Antes solo se leía qualityScore → siempre 0%.
+    const qscore = (s: SessionModel) => s.metrics?.score ?? s.metrics?.qualityScore ?? 0;
+
     const avgScore = sessions.length > 0
-        ? Math.round(sessions.reduce((a, s) => a + (s.metrics?.qualityScore || 0), 0) / sessions.length)
+        ? Math.round(sessions.reduce((a, s) => a + qscore(s), 0) / sessions.length)
         : 0;
 
     const columns = [
@@ -89,7 +119,7 @@ export default function AdminSessionsPage() {
             key: 'qualityScore',
             label: 'Calidad AHA',
             render: (_: unknown, row: SessionModel) => {
-                const score = row.metrics?.qualityScore || 0;
+                const score = qscore(row);
                 const color = score >= 85 ? '#059669' : score >= 70 ? '#D97706' : '#DC2626';
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -105,7 +135,7 @@ export default function AdminSessionsPage() {
             key: 'status',
             label: 'Estado AHA',
             render: (_: unknown, row: SessionModel) => {
-                const score = row.metrics?.qualityScore || 0;
+                const score = qscore(row);
                 const approved = score >= 85;
                 return (
                     <span style={{
@@ -153,6 +183,12 @@ export default function AdminSessionsPage() {
                         </div>
                     }
                 />
+
+                {error && (
+                    <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B', borderRadius: 16, padding: '14px 18px', marginBottom: 16, fontSize: 13, fontWeight: 600, wordBreak: 'break-word' }}>
+                        {error}
+                    </div>
+                )}
 
                 <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 24, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <DataTable

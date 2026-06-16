@@ -246,7 +246,7 @@ export const CourseService = {
         return parseCourse(snap.id, { ...data, studentCount });
     },
 
-    async getByInstructor(instructorId: string): Promise<CourseModel[]> {
+    async getByInstructor(instructorId: string, includeCount = false): Promise<CourseModel[]> {
         // Query 1: instructorId singular (instructor primario)
         const [snap1, snap2] = await Promise.all([
             getDocs(query(collection(db, 'courses'), where('instructorId', '==', instructorId))),
@@ -262,11 +262,21 @@ export const CourseService = {
             return true;
         });
 
-        // Usar studentCount del documento (evita aggregation query que falla con 403 para instructores).
-        return uniqueDocs.map((s) => {
+        // Conteo real desde la subcolección enrollments (el contador denormalizado
+        // se desfasa porque las inscripciones por QR en Flutter no lo incrementan).
+        // Solo cuando se pide explícitamente, con fallback al valor guardado si la
+        // aggregation query falla (p.ej. 403 puntual).
+        return Promise.all(uniqueDocs.map(async (s) => {
             const data = s.data() as Record<string, unknown>;
-            return parseCourse(s.id, data);
-        });
+            let studentCount = (data.studentCount as number) || 0;
+            if (includeCount) {
+                try {
+                    const countSnap = await getCountFromServer(collection(db, 'courses', s.id, 'enrollments'));
+                    studentCount = countSnap.data().count;
+                } catch (e) { /* fallback al valor guardado */ }
+            }
+            return parseCourse(s.id, { ...data, studentCount });
+        }));
     },
 
     async getByStudent(studentId: string): Promise<CourseModel[]> {
@@ -553,6 +563,31 @@ export const NotificationService = {
 
     async markAsRead(id: string): Promise<void> {
         await updateDoc(doc(db, 'notifications', id), { isRead: true });
+    },
+
+    /**
+     * Anuncios masivos (colección `broadcasts`) que aplican a este usuario.
+     * El filtrado por audiencia es en cliente (igual que la app Flutter):
+     *   · all          → todos
+     *   · role         → coincide el rol del usuario
+     *   · institution  → coincide la institución del usuario
+     * Las reglas (§42) permiten lectura a cualquier autenticado.
+     */
+    async getBroadcastsForUser(
+        role?: string,
+        institutionId?: string,
+        limitN = 15,
+    ): Promise<any[]> {
+        const snaps = await getDocs(collection(db, 'broadcasts'));
+        return snaps.docs
+            .map(s => ({ id: s.id, ...s.data(), createdAt: tsToDate(s.data().createdAt) }))
+            .filter((b: any) =>
+                b.audience === 'all' ||
+                (b.audience === 'role' && b.role === role) ||
+                (b.audience === 'institution' && b.institutionId === institutionId)
+            )
+            .sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime())
+            .slice(0, limitN);
     }
 };
 
@@ -619,11 +654,22 @@ export const SearchService = {
 };
 
 export const ActivityService = {
-    async getRecentActivity(instructorId: string): Promise<any[]> {
+    async getRecentActivity(
+        userId: string,
+        opts?: { role?: string; institutionId?: string },
+    ): Promise<any[]> {
         try {
-            const notifications = await NotificationService.getByUser(instructorId, 10);
-            if (notifications.length === 0) {
-                const courses = await CourseService.getByInstructor(instructorId);
+            // Personales (dirigidas por userId) + anuncios masivos (broadcasts).
+            // Se fusionan y ordenan por fecha, igual que la app Flutter.
+            const [personal, broadcasts] = await Promise.all([
+                NotificationService.getByUser(userId, 10),
+                NotificationService.getBroadcastsForUser(opts?.role, opts?.institutionId, 15),
+            ]);
+            const merged = [...personal, ...broadcasts];
+
+            if (merged.length === 0) {
+                // Fallback (caso instructor): actividad derivada de sesiones de sus cursos.
+                const courses = await CourseService.getByInstructor(userId);
                 const sessionPromises = courses.map(c => SessionService.getByCourse(c.id));
                 const allSessions = (await Promise.all(sessionPromises)).flat();
                 return allSessions
@@ -638,14 +684,18 @@ export const ActivityService = {
                         icon: (s.metrics?.qualityScore || 0) >= 85 ? 'Award' : 'Activity'
                     }));
             }
-            return notifications.map(n => ({
-                id: n.id,
-                title: n.title,
-                desc: n.message || n.desc,
-                time: this.formatTimeAgo(n.createdAt),
-                type: n.type || 'info',
-                icon: n.icon || 'Bell'
-            }));
+
+            return merged
+                .sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime())
+                .slice(0, 12)
+                .map((n: any) => ({
+                    id: n.id,
+                    title: n.title,
+                    desc: n.message || n.desc,
+                    time: this.formatTimeAgo(n.createdAt),
+                    type: n.type || 'info',
+                    icon: n.icon || 'Bell'
+                }));
         } catch (error) {
             console.error('Error fetching activity:', error);
             return [];

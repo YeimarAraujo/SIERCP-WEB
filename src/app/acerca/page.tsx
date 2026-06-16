@@ -120,15 +120,12 @@ export default function AcercaPage() {
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section style={{ background: "var(--clr-bg-hero)", padding: "130px 0 90px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 20% 80%, rgba(109,74,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(24,0,173,0.2) 0%, transparent 40%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 80% 18%, rgba(109,74,255,0.18) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255,255,255,0.05) 0%, transparent 50%)", pointerEvents: "none" }} />
         {/* Grid lines */}
         <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
         <Container style={{ position: "relative", zIndex: 1 }}>
           <Row className="align-items-center g-5">
             <Col lg={6}>
-              <span className="badge-pill-white mb-4 d-inline-flex">
-                <i className="bi bi-cpu-fill" style={{ fontSize: "0.8rem" }} /> SIERCP Platform
-              </span>
               <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.8rem)", fontWeight: 900, color: "#fff", lineHeight: 1.05, marginBottom: "24px" }}>
                 El sistema que<br />
                 <span style={{ color: "#a5f3fc" }}>transforma la formación</span><br />
@@ -147,20 +144,34 @@ export default function AcercaPage() {
               </div>
             </Col>
             <Col lg={6}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                {METRICS.map((m, i) => (
-                  <div key={i} style={{
-                    background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "20px", padding: "28px 24px",
-                    backdropFilter: "blur(12px)",
-                  }}>
-                    <div style={{ fontSize: "2.2rem", fontWeight: 900, color: "#a5f3fc", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: "10px" }}>{m.value}</div>
-                    <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>{m.label}</div>
-                  </div>
-                ))}
+              <div style={{ position: "relative", borderRadius: "24px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 30px 70px rgba(0,0,0,0.45)" }}>
+                <img
+                  src="/assets/images/SICAP/webp/software_sicap.webp"
+                  alt="Plataforma de software SIERCP en uso"
+                  className="img-fluid"
+                  style={{ display: "block", width: "100%", height: "auto" }}
+                />
+                {/* Velo de marca para integrar la imagen con el fondo oscuro del hero */}
+                <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(135deg, rgba(24,0,173,0.18) 0%, transparent 45%)", boxShadow: "inset 0 0 120px rgba(0,0,0,0.35)" }} />
               </div>
             </Col>
           </Row>
+
+          {/* Métricas (debajo del hero, conservadas como franja) */}
+          {/* <Row className="g-3" style={{ marginTop: "44px" }}>
+            {METRICS.map((m, i) => (
+              <Col key={i} xs={6} lg={3}>
+                <div style={{
+                  background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "20px", padding: "24px 22px", height: "100%",
+                  backdropFilter: "blur(12px)",
+                }}>
+                  <div style={{ fontSize: "2rem", fontWeight: 900, color: "#a5f3fc", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: "10px" }}>{m.value}</div>
+                  <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>{m.label}</div>
+                </div>
+              </Col>
+            ))}
+          </Row> */}
         </Container>
       </section>
 

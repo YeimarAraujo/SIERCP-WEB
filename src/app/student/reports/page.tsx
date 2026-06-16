@@ -78,16 +78,16 @@ export default function StudentReportsPage() {
         },
         {
             key: 'metrics',
-            label: 'Calidad AHA',
+            label: 'Calidad',
             render: (metrics: any) => {
                 const score = metrics?.qualityScore || metrics?.score || 0;
                 const color = score >= 85 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{ flex: 1, height: 6, background: 'var(--muted)', borderRadius: 3, minWidth: 60, overflow: 'hidden' }}>
-                            <div style={{ width: `${score}%`, height: '100%', background: color, borderRadius: 3 }} />
+                            <div style={{ width: `${Math.round(score)}%`, height: '100%', background: color, borderRadius: 3 }} />
                         </div>
-                        <span style={{ fontSize: 14, fontWeight: 900, color: color }}>{score}%</span>
+                        <span style={{ fontSize: 14, fontWeight: 900, color: color }}>{Math.round(score)}%</span>
                     </div>
                 );
             }

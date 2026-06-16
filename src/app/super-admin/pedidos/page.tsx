@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { collection, getDocs, doc, updateDoc, orderBy, query, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, orderBy, query, serverTimestamp, Timestamp, getDoc } from 'firebase/firestore';
 import { db } from '@/shared/lib/firebase';
 import { Package, Truck, CheckCircle2, Clock, XCircle, RefreshCw, ChevronDown, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -16,29 +16,104 @@ type ShippingStatus = 'pending' | 'preparing' | 'shipped' | 'delivered';
 
 interface Order {
     orderId: string;
+    userId?: string;
+    institutionId?: string;
     type: OrderType;
     status: OrderStatus;
     shippingStatus?: ShippingStatus;
-    priceTotal: number;
+    total: number;
     payMethod: string;
+    quantity?: number;
     createdAt: Timestamp | null;
-    // plan / licencia-sst
     planSlug?: string;
     planName?: string;
     packSlug?: string;
     packName?: string;
     userEmail?: string;
-    personal?: { nombreCompleto?: string; nombre?: string; email: string; };
-    // corporate plan
-    company?: { institucionName: string; email: string; nit: string; };
-    // manikin
-    quantity?: number;
-    buyer?: { razonSocial?: string; nombre?: string; email: string; };
+    personal?: {
+        nombreCompleto?: string;
+        nombre?: string;
+        email: string;
+    };
+    company?: {
+        institucionName: string;
+        email: string;
+        nit: string;
+    };
+    buyer?: {
+        razonSocial?: string;
+        nombre?: string;
+        email: string;
+    };
     buyerType?: 'empresa' | 'persona';
-    shipping?: { address: string; city: string; department: string; };
+    shipping?: {
+        address: string;
+        city: string;
+        department: string;
+    };
+    user?: {
+        name?: string;
+        fullName?: string;
+        email?: string;
+    };
+    institution?: {
+        name?: string;
+        institucionName?: string;
+        email?: string;
+        nit?: string;
+    };
 }
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+function getBuyerName(order: Order): string {
+    if (order.institution?.institucionName)
+        return order.institution.institucionName;
+
+    if (order.institution?.name)
+        return order.institution.name;
+
+    if (order.user?.fullName)
+        return order.user.fullName;
+
+    if (order.user?.name)
+        return order.user.name;
+
+    if (order.company?.institucionName)
+        return order.company.institucionName;
+
+    if (order.buyer?.razonSocial)
+        return order.buyer.razonSocial;
+
+    if (order.buyer?.nombre)
+        return order.buyer.nombre;
+
+    if (order.personal?.nombreCompleto)
+        return order.personal.nombreCompleto;
+
+    if (order.personal?.nombre)
+        return order.personal.nombre;
+
+    return order.userEmail ?? '—';
+}
+function getBuyerEmail(order: Order): string {
+    if (order.institution?.email)
+        return order.institution.email;
+
+    if (order.user?.email)
+        return order.user.email;
+
+    if (order.company?.email)
+        return order.company.email;
+
+    if (order.buyer?.email)
+        return order.buyer.email;
+
+    if (order.personal?.email)
+        return order.personal.email;
+
+    return order.userEmail ?? '—';
+
+}
 
 function fmt(n?: number | null) {
     if (typeof n !== 'number') return '—';
@@ -48,23 +123,6 @@ function fmt(n?: number | null) {
 function fmtDate(ts: Timestamp | null): string {
     if (!ts) return '—';
     return ts.toDate().toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
-function getBuyerName(order: Order): string {
-    if (order.company?.institucionName) return order.company.institucionName;
-    if (order.buyer?.razonSocial) return order.buyer.razonSocial;
-    if (order.buyer?.nombre) return order.buyer.nombre;
-    if (order.personal?.nombreCompleto) return order.personal.nombreCompleto;
-    if (order.personal?.nombre) return order.personal.nombre;
-    return order.userEmail ?? '—';
-}
-
-function getBuyerEmail(order: Order): string {
-    if (order.company?.email) return order.company.email;
-    if (order.buyer?.email) return order.buyer.email;
-    if (order.personal?.email) return order.personal.email;
-    if (order.userEmail) return order.userEmail;
-    return '—';
 }
 
 function getProductName(order: Order): string {
@@ -167,8 +225,8 @@ function OrderDetail({ order, onClose, onUpdate }: { order: Order; onClose: () =
                         ['Estado', <StatusBadge key="s" status={order.status} />],
                         ['Comprador', getBuyerName(order)],
                         ['Correo', getBuyerEmail(order)],
-                        ['Total', fmt(order.priceTotal) + ' COP'],
-                        ['Método de pago', order.payMethod === 'card' ? 'Tarjeta' : 'PSE'],
+                        ['Total', fmt(order.total) + ' COP'],
+                        ['Método de pago', order.payMethod === 'card' ? 'Tarjeta' : order.payMethod === 'manual' ? 'Manual (super admin)' : 'PSE'],
                         ['Fecha', fmtDate(order.createdAt)],
                         ...(order.quantity ? [['Cantidad', `${order.quantity} maniquí${order.quantity > 1 ? 'es' : ''}`]] : []),
                         ...(order.shipping ? [['Dirección de envío', `${order.shipping.address}, ${order.shipping.city}, ${order.shipping.department}`]] : []),
@@ -245,15 +303,63 @@ export default function PedidosPage() {
 
     const load = useCallback(async () => {
         setLoading(true);
+
         try {
-            const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc')));
-            setOrders(snap.docs.map(d => ({ orderId: d.id, ...d.data() } as Order)));
-        } catch {
+            const snap = await getDocs(
+                query(
+                    collection(db, 'orders'),
+                    orderBy('createdAt', 'desc')
+                )
+            );
+
+            const ordersData = await Promise.all(
+                snap.docs.map(async (d) => {
+                    const order = {
+                        orderId: d.id,
+                        ...d.data(),
+                    } as Order;
+
+                    let user;
+                    let institution;
+
+                    if (order.userId) {
+                        const userSnap = await getDoc(
+                            doc(db, 'users', order.userId)
+                        );
+
+                        if (userSnap.exists()) {
+                            user = userSnap.data();
+                        }
+                    }
+
+                    if (order.institutionId) {
+                        const institutionSnap = await getDoc(
+                            doc(db, 'institutions', order.institutionId)
+                        );
+
+                        if (institutionSnap.exists()) {
+                            institution = institutionSnap.data();
+                        }
+                    }
+
+                    return {
+                        ...order,
+                        user,
+                        institution,
+                    };
+                })
+            );
+
+            setOrders(ordersData);
+        } catch (e) {
+            console.error(e);
             toast.error('Error cargando pedidos');
         } finally {
             setLoading(false);
         }
     }, []);
+
+
 
     useEffect(() => { load(); }, [load]);
 
@@ -266,7 +372,7 @@ export default function PedidosPage() {
         (statusFilter === 'all' || o.status === statusFilter)
     );
 
-    const totalRevenue = filtered.reduce((sum, o) => sum + (o.priceTotal ?? 0), 0);
+    const totalRevenue = filtered.reduce((sum, o) => sum + (o.total ?? 0), 0);
     const pendingCount = filtered.filter(o => o.status === 'pending_payment').length;
     const manikinPending = filtered.filter(o => o.type === 'manikin' && (o.shippingStatus === 'pending' || o.shippingStatus === 'preparing')).length;
 
@@ -364,7 +470,7 @@ export default function PedidosPage() {
                             </div>
                             <TypeBadge type={order.type} />
                             <StatusBadge status={order.status} />
-                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary,#111827)' }}>{fmt(order.priceTotal)}</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary,#111827)' }}>{fmt(order.total)}</span>
                             <span style={{ fontSize: 12, color: 'var(--text-secondary,#6b7280)' }}>{fmtDate(order.createdAt)}</span>
                             <button onClick={() => setSelected(order)}
                                 style={{ padding: '7px 12px', borderRadius: 8, border: '1.5px solid var(--border,#e5e7eb)', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary,#6b7280)', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600 }}>

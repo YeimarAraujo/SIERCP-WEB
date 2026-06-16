@@ -313,6 +313,7 @@ export const StudentEnrollmentService = {
           id: courseIdOrSlug,
           title: tData.title || enrollment.courseTitle,
           description: tData.description || '',
+          institutionId: tData.institutionId || 'jomar-seguridad',
           instructorId: tData.institutionId || 'jomar-seguridad',
           instructorName: tData.institutionId === 'jomar-seguridad' ? 'Jomar Seguridad' : tData.institutionName || 'Institución',
           certification: 'SIERCP / JOMAR',

@@ -30,7 +30,6 @@ const NAV_GROUPS: Record<string, NavGroup[]> = {
             group: 'Académico',
             items: [
                 { label: 'Cursos',        href: '/admin/courses',       icon: '📚' },
-                { label: 'Certificados',  href: '/admin/certificates',  icon: '🏅' },
                 { label: 'Reportes',      href: '/admin/reports',       icon: '📊' },
             ],
         },

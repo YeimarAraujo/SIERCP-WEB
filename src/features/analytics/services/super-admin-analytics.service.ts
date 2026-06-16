@@ -14,7 +14,12 @@ import {
     type QueryConstraint,
 } from 'firebase/firestore';
 import { db } from '@/shared/lib/firebase';
-import { ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_STUDENT } from '@/shared/lib/constants';
+import { ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_USUARIO, ROLE_USUARIO_SST, ROLE_USUARIO_PRO } from '@/shared/lib/constants';
+
+// Los tres niveles de "estudiante" del modelo de 3 niveles. El KPI debe sumar
+// los tres, no solo 'USUARIO' (de lo contrario los USUARIO_SST / PROFESIONAL
+// quedan fuera del conteo).
+const STUDENT_ROLES = [ROLE_USUARIO, ROLE_USUARIO_SST, ROLE_USUARIO_PRO] as const;
 
 export interface AnalyticsTrendPoint {
     month: string;
@@ -114,11 +119,19 @@ function toDate(value: unknown): Date {
     return new Date();
 }
 
-async function safeCount(collectionName: string, ...constraints: QueryConstraint[]): Promise<number> {
+async function safeCount(
+    errors: unknown[],
+    collectionName: string,
+    ...constraints: QueryConstraint[]
+): Promise<number> {
     try {
         const snap = await getCountFromServer(query(collection(db, collectionName), ...constraints));
         return snap.data().count;
-    } catch {
+    } catch (err) {
+        // No silenciamos el fallo: lo registramos y lo acumulamos. Un 0 por error
+        // (cuota agotada, índice faltante, permisos) no es lo mismo que un 0 real.
+        console.error(`[super-admin-analytics] conteo de "${collectionName}" falló:`, err);
+        errors.push(err);
         return 0;
     }
 }
@@ -177,6 +190,7 @@ export const SuperAdminAnalyticsService = {
 
         const stats = await getStatsDocument();
 
+        const errors: unknown[] = [];
         const [
             institutions,
             activeInstitutions,
@@ -191,19 +205,34 @@ export const SuperAdminAnalyticsService = {
             pendingInstitutions,
             suspendedInstitutions,
         ] = await Promise.all([
-            safeCount('institutions'),
-            safeCount('institutions', where('status', '==', 'active')),
-            safeCount('users'),
-            safeCount('users', where('role', '==', ROLE_ADMIN)),
-            safeCount('users', where('role', '==', ROLE_INSTRUCTOR)),
-            safeCount('users', where('role', '==', ROLE_STUDENT)),
-            safeCount('sessions'),
-            safeCount('certificates'),
-            safeCount('courses', where('isActive', '==', true)),
-            safeCount('jomarCourses', where('isPublished', '==', true)),
-            safeCount('institutions', where('status', '==', 'pending')),
-            safeCount('institutions', where('status', '==', 'suspended')),
+            safeCount(errors, 'institutions'),
+            safeCount(errors, 'institutions', where('status', '==', 'active')),
+            safeCount(errors, 'users'),
+            safeCount(errors, 'users', where('role', '==', ROLE_ADMIN)),
+            safeCount(errors, 'users', where('role', '==', ROLE_INSTRUCTOR)),
+            // Suma los 3 niveles de estudiante (USUARIO / USUARIO_SST / USUARIO_PROFESIONAL).
+            safeCount(errors, 'users', where('role', 'in', [...STUDENT_ROLES])),
+            safeCount(errors, 'sessions'),
+            safeCount(errors, 'certificates'),
+            safeCount(errors, 'courses', where('isActive', '==', true)),
+            safeCount(errors, 'jomarCourses', where('isPublished', '==', true)),
+            safeCount(errors, 'institutions', where('status', '==', 'pending')),
+            safeCount(errors, 'institutions', where('status', '==', 'suspended')),
         ]);
+
+        // Si hubo errores Y todos los conteos núcleo dieron 0, es un fallo
+        // sistémico (cuota de Firestore agotada, red o reglas), no datos vacíos.
+        // Lo propagamos para que el dashboard muestre el error real en vez de
+        // pintar ceros engañosos.
+        if (
+            errors.length > 0 &&
+            institutions === 0 && users === 0 && sessions === 0 &&
+            certificates === 0 && instructors === 0
+        ) {
+            const first = errors[0];
+            const msg = first instanceof Error ? first.message : String(first);
+            throw new Error(`No se pudieron leer las métricas de Firestore (${msg}).`);
+        }
 
         const [recentSessionsSnap, auditSnap, courseSnap, institutionSnap] = await Promise.all([
             getDocs(query(collection(db, 'sessions'), orderBy('startedAt', 'desc'), limit(8))).catch(() => null),

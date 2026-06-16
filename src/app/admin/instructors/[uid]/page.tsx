@@ -27,7 +27,7 @@ export default function InstructorDetailPage() {
         
         Promise.all([
             UserService.get(uid),
-            CourseService.getByInstructor(uid)
+            CourseService.getByInstructor(uid, true)
         ]).then(([userData, coursesData]) => {
             if (!userData) {
                 router.push('/admin/instructors');

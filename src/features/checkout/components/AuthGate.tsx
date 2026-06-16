@@ -306,7 +306,7 @@ function RegisterForm({
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
-        identificacion: data.documentNumber,
+        identification: data.documentNumber,
         phoneNumber: data.phone || undefined,
       });
       onAuthenticated();

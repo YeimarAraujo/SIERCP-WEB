@@ -9,6 +9,7 @@ import { Check, Clock, X, ArrowRight } from 'lucide-react';
 import { corporatePlans, maniquiPackages, sstConLicenciaPlans, sstSinLicenciaPlans } from '@/data/planes';
 import { getTransactionStatus, type WompiTransactionStatus } from '@/services/wompi.service';
 import { useAuth } from '@/hooks/use-auth';
+import VideoLoader from '@/components/video-loader';
 
 function fmt(n: number) { return `$${n.toLocaleString('es-CO')}`; }
 
@@ -253,7 +254,7 @@ function ResultContent() {
 
 export default function ResultadoPage() {
     return (
-        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', color: '#6b7280', fontSize: 14 }}>Cargando…</div>}>
+        <Suspense fallback={<VideoLoader fullScreen />}>
             <ResultContent />
         </Suspense>
     );

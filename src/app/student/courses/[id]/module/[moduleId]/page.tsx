@@ -1,12 +1,40 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { getAuth } from 'firebase/auth';
 import { Header } from '@/components/layout/header';
 import { useAuth } from '@/shared/hooks/use-auth';
-import { BookOpen, PlayCircle, CheckCircle, ChevronLeft, FileText, Video } from 'lucide-react';
-import Link from 'next/link';
+import { BookOpen, CheckCircle, FileText, Video, HeartPulse, ClipboardList, Award, Smartphone } from 'lucide-react';
+import {
+    normalizeScenario,
+    CLINICAL_SCENARIO_LABELS,
+    CLINICAL_SCENARIO_DIFFICULTY,
+    CLINICAL_SCENARIO_PATIENT_TYPE,
+} from '@/shared/constants/clinical_scenarios';
+
+// Metadatos por tipo de módulo (antes el encabezado decía siempre "Teoría").
+const MODULE_META: Record<string, { label: string; icon: typeof BookOpen; color: string }> = {
+    teoria: { label: 'Teoría', icon: BookOpen, color: 'var(--brand)' },
+    evaluacion_teorica: { label: 'Evaluación teórica', icon: ClipboardList, color: '#7C3AED' },
+    practica_guiada: { label: 'Práctica guiada', icon: HeartPulse, color: '#DC2626' },
+    certificacion: { label: 'Certificación', icon: Award, color: '#D97706' },
+};
+
+const PATIENT_LABEL: Record<string, string> = { adult: 'Adulto', pediatric: 'Pediátrico', infant: 'Lactante' };
+
+function scenarioInfo(raw: string): { title: string; difficulty: string; patient: string } {
+    try {
+        const s = normalizeScenario(raw);
+        return {
+            title: CLINICAL_SCENARIO_LABELS[s] ?? raw,
+            difficulty: CLINICAL_SCENARIO_DIFFICULTY[s] ?? '',
+            patient: PATIENT_LABEL[CLINICAL_SCENARIO_PATIENT_TYPE[s]] ?? '',
+        };
+    } catch {
+        return { title: raw, difficulty: '', patient: '' };
+    }
+}
 
 interface Module {
     id: string;
@@ -15,7 +43,10 @@ interface Module {
     type: string;
     contentUrl?: string;
     videoUrl?: string;
+    scenarios?: string[];
+    topics?: string[];
     estimatedMinutes?: number;
+    passingScore?: number;
     order: number;
 }
 
@@ -104,7 +135,7 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--muted)' }}>
-            <Header 
+            <Header
                 title={module.title}
                 showBack
                 onBack={() => router.push(`/student/courses/${courseId}`)}
@@ -118,21 +149,29 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{
-                                width: 40, height: 40, borderRadius: 10,
-                                background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: 'var(--brand)'
-                            }}>
-                                <BookOpen size={20} />
-                            </div>
-                            <div>
-                                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>
-                                    Teoría
-                                </span>
-                                <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--foreground)', margin: 0 }}>
-                                    {module.title}
-                                </h3>
-                            </div>
+                            {(() => {
+                                const meta = MODULE_META[module.type] ?? MODULE_META.teoria;
+                                const Icon = meta.icon;
+                                return (
+                                    <>
+                                        <div style={{
+                                            width: 40, height: 40, borderRadius: 10,
+                                            background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: meta.color
+                                        }}>
+                                            <Icon size={20} />
+                                        </div>
+                                        <div>
+                                            <span style={{ fontSize: 11, fontWeight: 700, color: meta.color, textTransform: 'uppercase' }}>
+                                                {meta.label}
+                                            </span>
+                                            <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--foreground)', margin: 0 }}>
+                                                {module.title}
+                                            </h3>
+                                        </div>
+                                    </>
+                                );
+                            })()}
                         </div>
                         {completed && (
                             <div style={{
@@ -180,7 +219,7 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
 
                 {/* Content Area */}
                 <div style={{ padding: 24 }}>
-                    {activeTab === 'pdf' && module.contentUrl && (
+                    {module.contentUrl && (activeTab === 'pdf' || !module.videoUrl) && (
                         <div style={{
                             background: 'var(--card)', borderRadius: 16, border: '1px solid var(--border)',
                             overflow: 'hidden', height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center'
@@ -193,7 +232,7 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
                         </div>
                     )}
 
-                    {activeTab === 'video' && module.videoUrl && (
+                    {module.videoUrl && (activeTab === 'video' || !module.contentUrl) && (
                         <div style={{
                             background: '#000', borderRadius: 16, overflow: 'hidden',
                             aspectRatio: '16/9', maxHeight: 400
@@ -208,11 +247,81 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
                         </div>
                     )}
 
-                    {!module.contentUrl && !module.videoUrl && (
-                        <div style={{
-                            background: 'var(--card)', borderRadius: 16, padding: 40, textAlign: 'center',
-                            border: '1px solid var(--border)'
-                        }}>
+                    {module.type === 'practica_guiada' && (
+                        <div style={{ display: 'grid', gap: 16, marginTop: (module.contentUrl || module.videoUrl) ? 16 : 0 }}>
+                            {/* Aviso: la práctica con maniquí se realiza en la app SIERCP */}
+                            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 16, padding: 16 }}>
+                                <Smartphone size={20} color="#DC2626" style={{ flexShrink: 0, marginTop: 2 }} />
+                                <div>
+                                    <div style={{ fontWeight: 800, color: '#991B1B', fontSize: 14 }}>Práctica con maniquí en la app SIERCP</div>
+                                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#7F1D1D' }}>
+                                        Estos escenarios se realizan desde la app móvil SIERCP conectada al maniquí. Tu desempeño (calidad AHA) se registra automáticamente y cuenta para tu nota del curso.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style={{ background: 'var(--card)', borderRadius: 16, padding: 20, border: '1px solid var(--border)' }}>
+                                <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 800, color: 'var(--foreground)' }}>
+                                    Escenarios de práctica ({module.scenarios?.length ?? 0})
+                                </h3>
+                                {module.scenarios?.length ? (
+                                    <div style={{ display: 'grid', gap: 10 }}>
+                                        {module.scenarios.map((scenario) => {
+                                            const info = scenarioInfo(scenario);
+                                            return (
+                                                <div key={scenario} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, background: 'var(--muted)', border: '1px solid var(--border)' }}>
+                                                    <div style={{ width: 34, height: 34, borderRadius: 9, background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#DC2626', flexShrink: 0 }}>
+                                                        <HeartPulse size={18} />
+                                                    </div>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--foreground)' }}>{info.title}</div>
+                                                        <div style={{ display: 'flex', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
+                                                            {info.difficulty && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 20, background: 'var(--accent)', color: 'var(--brand)' }}>{info.difficulty}</span>}
+                                                            {info.patient && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 20, background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>{info.patient}</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: 0 }}>No hay escenarios configurados para esta práctica.</p>
+                                )}
+
+                                {!!module.topics?.length && (
+                                    <>
+                                        <h3 style={{ margin: '20px 0 10px', fontSize: 15, fontWeight: 800, color: 'var(--foreground)' }}>Temas</h3>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                            {module.topics.map((topic) => (
+                                                <span key={topic} style={{ fontSize: 12, fontWeight: 600, padding: '6px 12px', borderRadius: 20, background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>{topic}</span>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Evaluación teórica / Certificación: el quiz/examen se hace en la app */}
+                    {(module.type === 'evaluacion_teorica' || module.type === 'certificacion') && !module.contentUrl && !module.videoUrl && (
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
+                            {module.type === 'certificacion' ? <Award size={20} color="#D97706" style={{ flexShrink: 0, marginTop: 2 }} /> : <ClipboardList size={20} color="#7C3AED" style={{ flexShrink: 0, marginTop: 2 }} />}
+                            <div>
+                                <div style={{ fontWeight: 800, color: 'var(--foreground)', fontSize: 14 }}>
+                                    {module.type === 'certificacion' ? 'Módulo de certificación' : 'Evaluación teórica'}
+                                </div>
+                                <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary)' }}>
+                                    {module.type === 'certificacion'
+                                        ? 'Al cumplir los requisitos del curso (nota y asistencia), tu certificado se emite automáticamente y podrás verlo en tu perfil.'
+                                        : `Esta evaluación se responde en la app SIERCP. Puntaje mínimo para aprobar: ${module.passingScore ?? 70}%.`}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Sin contenido en módulos de teoría */}
+                    {module.type !== 'practica_guiada' && module.type !== 'evaluacion_teorica' && module.type !== 'certificacion' && !module.contentUrl && !module.videoUrl && (
+                        <div style={{ background: 'var(--card)', borderRadius: 16, padding: 40, textAlign: 'center', border: '1px solid var(--border)' }}>
                             <p style={{ color: 'var(--text-secondary)' }}>No hay contenido disponible para este módulo.</p>
                         </div>
                     )}

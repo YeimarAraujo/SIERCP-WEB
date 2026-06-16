@@ -235,7 +235,7 @@ export default function StudentCoursesPage() {
       setState(courses.length === 0 ? { kind: 'empty' } : { kind: 'ready', courses });
 
       // Cursos como instructor (en paralelo, sin bloquear la UI)
-      CourseService.getByInstructor(user.uid)
+      CourseService.getByInstructor(user.uid, true)
         .then(setInstCourses)
         .catch(() => {});
     } catch (err) {

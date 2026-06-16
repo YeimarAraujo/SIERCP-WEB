@@ -24,7 +24,7 @@ export default function InstructorEditStudentPage() {
         firstName: '',
         lastName: '',
         email: '',
-        identificacion: '',
+        identification: '',
     });
 
     useEffect(() => {
@@ -41,7 +41,7 @@ export default function InstructorEditStudentPage() {
                     firstName: u.firstName || '',
                     lastName: u.lastName || '',
                     email: u.email || '',
-                    identificacion: u.identificacion || '',
+                    identification: u.identification || '',
                 });
             })
             .catch(() => router.push('/instructor/students'))
@@ -62,7 +62,7 @@ export default function InstructorEditStudentPage() {
             await UserService.update(uid, {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
-                identificacion: formData.identificacion,
+                identification: formData.identification,
                 updatedAt: new Date(),
             });
             
@@ -115,7 +115,7 @@ export default function InstructorEditStudentPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Nombres" icon={User} placeholder="Ej. Juan Andrés" required value={formData.firstName} onChange={(v: string) => setFormData({...formData, firstName: v})} />
                                     <FormInput label="Apellidos" icon={User} placeholder="Ej. Pérez García" required value={formData.lastName} onChange={(v: string) => setFormData({...formData, lastName: v})} />
-                                    <FormInput label="Identificación" icon={Fingerprint} placeholder="1.000.000.000" value={formData.identificacion} onChange={(v: string) => setFormData({...formData, identificacion: v})} />
+                                    <FormInput label="Identificación" icon={Fingerprint} placeholder="1.000.000.000" value={formData.identification} onChange={(v: string) => setFormData({...formData, identification: v})} />
                                     <FormInput label="Correo" icon={Mail} placeholder="correo@ejemplo.com" type="email" disabled value={formData.email} onChange={() => {}} />
                                 </div>
                             </div>

@@ -226,7 +226,7 @@ export default function EnrollmentFlow({ show, onHide, curso, grupo }: Enrollmen
 
 function AuthStep({ onSuccess }: { onSuccess: () => void; onSwitchToLogin: () => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('register');
-  const [formData, setFormData] = useState({ email: '', password: '', firstName: '', lastName: '', identificacion: '', phoneNumber: '', departamento: '', ciudad: '', direccion: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', firstName: '', lastName: '', identification: '', phoneNumber: '', departamento: '', ciudad: '', direccion: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, register } = useAuth();
@@ -261,7 +261,7 @@ function AuthStep({ onSuccess }: { onSuccess: () => void; onSwitchToLogin: () =>
           <div className="row g-2 mb-2">
             <div className="col-6"><Form.Control placeholder="Nombre" required onChange={e => setFormData({...formData, firstName: e.target.value})} className="form-control-custom" /></div>
             <div className="col-6"><Form.Control placeholder="Apellido" required onChange={e => setFormData({...formData, lastName: e.target.value})} className="form-control-custom" /></div>
-            <div className="col-12"><Form.Control placeholder="Identificación (Cédula/DNI)" required onChange={e => setFormData({...formData, identificacion: e.target.value})} className="form-control-custom" /></div>
+            <div className="col-12"><Form.Control placeholder="Identificación (Cédula/DNI)" required onChange={e => setFormData({...formData, identification: e.target.value})} className="form-control-custom" /></div>
             <div className="col-12"><Form.Control type="tel" placeholder="Teléfono / WhatsApp (opcional)" onChange={e => setFormData({...formData, phoneNumber: e.target.value})} className="form-control-custom" /></div>
             <div className="col-12">
               <Form.Select value={formData.departamento} onChange={e => setFormData({...formData, departamento: e.target.value, ciudad: ''})} className="form-control-custom">
@@ -313,7 +313,7 @@ function LegalStep({ user, onSubmit, acceptTerms, setAcceptTerms, error }: any) 
         <h4 style={{ fontWeight: 900, margin: 0, color: 'var(--clr-text-head)' }}>{user?.firstName} {user?.lastName}</h4>
         <div className="d-flex align-items-center gap-2 mt-1 opacity-75">
           <i className="bi bi-person-badge" />
-          <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>ID: {user?.identificacion || 'No registrado'}</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>ID: {user?.identification || 'No registrado'}</span>
         </div>
       </div>
 

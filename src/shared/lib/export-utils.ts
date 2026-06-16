@@ -2,7 +2,6 @@ import Papa from 'papaparse';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AuditService } from '@/features/audit/services/audit.service';
-import { CertificateService } from '@/features/certificates/services/certificate.service';
 
 type ReportCell = string | number | boolean | null | undefined;
 type ReportRow = Record<string, ReportCell>;
@@ -237,58 +236,4 @@ export function downloadSessionPdfReport(options: Omit<PdfReportOptions, 'footer
   });
 }
 
-export function downloadCertificatePdf(options: {
-  filename: string;
-  studentName: string;
-  certification: string;
-  score: number;
-  issuedAt: Date;
-  sessionId?: string;
-  instructorOrInstitution?: string;
-  institutionId?: string;
-}): Promise<void> {
-  return CertificateService.issue({
-    id: options.sessionId,
-    studentName: options.studentName,
-    certification: options.certification,
-    score: options.score,
-    issuedAt: options.issuedAt,
-    sessionId: options.sessionId,
-    institutionId: options.institutionId,
-  }).catch(() => options.sessionId || options.filename.replace(/\.pdf$/i, '')).then((certificateId) => {
-    const verificationUrl = CertificateService.buildVerificationUrl(certificateId);
-    AuditService.record({
-      action: 'certificate.generate',
-      resource: 'certificate',
-      resourceId: certificateId,
-      institutionId: options.institutionId,
-      metadata: {
-        studentName: options.studentName,
-        certification: options.certification,
-        score: options.score,
-      },
-    });
-    return downloadPdfReport({
-      filename: options.filename,
-      title: 'Certificado de entrenamiento RCP',
-      subtitle: 'Constancia de cumplimiento de criterio minimo de calidad AHA',
-      institution: options.instructorOrInstitution || 'SIERCP / JOMAR SEGURID',
-      summary: [
-        { label: 'Participante', value: options.studentName },
-        { label: 'Calidad AHA', value: `${Math.round(options.score)}%` },
-        { label: 'Emision', value: options.issuedAt.toLocaleDateString('es-CO') },
-        { label: 'Folio', value: certificateId },
-      ],
-      columns: ['Campo', 'Valor'],
-      rows: [
-        ['Participante', options.studentName],
-        ['Certificacion', options.certification],
-        ['Puntaje de calidad', `${Math.round(options.score)}%`],
-        ['Fecha de emision', options.issuedAt.toLocaleDateString('es-CO')],
-        ['Folio verificable', certificateId],
-        ['URL de validacion', verificationUrl],
-      ],
-      footerNote: 'Certificado generado por SIERCP / JOMAR SEGURID. Validacion publica disponible por folio.',
-    });
-  });
-}
+// downloadCertificatePdf retirado (S6.2 — certificados Tipo A reemplazados por Skills).

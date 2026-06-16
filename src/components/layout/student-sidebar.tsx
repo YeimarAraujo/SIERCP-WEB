@@ -27,11 +27,10 @@ const studentNavItems: NavItem[] = [
     { label: 'Inicio', href: '/student/home', icon: Home },
     { label: 'Mis cursos', href: '/student/courses', icon: BookOpen },
     { label: 'Calendario', href: '/student/calendar', icon: CalendarDays },
-    { label: 'Historial', href: '/student/history', icon: Clock },
-    { label: 'Mis reportes', href: '/student/reports', icon: BarChart2 },
-    { label: 'Certificados', href: '/student/certificates', icon: Award },
     { label: 'Ranking', href: '/student/ranking', icon: Trophy },
-    { label: 'Tienda', href: '/student/tienda', icon: ShoppingBag },
+    { label: 'Mis reportes', href: '/student/reports', icon: BarChart2 },
+    { label: 'Credenciales', href: '/student/profile/certificados', icon: Award },
+    { label: 'Historial', href: '/student/history', icon: Clock },
 ];
 
 const instructorNavItems: NavItem[] = [
@@ -125,13 +124,12 @@ export function StudentSidebar({ collapsed }: { collapsed?: boolean }) {
         >
             {/* Branding */}
             <div style={{
-                padding: '20px 20px 16px',
-                borderBottom: '1px solid var(--sidebar-border)',
+                padding: '80px 20px 16px',
                 display: 'flex', alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
                 gap: isCollapsed ? 0 : '10px',
             }}>
-                <div style={{
+                {/* <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     width: 32, height: 32, borderRadius: 'var(--radius-md)',
                     background: 'rgba(255,255,255,0.15)', color: 'var(--sidebar-text)', flexShrink: 0,
@@ -146,7 +144,7 @@ export function StudentSidebar({ collapsed }: { collapsed?: boolean }) {
                     transition: 'opacity 0.2s ease, max-width 0.2s ease',
                 }}>
                     SIERCP
-                </span>
+                </span> */}
             </div>
 
             {/* Nav */}
@@ -175,9 +173,9 @@ export function StudentSidebar({ collapsed }: { collapsed?: boolean }) {
                 display: 'flex', flexDirection: 'column', gap: 4,
                 alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
+
+                <SidebarLink href="/student/tienda" icon={<ShoppingBag size={20} />} label="Tienda" isCollapsed={isCollapsed} />
                 <SidebarLink href="/" icon={<Globe size={20} />} label="Volver al sitio" isCollapsed={isCollapsed} />
-                <SidebarLink href="/student/profile" icon={<User size={20} />} label="Mi perfil" isCollapsed={isCollapsed} />
-                <SidebarBtn onClick={toggleTheme} icon={theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />} label={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} isCollapsed={isCollapsed} />
                 <SidebarBtn onClick={handleLogout} icon={<LogOut size={20} />} label="Cerrar sesión" isCollapsed={isCollapsed} />
             </div>
 

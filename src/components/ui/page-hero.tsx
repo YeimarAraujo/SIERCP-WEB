@@ -21,7 +21,7 @@ export function PageHero({ title, subtitle, actions, parentTitle, parentHref }: 
             background: 'var(--card)',
             borderRadius: 24,
             padding: '24px 32px',
-            marginBottom: 32,
+            marginBottom: 8,
             boxShadow: '0 4px 20px -5px rgba(0,0,0,0.05)',
             border: '1px solid var(--border)',
             display: 'flex',

@@ -3,11 +3,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { getUserInitials, getFullName } from '@/models/user';
-import { ChevronDown, ChevronLeft, Bell, Search, Settings, LogOut, User as UserIcon } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Bell, Search, Settings, LogOut, User as UserIcon, Sun, Moon, HeartPulseIcon } from 'lucide-react';
 import { GlobalSearch } from '@/components/ui/global-search';
 import { NotificationsDrawer } from '@/components/ui/notifications-drawer';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useThemeStore } from '@/stores';
 
 interface HeaderProps {
     title?: string;
@@ -23,6 +24,7 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const profileRef = useRef<HTMLDivElement>(null);
+    const { theme, toggleTheme } = useThemeStore();
 
     useEffect(() => {
         if (!isProfileOpen) return;
@@ -75,9 +77,23 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                             <ChevronLeft size={18} />
                         </button>
                     )}
-                    {/* <h1 style={{ fontSize: 14, fontWeight: 700, color: textColor, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
-                        {title}
-                    </h1> */}
+                    <div
+                        className="flex items-center gap-2 cursor-pointer"
+                    >
+                        <img
+                            src={
+                                theme === 'dark'
+                                    ? "/assets/images/SICAP/webp/logo_sicap_white.webp"
+                                    : "/assets/images/SICAP/webp/logo_sicap.webp"
+                            }
+                            alt="SICAP"
+                            style={{
+                                height: 40,
+                                width: 'auto',
+                                transition: 'all 0.3s ease',
+                            }}
+                        />
+                    </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
@@ -98,6 +114,14 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                             <Bell size={18} />
                             <div style={{ position: 'absolute', top: 8, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#EF4444', border: `2px solid ${bgColor}` }} />
                         </div>
+                        <div
+                            className="header-icon-btn"
+                            onClick={toggleTheme}
+                        >
+                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                        </div>
+
+
                     </div>
 
                     <div style={{ width: 1, height: 24, background: borderColor }} />
@@ -161,21 +185,23 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                     )}
                 </div>
                 <style jsx>{`
-                    .header-profile-hover:hover {
-                        background: ${dark ? 'rgba(255,255,255,0.05)' : 'var(--muted)'};
-                    }
-                    .header-icon-btn:hover {
-                        background: ${dark ? 'rgba(255,255,255,0.05)' : 'var(--muted)'};
-                        color: var(--brand);
-                    }
-                    .dropdown-item:hover {
-                        background: var(--muted);
-                        color: var(--brand) !important;
-                    }
-                    .dropdown-item-danger:hover {
-                        background: var(--danger-bg);
-                    }
-                `}</style>
+  .header-icon-btn {
+    position: relative;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .header-icon-btn:hover {
+    background: ${dark ? 'rgba(255,255,255,0.05)' : 'var(--muted)'};
+    transform: scale(1.05);
+    color: var(--brand);
+  }
+`}</style>
             </header>
 
             {/* Overlays */}

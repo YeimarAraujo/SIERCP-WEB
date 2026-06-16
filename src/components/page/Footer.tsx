@@ -3,7 +3,7 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 
-const logo = "/assets/JOMAR/logoTextov2.png";
+const logo = "/assets/images/SICAP/webp/logo_sicap_white.webp";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -18,9 +18,9 @@ export default function Footer() {
       <Container>
         <Row className="g-5 mb-5">
           <Col lg={4}>
-            <img src={logo} alt="Jomar Segurid" style={{ height: "55px", marginBottom: "28px", filter: "brightness(0) invert(1)" }} />
+            <img src={logo} alt="Sicap" style={{ height: "55px", marginBottom: "28px", filter: "brightness(0) invert(1)" }} />
             <p style={{ fontSize: "0.95rem", lineHeight: "1.8", maxWidth: "340px", marginBottom: "32px" }}>
-              Liderando la formación en emergencias y la innovación tecnológica clínica en el Caribe colombiano desde 2004.
+              Sistema inteligente de formación para la capacitación en primeros auxilios.
             </p>
             <div className="d-flex gap-3">
               {[

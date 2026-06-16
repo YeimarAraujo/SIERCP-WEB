@@ -9,8 +9,11 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'SIERCP — Sistema de Entrenamiento RCP',
-    description: 'Plataforma web para evaluación y retroalimentación de RCP basada en guías AHA 2020/2025',
+    icons: {
+        icon: "/assets/images/SICAP/webp/logo.webp",
+    },
+    title: 'SICAP - Sistema Inteligente de Capacitaciones',
+    description: 'Sistema de Entrenamiento de Primeros Auxilios',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

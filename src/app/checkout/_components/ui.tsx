@@ -82,6 +82,29 @@ export function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>
     );
 }
 
+// ── Document type select ──────────────────────────────────────────────────────
+// Shared across every checkout form for individuals (companies/institutions use NIT).
+
+export const DOCUMENT_TYPES: { value: string; label: string }[] = [
+    { value: 'CC', label: 'CC — Cédula de Ciudadanía' },
+    { value: 'CE', label: 'CE — Cédula de Extranjería' },
+    { value: 'TI', label: 'TI — Tarjeta de Identidad' },
+    { value: 'PP', label: 'PP — Pasaporte' },
+    { value: 'NIT', label: 'NIT' },
+    { value: 'DIE', label: 'DIE — Doc. Identidad Extranjero' },
+];
+
+export function DocumentTypeSelect({ value, onChange }: {
+    value: string;
+    onChange: (v: string) => void;
+}) {
+    return (
+        <SelectInput value={value} onChange={e => onChange(e.target.value)}>
+            {DOCUMENT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+        </SelectInput>
+    );
+}
+
 // ── SearchableSelect ──────────────────────────────────────────────────────────
 
 export function SearchableSelect({

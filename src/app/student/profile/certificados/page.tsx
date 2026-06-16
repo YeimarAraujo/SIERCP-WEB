@@ -8,8 +8,8 @@ import {
   FileText, ShieldCheck, Info, ChevronRight, AlertTriangle,
 } from 'lucide-react';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy } from 'firebase/firestore';
-import { app } from '@/lib/firebase';
+import { collection, addDoc, query, where, getDocs, serverTimestamp, orderBy } from 'firebase/firestore';
+import { app, db } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
 import type { UserCertificate, CertVerificationStatus } from '@/shared/types/user';
@@ -100,7 +100,6 @@ export default function CertificadosPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const db = getFirestore(app);
   const storage = getStorage(app);
 
   // Load existing certificates

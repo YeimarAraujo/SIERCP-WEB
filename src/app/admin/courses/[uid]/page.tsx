@@ -14,6 +14,7 @@ import {
 import { CourseQr } from '@/components/ui/course-qr';
 import { PageHero } from '@/components/ui/page-hero';
 import { DataTable } from '@/components/ui/data-table';
+import { AttendancePanel } from '@/features/attendance/components/attendance-panel';
 import toast from 'react-hot-toast';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -26,6 +27,7 @@ export default function AdminCourseDetailPage() {
 
     const [course, setCourse] = useState<CourseModel | null>(null);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+    const [modules, setModules] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
@@ -47,10 +49,24 @@ export default function AdminCourseDetailPage() {
                     enrolledAt: d.data().enrolledAt?.toDate() || new Date(),
                 } as Enrollment)))
                 .catch(() => [] as Enrollment[]),
+            // Los módulos viven en la subcolección courses/{id}/modules (no en el doc).
+            getDocs(query(collection(db, 'courses', courseId, 'modules'), orderBy('order')))
+                .then(snap => snap.docs.map(d => {
+                    const data = d.data() as any;
+                    const cfg = data.config || {};
+                    return {
+                        id: d.id,
+                        title: data.title || '',
+                        type: data.type || 'teoria',
+                        duration: cfg.duration || '',
+                    };
+                }))
+                .catch(() => [] as any[]),
         ])
-            .then(([courseData, enrollData]) => {
+            .then(([courseData, enrollData, moduleData]) => {
                 setCourse(courseData);
                 setEnrollments(enrollData);
+                setModules(moduleData);
             })
             .catch(() => toast.error('Error al cargar el curso'))
             .finally(() => setLoading(false));
@@ -124,10 +140,10 @@ export default function AdminCourseDetailPage() {
 
     const activeCount = enrollments.filter(e => e.status === 'active').length;
     const completedCount = enrollments.filter(e => e.status === 'completed').length;
+
     const avgScore = enrollments.length > 0
         ? enrollments.reduce((s, e) => s + (e.avgScore || 0), 0) / enrollments.length
         : 0;
-    const modules: any[] = (course as any).modules || [];
 
     const enrollColumns = [
         {
@@ -322,6 +338,18 @@ export default function AdminCourseDetailPage() {
                     </div>
                     <DataTable columns={enrollColumns} data={filteredEnrollments} loading={loading} emptyMessage="No hay inscripciones en este curso." />
                 </div>
+
+                {/* Asistencia (impacta el gating de certificación) */}
+                <AttendancePanel
+                    courseId={courseId}
+                    roster={enrollments.map(e => ({
+                        studentId: e.studentId,
+                        studentName: e.studentName,
+                        attendanceRate: (e as { attendanceRate?: number }).attendanceRate,
+                    }))}
+                />
+
+                {/* Certificados Tipo A retirados (S6.2) — reemplazados por Skills/Passport. */}
             </div>
         </div>
     );

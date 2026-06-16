@@ -10,8 +10,8 @@ import { Container, Row, Col } from "react-bootstrap";
 const VIDEOS = [
   {
     id: "intro",
-    youtubeId: "dQw4w9WgXcQ",          // placeholder — replace with real ID
-    title: "¿Qué es SIERCP?",
+    youtubeId: "dQw4w9WgXcQ",
+    title: "¿Qué es SICAP?",
     desc: "Conoce el sistema inteligente de entrenamiento en RCP y cómo funciona el maniquí IoT.",
     duration: "2:34",
     tag: "Introducción",
@@ -34,15 +34,6 @@ const VIDEOS = [
     duration: "4:50",
     tag: "Entrenamiento",
     tagColor: "#f59e0b",
-  },
-  {
-    id: "certificado",
-    youtubeId: "dQw4w9WgXcQ",
-    title: "Obtén tu certificado digital",
-    desc: "Así se genera automáticamente tu constancia al completar un curso con puntaje aprobatorio.",
-    duration: "1:48",
-    tag: "Certificación",
-    tagColor: "#6366f1",
   },
 ];
 
@@ -152,7 +143,7 @@ export default function VideoTutorial() {
               fontWeight: 900, lineHeight: 1.1, marginBottom: 16,
             }}>
               Aprende a usar{" "}
-              <span style={{ color: "var(--clr-primary)" }}>SIERCP en minutos</span>
+              <span style={{ color: "var(--clr-primary)" }}>SICAP en minutos</span>
             </h2>
             <p className="on-dark-text" style={{ opacity: 0.75, fontSize: "1rem", lineHeight: 1.75 }}>
               Video tutoriales cortos que cubren desde la configuración inicial
@@ -241,7 +232,7 @@ export default function VideoTutorial() {
                   ¿Listo para empezar tu entrenamiento real?
                 </p>
                 <a
-                  href="/programas"
+                  href="/login"
                   style={{
                     display: "inline-flex", alignItems: "center", gap: 8,
                     background: "var(--clr-primary)", color: "#fff",
@@ -250,7 +241,7 @@ export default function VideoTutorial() {
                     textDecoration: "none",
                   }}
                 >
-                  Ver programas <i className="bi bi-arrow-right" />
+                  Ir a SICAP <i className="bi bi-arrow-right" />
                 </a>
               </div>
             </div>

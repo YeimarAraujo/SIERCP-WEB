@@ -76,7 +76,7 @@ export default function ImportStudentsPage() {
                     await setDoc(doc(db!, 'users', cred.user.uid), {
                         uid: cred.user.uid, email,
                         firstName: nombres || '', lastName: apellidos || '',
-                        role: 'USUARIO', identificacion: identificacion || '',
+                        role: 'USUARIO', identification: identificacion || '',
                         isActive: true, institutionId: 'SIERCP-GENERAL',
                         status: 'ACTIVE',
                         stats: { totalSessions: 0, sessionsToday: 0, averageScore: 0, bestScore: 0, streakDays: 0, totalHours: 0, averageDepthMm: 0, averageRatePerMin: 0 },

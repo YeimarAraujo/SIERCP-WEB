@@ -69,6 +69,38 @@ export default function Hero() {
     return () => obs.disconnect();
   }, []);
 
+  /* ── Mantener el DOM sincronizado con isMuted (React puede revertirlo) ── */
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = isMuted;
+  }, [isMuted]);
+
+  /* ── Activar sonido en el primer gesto del usuario ────────────────────── */
+  useEffect(() => {
+    const enableSound = () => {
+      const v = videoRef.current;
+      if (!v) return;
+      v.muted = false;
+      v.volume = 1;
+      setIsMuted(false);
+      // Si el navegador rechaza reproducir con sonido, volver a silenciar
+      // para que el video no se congele; el botón 🔊 sigue disponible.
+      v.play().catch(() => {
+        v.muted = true;
+        setIsMuted(true);
+        v.play().catch(() => {});
+      });
+    };
+    const opts = { once: true } as AddEventListenerOptions;
+    window.addEventListener("pointerdown", enableSound, opts);
+    window.addEventListener("keydown", enableSound, opts);
+    window.addEventListener("touchstart", enableSound, opts);
+    return () => {
+      window.removeEventListener("pointerdown", enableSound);
+      window.removeEventListener("keydown", enableSound);
+      window.removeEventListener("touchstart", enableSound);
+    };
+  }, []);
+
   /* ── Scroll suave al hacer click en el indicador ─────────────────────── */
   const scrollToNext = () => {
     const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
@@ -101,6 +133,7 @@ export default function Hero() {
           className={`hero-video ${videoReady ? "hero-video--ready" : ""}`}
         >
           <source src="/assets/RCP_Hero.webm" type="video/webm" />
+          <source src="/assets/RCP_Hero.mp4" type="video/mp4" />
         </video>
 
         {/* Overlay en capas: oscurecimiento + gradiente brand */}
@@ -125,43 +158,33 @@ export default function Hero() {
 
       {/* ── CONTENIDO PRINCIPAL ────────────────────────────────────────── */}
       <div className="hero-content">
-        <div className="container-fluid px-4 px-md-5" style={{ maxWidth: "1400px", margin: "0 auto" }}>
-
-          {/* Badge animado */}
-          <div className={`hero-badge-wrapper ${entered ? "hero-anim--badge" : ""}`}>
-            {/* <div className="hero-badge-live">
-              <span className="hero-badge-dot" />
-              <span>En vivo · AHA 2025</span>
-            </div>
-            <div className="hero-badge-sep" /> */}
-            <span className="hero-badge-text">
-              <i className="bi bi-shield-check" /> Protegiendo el Caribe Colombiano
-            </span>
-          </div>
+        <div className="container-fluid" style={{ maxWidth: "1400px", margin: "0 auto" }}>
 
           {/* Título principal con efecto de revelación */}
           <h1 className={`hero-h1 ${entered ? "hero-anim--title" : ""}`}>
             <span className="hero-h1-line" style={{ animationDelay: "0.1s" }}>
-              Aprende a{" "}
+              Conecta tu formación{" "}
               <span className="hero-highlight">
-                Salvar Vidas{" "}
+                a un sistema inteligente{" "}
+
+              </span>
+            </span>
+            <span className="hero-h1-line" style={{ animationDelay: "0.1s" }}>
+              de{" "}
+              <span className="hero-highlight"> capacitación
                 <svg className="hero-underline-svg" viewBox="0 0 300 12" preserveAspectRatio="none">
                   <path d="M0,8 Q75,0 150,8 Q225,16 300,8" strokeWidth="3" fill="none" />
                 </svg>
               </span>
-            </span>
-            <span className="hero-h1-line" style={{ animationDelay: "0.22s" }}>
-              con nuestros{" "}
-              <span className="hero-highlight-box"> Cursos de Emergencias</span>
+
             </span>
           </h1>
 
-          {/* Subtítulo */}
-          <p className={`hero-subtitle ${entered ? "hero-anim--subtitle" : ""}`}>
-            {/*En Jomar Segurid ofrecemos formación en primeros auxilios, RCP y atención de emergencias con enfoque práctico y certificación.*/}
-            {/*Integramos el sistema de simulación clínica SIERCP y tecnología avanzada bajo estándares AHA 2025
-             para una experiencia de aprendizaje realista, moderna y efectiva.*/}
-          </p>
+          {/* <p className={`hero-subtitle ${entered ? "hero-anim--subtitle" : ""}`}>
+            Formación en RCP, primeros auxilios y emergencias bajo estándares AHA 2025,
+            potenciada por SIERCP: simulación clínica con sensores IoT que miden la calidad
+            de cada maniobra en tiempo real.
+          </p> */}
 
           {/* CTAs */}
           <div className={`hero-ctas ${entered ? "hero-anim--cta" : ""}`}>
@@ -169,7 +192,7 @@ export default function Hero() {
               <span className="hero-btn-bg" />
               <span className="hero-btn-content">
                 <i className="bi bi-cpu-fill" />
-                Acceder a SIERCP App
+                Acceder a SICAPP
               </span>
               <span className="hero-btn-shine" />
             </a>
@@ -177,24 +200,6 @@ export default function Hero() {
               <i className="bi bi-play-circle-fill" />
               Ver Programas
             </a>
-          </div>
-
-          {/* Indicadores de confianza */}
-          <div className={`hero-trust ${entered ? "hero-anim--trust" : ""}`}>
-            <div className="hero-trust-item">
-              <i className="bi bi-patch-check-fill" style={{ color: "#6d4aff" }} />
-              <span>Certificado AHA</span>
-            </div>
-            <div className="hero-trust-divider" />
-            <div className="hero-trust-item">
-              <i className="bi bi-shield-lock-fill" style={{ color: "#6d4aff" }} />
-              <span>Pago 100% Seguro</span>
-            </div>
-            <div className="hero-trust-divider" />
-            <div className="hero-trust-item">
-              <i className="bi bi-award-fill" style={{ color: "#6d4aff" }} />
-              <span>Aval Internacional</span>
-            </div>
           </div>
         </div>
       </div>

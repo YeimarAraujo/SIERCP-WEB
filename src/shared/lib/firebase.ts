@@ -1,6 +1,10 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import {
+    getFirestore,
+    initializeFirestore,
+    type Firestore,
+} from 'firebase/firestore';
 import { getDatabase } from 'firebase/database';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
@@ -17,7 +21,23 @@ const firebaseConfig = {
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
-const db = getFirestore(app);
+
+// Force long-polling for the Firestore transport. The default WebChannel
+// (gRPC-over-WebSocket) stream corrupts its internal target state under
+// Next.js dev (StrictMode double-mount + hot-reload), throwing
+// "INTERNAL ASSERTION FAILED: Unexpected state (ID: ca9 / b815)".
+// initializeFirestore throws if Firestore was already initialized for this
+// app (hot reload), so fall back to getFirestore in that case.
+function createDb(): Firestore {
+    try {
+        return initializeFirestore(app, {
+            experimentalForceLongPolling: true,
+        });
+    } catch {
+        return getFirestore(app);
+    }
+}
+const db = createDb();
 const rtdb = getDatabase(app);
 const storage = getStorage(app);
 const functions = getFunctions(app);

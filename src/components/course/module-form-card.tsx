@@ -5,9 +5,21 @@ import {
     GripVertical, Trash2, Plus,
     FileText, Video, Link as LinkIcon, HelpCircle,
     BookOpen, ClipboardCheck, Heart, Award, Search, X,
+    HeartPulse,
+    LucideIcon,
+    Waves,
+    Car,
+    SportShoe,
+    Donut,
+    Zap,
+    Pill,
+    Baby,
+    User,
+    Brain,
 } from 'lucide-react';
 import {
     ALL_CLINICAL_SCENARIOS,
+
     CLINICAL_SCENARIO_LABELS,
     CLINICAL_SCENARIO_DIFFICULTY,
     CLINICAL_SCENARIO_PATIENT_TYPE,
@@ -22,7 +34,6 @@ export type ContentType = 'pdf' | 'video' | 'external' | 'quiz';
 export interface ModuleForm {
     title: string;
     topics: string[];
-    duration: string;
     order: number;
     type: ModuleType;
     contentType: ContentType;
@@ -36,7 +47,6 @@ export interface ModuleForm {
 export const DEFAULT_MODULE: ModuleForm = {
     title: '',
     topics: [''],
-    duration: '',
     order: 1,
     type: 'teoria',
     contentType: 'video',
@@ -50,49 +60,49 @@ export const DEFAULT_MODULE: ModuleForm = {
 // ─── Module Type Config ───────────────────────────────────────────────────────
 
 const MODULE_TYPES: { value: ModuleType; icon: React.ComponentType<any>; label: string; description: string; color: string }[] = [
-    { value: 'teoria',             icon: BookOpen,       label: 'Teoría',          description: 'PDF, video o documento', color: '#1800AD' },
-    { value: 'evaluacion_teorica', icon: ClipboardCheck, label: 'Evaluación',      description: 'Quiz teórico',           color: '#7C3AED' },
-    { value: 'practica_guiada',    icon: Heart,          label: 'Práctica Guiada', description: 'Simulación en App',      color: '#DC2626' },
-    { value: 'certificacion',      icon: Award,          label: 'Certificación',   description: 'Genera certificado',     color: '#D97706' },
+    { value: 'teoria', icon: BookOpen, label: 'Teoría', description: 'PDF, video o documento', color: '#1800AD' },
+    { value: 'evaluacion_teorica', icon: ClipboardCheck, label: 'Evaluación', description: 'Quiz teórico', color: '#7C3AED' },
+    { value: 'practica_guiada', icon: Heart, label: 'Práctica Guiada', description: 'Simulación en App', color: '#DC2626' },
+    { value: 'certificacion', icon: Award, label: 'Certificación', description: 'Genera certificado', color: '#D97706' },
 ];
 
 // ─── Content Type Config ──────────────────────────────────────────────────────
 
 const CONTENT_TYPES: { value: ContentType; icon: React.ComponentType<any>; label: string; urlLabel: string; placeholder: string }[] = [
-    { value: 'video',    icon: Video,     label: 'Video',          urlLabel: 'URL del Video (YouTube/Vimeo)',   placeholder: 'https://youtube.com/watch?v=...' },
-    { value: 'pdf',      icon: FileText,  label: 'Documento PDF',  urlLabel: 'URL del PDF',                    placeholder: 'https://drive.google.com/...' },
-    { value: 'external', icon: LinkIcon,  label: 'Link Externo',   urlLabel: 'URL Externa',                    placeholder: 'https://...' },
-    { value: 'quiz',     icon: HelpCircle,label: 'Quiz',           urlLabel: 'URL del Formulario / Quiz',      placeholder: 'https://forms.google.com/...' },
+    { value: 'video', icon: Video, label: 'Video', urlLabel: 'URL del Video (YouTube/Vimeo)', placeholder: 'https://youtube.com/watch?v=...' },
+    { value: 'pdf', icon: FileText, label: 'Documento PDF', urlLabel: 'URL del PDF', placeholder: 'https://drive.google.com/...' },
+    { value: 'external', icon: LinkIcon, label: 'Link Externo', urlLabel: 'URL Externa', placeholder: 'https://...' },
+    { value: 'quiz', icon: HelpCircle, label: 'Quiz', urlLabel: 'URL del Formulario / Quiz', placeholder: 'https://forms.google.com/...' },
 ];
 
 // ─── Scenario Config ──────────────────────────────────────────────────────────
 
-const SCENARIO_EMOJI: Record<ClinicalScenario, string> = {
-    paroCardiaco:          '❤️',
-    infarto:               '💔',
-    pediatricoParo:        '🧒',
-    ahogamiento:           '🌊',
-    accidenteTransito:     '🚗',
-    colapsoEjercicio:      '🏃',
-    atragantamiento:       '🤲',
-    descargaElectrica:     '⚡',
-    sobredosis:            '💊',
-    ahogamientoPediatrico: '🧒',
-    rvNeonatal:            '👶',
-    traumaCraneo:          '🧠',
+const SCENARIO_ICON: Record<ClinicalScenario, LucideIcon> = {
+    paroCardiaco: Heart,
+    infarto: HeartPulse,
+    pediatricoParo: Heart,
+    ahogamiento: Waves,
+    accidenteTransito: Car,
+    colapsoEjercicio: SportShoe,
+    atragantamiento: Donut,
+    descargaElectrica: Zap,
+    sobredosis: Pill,
+    ahogamientoPediatrico: User,
+    rvNeonatal: Baby,
+    traumaCraneo: Brain,
 };
 
 const DIFFICULTY_COLORS: Record<string, { bg: string; text: string }> = {
-    'Básico':      { bg: '#DCFCE7', text: '#166534' },
-    'Intermedio':  { bg: '#DBEAFE', text: '#1D4ED8' },
-    'Avanzado':    { bg: '#FEF3C7', text: '#92400E' },
-    'Experto':     { bg: '#FEE2E2', text: '#991B1B' },
+    'Básico': { bg: '#DCFCE7', text: '#166534' },
+    'Intermedio': { bg: '#DBEAFE', text: '#1D4ED8' },
+    'Avanzado': { bg: '#FEF3C7', text: '#92400E' },
+    'Experto': { bg: '#FEE2E2', text: '#991B1B' },
 };
 
 const PATIENT_LABEL: Record<string, string> = {
-    adult:     '👤 Adulto',
-    pediatric: '👧 Pediátrico',
-    infant:    '👶 Neonato',
+    adult: 'Adulto',
+    pediatric: 'Pediátrico',
+    infant: 'Neonato',
 };
 
 // ─── Scenario Search-Select ───────────────────────────────────────────────────
@@ -118,33 +128,46 @@ function ScenarioSearchSelect({
         }
     };
 
+
     return (
         <div>
-            {/* Selected chips */}
-            {selected.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-                    {selected.map(id => (
-                        <span key={id} style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 5,
-                            padding: '4px 10px', borderRadius: 20,
-                            background: '#DC262614', border: '1px solid #DC262640',
-                            color: '#DC2626', fontSize: 11, fontWeight: 700,
-                        }}>
-                            {SCENARIO_EMOJI[id]} {CLINICAL_SCENARIO_LABELS[id]}
-                            <button
-                                type="button"
-                                onClick={() => toggle(id)}
-                                style={{
-                                    background: 'none', border: 'none', cursor: 'pointer',
-                                    color: '#DC2626', padding: 0, display: 'flex', alignItems: 'center',
-                                }}
-                            >
-                                <X size={11} />
-                            </button>
-                        </span>
-                    ))}
-                </div>
-            )}
+            {selected.map(id => {
+                const Icon = SCENARIO_ICON[id];
+
+                return (
+                    <span key={id} style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '4px 10px',
+                        borderRadius: 20,
+                        background: '#DC262614',
+                        border: '1px solid #DC262640',
+                        color: '#DC2626',
+                        fontSize: 11,
+                        fontWeight: 700,
+                    }}>
+                        {Icon && <Icon size={14} />}
+                        {CLINICAL_SCENARIO_LABELS[id]}
+
+                        <button
+                            type="button"
+                            onClick={() => toggle(id)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#DC2626',
+                                padding: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <X size={11} />
+                        </button>
+                    </span>
+                );
+            })}
 
             {/* Search input */}
             <div style={{ position: 'relative', marginBottom: 10 }}>
@@ -181,6 +204,7 @@ function ScenarioSearchSelect({
                     const diff = CLINICAL_SCENARIO_DIFFICULTY[id];
                     const diffColor = DIFFICULTY_COLORS[diff];
                     const patient = CLINICAL_SCENARIO_PATIENT_TYPE[id];
+                    const Icon = SCENARIO_ICON[id];
 
                     return (
                         <button
@@ -197,7 +221,7 @@ function ScenarioSearchSelect({
                         >
                             {/* Emoji */}
                             <span style={{ fontSize: 20, flexShrink: 0, lineHeight: 1 }}>
-                                {SCENARIO_EMOJI[id]}
+                                {Icon && <Icon size={20} />}
                             </span>
 
                             {/* Info */}
@@ -292,19 +316,12 @@ export function ModuleFormCard({ module: mod, index: mIdx, showRemove, onChange,
                 )}
             </div>
 
-            {/* ── Title + Duration ────────────────────────────────────────── */}
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12, marginBottom: 16 }}>
                 <input
                     style={inputStyle}
                     placeholder="Nombre del módulo *"
                     value={mod.title}
                     onChange={(e) => update({ title: e.target.value })}
-                />
-                <input
-                    style={inputStyle}
-                    placeholder="Duración (ej: 2h)"
-                    value={mod.duration}
-                    onChange={(e) => update({ duration: e.target.value })}
                 />
             </div>
 

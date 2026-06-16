@@ -6,14 +6,14 @@ import { useAuthStore } from '@/stores/auth-store';
 import { corporatePlans } from '@/data/planes';
 import { PricingPlanService, type PricingDoc } from '@/features/super-admin/services/plan.service';
 import { ChevronRight, ShieldCheck, Lock } from 'lucide-react';
-import { collection, query, where, getDocs, doc, setDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { db, functions, auth } from '@/shared/lib/firebase';
 import toast from 'react-hot-toast';
 import { fmt, validateEmail, validatePhone, validateNIT, IVA_RATE } from '../_lib';
 import {
-    Field, Input, SearchableSelect,
+    Field, Input, SearchableSelect, DocumentTypeSelect,
     AccountAccessSection, validateAccount, type AccountData, type AccountErrors, emptyAccountData,
     PasswordInput, PasswordStrengthBar, TermsRow,
     CheckoutLayout, CheckoutSuspenseFallback, PaymentForm, PaymentSummaryBox,
@@ -300,18 +300,7 @@ function Step3({ adminForm, setAdminForm, adminErrors, accountData, setAccountDa
 
 
                 <Field label="Tipo de documento" required error={adminErrors.documentType}>
-                    <select
-                        value={adminForm.documentType}
-                        onChange={e => setAdminForm({ ...adminForm, documentType: e.target.value })}
-                        style={{ width: '100%', height: 44, borderRadius: 10, border: '1px solid var(--clr-border,#e5e7eb)', background: 'var(--clr-bg,#fff)', padding: '0 12px', fontSize: 14 }}
-                    >
-                        <option value="CC">CC — Cédula de Ciudadanía</option>
-                        <option value="CE">CE — Cédula de Extranjería</option>
-                        <option value="TI">TI — Tarjeta de Identidad</option>
-                        <option value="PP">PP — Pasaporte</option>
-                        <option value="NIT">NIT</option>
-                        <option value="DIE">DIE — Doc. Identidad Extranjero</option>
-                    </select>
+                    <DocumentTypeSelect value={adminForm.documentType} onChange={v => setAdminForm({ ...adminForm, documentType: v })} />
                 </Field>
                 <Field label="Número de documento" required error={adminErrors.identification}>
                     <Input value={adminForm.identification} onChange={e => setAdminForm({ ...adminForm, identification: e.target.value })} placeholder="Número" />
@@ -469,7 +458,7 @@ async function checkDuplicateEmail(email: string): Promise<boolean> {
 // ── Client-side provisioning (fallback when CF unavailable) ──────────────────
 
 
-async function provisionClientSide(uid: string, company: CompanyForm, admin: AdminForm, planSlug: string): Promise<string> {
+async function provisionClientSide(uid: string, company: CompanyForm, admin: AdminForm, planSlug: string, isExisting = false): Promise<string> {
     const planExpiresDate = new Date();
     planExpiresDate.setFullYear(planExpiresDate.getFullYear() + 1);
     const planExpiresAt = Timestamp.fromDate(planExpiresDate);
@@ -509,28 +498,48 @@ async function provisionClientSide(uid: string, company: CompanyForm, admin: Adm
 
     });
 
-    // Step 2: Create user doc with ADMIN role
-    await setDoc(doc(db, 'users', uid), {
-        uid,
-        email: admin.email.toLowerCase(),
-        firstName: admin.firstName,
-        lastName: admin.lastName,
-        documentType: admin.documentType || undefined,
-        identification: admin.identification,
-        phoneNumber: admin.phone,
-        address: admin.address,
-        city: admin.city,
-        department: admin.department,
-        country: 'Colombia',
-        institutionId,
-        role: 'ADMIN',
-        isActive: true,
-        certVerification: 'NONE',
-        coursesCreated: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        stats: { totalSessions: 0, sessionsToday: 0, averageScore: 0, bestScore: 0, streakDays: 0, totalHours: 0, averageDepthMm: 0, averageRatePerMin: 0 },
-    });
+    // Step 2: Create (new account) or promote (existing account) the ADMIN profile.
+    if (isExisting) {
+        // Existing user: promote to ADMIN of the new institution WITHOUT overwriting
+        // their profile. Las reglas (Caso 2 — auto-promoción checkout) exigen NO tocar
+        // certVerification/isActive/accountStatus/isSuperAdmin, así que se omiten aquí.
+        await setDoc(doc(db, 'users', uid), {
+            role: 'ADMIN',
+            institutionId,
+            firstName: admin.firstName,
+            lastName: admin.lastName,
+            documentType: admin.documentType || undefined,
+            identification: admin.identification,
+            phoneNumber: admin.phone,
+            address: admin.address,
+            city: admin.city,
+            department: admin.department,
+            country: 'Colombia',
+            updatedAt: serverTimestamp(),
+        }, { merge: true });
+    } else {
+        await setDoc(doc(db, 'users', uid), {
+            uid,
+            email: admin.email.toLowerCase(),
+            firstName: admin.firstName,
+            lastName: admin.lastName,
+            documentType: admin.documentType || undefined,
+            identification: admin.identification,
+            phoneNumber: admin.phone,
+            address: admin.address,
+            city: admin.city,
+            department: admin.department,
+            country: 'Colombia',
+            institutionId,
+            role: 'ADMIN',
+            isActive: true,
+            certVerification: 'NONE',
+            coursesCreated: 0,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            stats: { totalSessions: 0, sessionsToday: 0, averageScore: 0, bestScore: 0, streakDays: 0, totalHours: 0, averageDepthMm: 0, averageRatePerMin: 0 },
+        });
+    }
 
     // Step 3: Create admin membership
     await setDoc(doc(db, 'memberships', `${uid}_${institutionId}`), {
@@ -589,7 +598,7 @@ interface ProvisionResult {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 // Fallback plans from static data shaped as PricingDoc (used until Firebase loads)
-const staticFallback: PricingDoc[] = corporatePlans.map((p, i) => ({
+const staticFallback: PricingDoc[] = corporatePlans.filter(p => !p.isContact).map((p, i) => ({
     id: `corporativo-${p.slug}`,
     category: 'corporativo' as const,
     active: true,
@@ -743,92 +752,75 @@ function Content() {
     };
     const handlePay = async (method: PayMethod, card: CardData, pse: PseData) => {
         setProcessing(true);
-
-        const email = adminForm.email.trim();
-        const password = accountData.contrasena.trim();
-
-        if (!email || !password || password.length < 6) {
-            throw new Error("Email o contraseña inválidos");
-        }
-
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-        const uid = userCredential.user.uid;
-        let orderId: string | undefined;
-
         try {
-            // ─────────────────────────────
-            // FASE 1: ORDER (CLIENT FIRESTORE)
-            // ─────────────────────────────
-            try {
+            const isExisting = accountData.mode === 'existing';
+            const email = adminForm.email.trim().toLowerCase();
 
-                orderId = crypto.randomUUID();
-
-                await setDoc(doc(db, "orders", orderId), {
-                    orderId,
-                    userId: uid,
-                    institutionId: null,
-                    company: companyForm,
-                    payMethod: method,
-                    product: `Plan ${currentPlan.name}`,
-                    cardLast4:
-                        method === "card"
-                            ? card.numero.replace(/\s/g, "").slice(-4)
-                            : null,
-                    bank: method === "pse" ? pse.banco : null,
-                    orderType: "Plan",
-                    planSlug: currentPlan.slug,
-                    planName: currentPlan.name,
-                    priceTotal: totalAnual,
-                    PriceMonth: currentPlan.monthlyCOP,
-                    admin: adminForm,
-                    status: 'paid',
-                    createdAt: serverTimestamp(),
-                });
-            } catch (e) {
-                console.error("ORDER CREATION ERROR:", e);
-                throw e; // throw para que el catch principal lo maneje
+            // ── 1. Resolver el usuario autenticado ──────────────────────────────
+            // Cuenta existente: ya se verificó (inició sesión) en el paso de credenciales.
+            // Cuenta nueva: se crea aquí, DENTRO del try, para capturar email-already-in-use.
+            let uid: string;
+            if (isExisting) {
+                if (!auth.currentUser) {
+                    toast.error('Tu sesión expiró. Vuelve a verificar tu cuenta.');
+                    setStep(2);
+                    return;
+                }
+                uid = auth.currentUser.uid;
+            } else {
+                const password = accountData.contrasena;
+                if (!email || password.length < 6) {
+                    toast.error('Correo o contraseña inválidos.');
+                    return;
+                }
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                uid = cred.user.uid;
             }
 
+            // ── 2. Aprovisionar institución + usuario + membership ──────────────
             const institutionId = await provisionClientSide(
-                uid,
-                companyForm,
-                adminForm,
-                currentPlan.slug
+                uid, companyForm, adminForm, currentPlan.slug, isExisting,
             );
 
-            await updateDoc(doc(db, "orders", orderId), {
+            // ── 3. Crear la orden UNA sola vez, ya enlazada ─────────────────────
+            // Antes se creaba con institutionId:null y se hacía updateDoc después,
+            // pero la regla de `orders` solo permite update a SuperAdmin → permiso
+            // denegado. Creándola ya completa evitamos por completo ese update.
+            const orderId = crypto.randomUUID();
+            await setDoc(doc(db, 'orders', orderId), {
+                orderId,
+                userId: uid,
                 institutionId,
-                status: "paid"
+                type: 'plan-corporativo',
+                total: totalAnual,
+                company: companyForm,
+                payMethod: method,
+                product: `Plan ${currentPlan.name}`,
+                cardLast4: method === 'card' ? card.numero.replace(/\s/g, '').slice(-4) : null,
+                bank: method === 'pse' ? pse.banco : null,
+                orderType: 'Plan',
+                planSlug: currentPlan.slug,
+                planName: currentPlan.name,
+                priceTotal: totalAnual,
+                PriceMonth: currentPlan.monthlyCOP,
+                admin: adminForm,
+                status: 'paid',
+                createdAt: serverTimestamp(),
             });
 
-
-            updateLocalUser({
-                institutionId,
-                role: "ADMIN",
-            });
-
-            // ─────────────────────────────
-            // FASE 3: REDIRECT
-            // ─────────────────────────────
-            router.push(
-                `/checkout/resultado?type=plan&plan=${currentPlan.slug
-                }&status=approved`
-            );
-
+            // ── 4. Reflejar localmente y redirigir ──────────────────────────────
+            updateLocalUser({ institutionId, role: 'ADMIN' });
+            router.push(`/checkout/resultado?type=plan&plan=${currentPlan.slug}&status=approved`);
         } catch (err: any) {
-            console.error("PAYMENT FLOW ERROR", err);
-
-            const code = err?.code ?? "";
-
-            if (code === "auth/email-already-in-use") {
-                toast.error("Este correo ya está registrado.");
+            console.error('PAYMENT FLOW ERROR', err);
+            const code = err?.code ?? '';
+            const msg = err?.message ?? '';
+            if (code === 'auth/email-already-in-use') {
+                toast.error('Este correo ya tiene cuenta. Inicia sesión para continuar.');
+            } else if (code === 'permission-denied' || msg.includes('insufficient permissions')) {
+                toast.error('No se pudo completar por permisos. Intenta de nuevo o contacta a soporte.');
             } else {
-                toast.error(err.message || "Error en el proceso");
+                toast.error(msg || 'Error en el proceso. Intenta de nuevo.');
             }
         } finally {
             setProcessing(false);

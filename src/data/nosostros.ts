@@ -40,9 +40,6 @@ export interface Feature {
 }
 
 export const stats: Stat[] = [
-  { big: "200", suffix: "+", label: "Personas certificadas", icon: "bi-mortarboard-fill" },
-  { big: "9", suffix: "", label: "Programas activos", icon: "bi-journal-check" },
-  { big: "2", suffix: "", label: "Años de experiencia", icon: "bi-calendar3" },
   { big: "4", suffix: "+", label: "Empresas aliadas", icon: "bi-building" },
   { big: "5", suffix: "+", label: "Instituciones con SIERCP", icon: "bi-cpu" },
   { big: "98", suffix: "%", label: "Tasa de satisfacción", icon: "bi-star-fill" },
@@ -116,7 +113,7 @@ export const values: Value[] = [
 ];
 
 export const team: TeamMember[] = [
-  
+
   {
     name: "Ing. Yeimar Araujo",
     role: "CTO – Plataforma SIERCP",

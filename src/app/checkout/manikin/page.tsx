@@ -6,11 +6,13 @@ import Navbar from '@/components/page/Navbar';
 import Footer from '@/components/page/Footer';
 import { maniquiPackages } from '@/data/planes';
 import { ChevronRight, ShieldCheck, Building2, User, Lock } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/shared/lib/firebase';
+import { collection, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, auth } from '@/shared/lib/firebase';
+import toast from 'react-hot-toast';
 import { fmt, validateEmail, validatePhone, validateNIT, IVA_RATE } from '../_lib';
 import {
-    Field, Input, SelectInput,
+    Field, Input, SelectInput, DocumentTypeSelect,
     AccountAccessSection, validateAccount, type AccountData, type AccountErrors, emptyAccountData,
     CheckoutLayout, CheckoutSuspenseFallback, PaymentForm, PaymentSummaryBox,
     OrderSummaryShell, SummaryProductCard, SummaryFeatureList, SummaryPriceBlock, SummaryBadge,
@@ -112,11 +114,11 @@ function Step1({ selected, onSelect }: { selected: string; onSelect: (s: string)
 
 type BuyerType = 'empresa' | 'persona';
 interface EmpresaForm { razonSocial: string; nit: string; responsable: string; cargo: string; email: string; telefono: string; }
-interface PersonaForm { nombre: string; cedula: string; email: string; telefono: string; }
+interface PersonaForm { nombre: string; tipoDocumento: string; cedula: string; email: string; telefono: string; }
 type EmpresaErrors = Partial<Record<keyof EmpresaForm, string>>;
 type PersonaErrors = Partial<Record<keyof PersonaForm, string>>;
 const emptyEmpresa: EmpresaForm = { razonSocial: '', nit: '', responsable: '', cargo: '', email: '', telefono: '' };
-const emptyPersona: PersonaForm = { nombre: '', cedula: '', email: '', telefono: '' };
+const emptyPersona: PersonaForm = { nombre: '', tipoDocumento: 'CC', cedula: '', email: '', telefono: '' };
 
 function validateBuyerForms(buyerType: BuyerType, empresa: EmpresaForm, persona: PersonaForm) {
     const eErrs: EmpresaErrors = {};
@@ -189,10 +191,15 @@ function Step2({ buyerType, setBuyerType, empresa, setEmpresa, persona, setPerso
                             <>
                                 <Field label="Nombre completo" required error={pErrors.nombre}><Input value={persona.nombre} onChange={fp('nombre')} placeholder="María García López" /></Field>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                    <Field label="Cédula" required error={pErrors.cedula}><Input value={persona.cedula} onChange={fp('cedula')} placeholder="1000000000" /></Field>
-                                    <Field label="Teléfono" required error={pErrors.telefono}><Input value={persona.telefono} onChange={fp('telefono')} placeholder="3001234567" /></Field>
+                                    <Field label="Tipo de documento" required>
+                                        <DocumentTypeSelect value={persona.tipoDocumento} onChange={v => setPersona({ ...persona, tipoDocumento: v })} />
+                                    </Field>
+                                    <Field label="Número de documento" required error={pErrors.cedula}><Input value={persona.cedula} onChange={fp('cedula')} placeholder="1000000000" /></Field>
                                 </div>
-                                <Field label="Correo" required error={pErrors.email}><Input type="email" value={persona.email} onChange={fp('email')} placeholder="nombre@email.com" /></Field>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                    <Field label="Teléfono" required error={pErrors.telefono}><Input value={persona.telefono} onChange={fp('telefono')} placeholder="3001234567" /></Field>
+                                    <Field label="Correo" required error={pErrors.email}><Input type="email" value={persona.email} onChange={fp('email')} placeholder="nombre@email.com" /></Field>
+                                </div>
                             </>
                         )}
                     </div>
@@ -344,27 +351,74 @@ function Content() {
     const handlePay = async (method: PayMethod, card: CardData, pse: PseData) => {
         setProcessing(true);
         try {
+            const isExisting = accountData.mode === 'existing';
+
+            // 1. Autenticar al comprador — la regla de `orders` exige userId == uid.
+            let uid: string;
+            let email: string;
+            if (isExisting) {
+                if (!auth.currentUser) {
+                    toast.error('Tu sesión expiró. Vuelve a verificar tu cuenta.');
+                    setStep(1);
+                    return;
+                }
+                uid = auth.currentUser.uid;
+                email = auth.currentUser.email ?? '';
+            } else {
+                email = currentEmail.trim().toLowerCase();
+                const cred = await createUserWithEmailAndPassword(auth, email, accountData.contrasena);
+                uid = cred.user.uid;
+                const fullName = (buyerType === 'empresa' ? empresa.responsable : persona.nombre).trim();
+                const parts = fullName.split(/\s+/);
+                try {
+                    await setDoc(doc(db, 'users', uid), {
+                        uid, email,
+                        firstName: parts[0] || fullName || '—',
+                        lastName: parts.slice(1).join(' ') || parts[0] || '—',
+                        documentType: buyerType === 'persona' ? persona.tipoDocumento : 'NIT',
+                        identification: buyerType === 'empresa' ? empresa.nit : persona.cedula,
+                        phoneNumber: buyerType === 'empresa' ? empresa.telefono : persona.telefono,
+                        role: 'USUARIO',
+                        isActive: true,
+                        certVerification: 'NONE',
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                    });
+                } catch (e) { console.error('user doc create failed', e); }
+            }
+
+            // 2. Guardar la orden enlazada al comprador.
             await addDoc(collection(db, 'orders'), {
                 type: 'manikin',
                 packSlug: pkg.slug,
                 packName: pkg.name,
                 quantity: pkg.quantity ?? 1,
                 buyerType,
-                buyer: buyerType === 'empresa' ? empresa : persona,
-                buyerEmail: currentEmail,
+                userId: uid,
+                buyer: isExisting ? null : (buyerType === 'empresa' ? empresa : persona),
+                buyerEmail: email,
                 shipping,
                 payMethod: method,
                 cardLast4: method === 'card' ? card.numero.replace(/\s/g, '').slice(-4) : null,
                 bank: method === 'pse' ? pse.banco : null,
                 totalCOP: total,
+                total, // campo canónico leído por super-admin/pedidos
                 status: 'pending_payment',
                 shippingStatus: 'pending',
                 createdAt: serverTimestamp(),
             });
-        } catch {
-            // Order save failed (e.g. permissions in demo); proceed to result anyway
+
+            router.push(`/checkout/resultado?type=manikin&pack=${selectedPack}&status=approved`);
+        } catch (err: any) {
+            const code = err?.code ?? '';
+            if (code === 'auth/email-already-in-use') {
+                toast.error('Este correo ya tiene cuenta. Inicia sesión para continuar.');
+            } else {
+                toast.error(err?.message || 'No se pudo completar la compra. Intenta de nuevo.');
+            }
+        } finally {
+            setProcessing(false);
         }
-        router.push(`/checkout/resultado?type=manikin&pack=${selectedPack}&status=approved`);
     };
 
     if (pkg.totalPriceCOP === null) {

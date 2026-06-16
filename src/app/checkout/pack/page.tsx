@@ -4,11 +4,13 @@ import { Suspense, useState, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { sstSinLicenciaPlans } from '@/data/planes';
 import { ChevronRight, ShieldCheck, Lock } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/shared/lib/firebase';
+import { collection, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, auth } from '@/shared/lib/firebase';
+import toast from 'react-hot-toast';
 import { fmt, validateEmail, validatePhone, validateCedula, IVA_RATE } from '../_lib';
 import {
-    Field, Input, SearchableSelect,
+    Field, Input, SearchableSelect, DocumentTypeSelect,
     AccountAccessSection, validateAccount, type AccountData, type AccountErrors, emptyAccountData,
     CheckoutLayout, CheckoutSuspenseFallback, PaymentForm, PaymentSummaryBox,
     OrderSummaryShell, SummaryProductCard, SummaryFeatureList, SummaryPriceBlock, SummaryBadge,
@@ -122,18 +124,7 @@ function Step2({ form, setForm, errors, accountData, setAccountData, accountErro
                     </Field>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                         <Field label="Tipo de documento" required error={errors.tipoDocumento}>
-                            <select
-                                value={form.tipoDocumento}
-                                onChange={e => setForm({ ...form, tipoDocumento: e.target.value })}
-                                style={{ width: '100%', height: 44, borderRadius: 10, border: '1px solid var(--clr-border,#e5e7eb)', background: 'var(--clr-bg,#fff)', padding: '0 12px', fontSize: 14 }}
-                            >
-                                <option value="CC">CC — Cédula de Ciudadanía</option>
-                                <option value="CE">CE — Cédula de Extranjería</option>
-                                <option value="TI">TI — Tarjeta de Identidad</option>
-                                <option value="PP">PP — Pasaporte</option>
-                                <option value="NIT">NIT</option>
-                                <option value="DIE">DIE — Doc. Identidad Extranjero</option>
-                            </select>
+                            <DocumentTypeSelect value={form.tipoDocumento} onChange={v => setForm({ ...form, tipoDocumento: v })} />
                         </Field>
                         <Field label="Número de documento" required error={errors.cedula}>
                             <Input value={form.cedula} onChange={s('cedula')} placeholder="Número" />
@@ -242,23 +233,70 @@ function Content() {
     const handlePay = async (method: PayMethod, card: CardData, pse: PseData) => {
         setProcessing(true);
         try {
+            const isExisting = accountData.mode === 'existing';
+
+            // 1. Autenticar al comprador — la regla de `orders` exige userId == uid.
+            let uid: string;
+            let email: string;
+            if (isExisting) {
+                if (!auth.currentUser) {
+                    toast.error('Tu sesión expiró. Vuelve a verificar tu cuenta.');
+                    setStep(1);
+                    return;
+                }
+                uid = auth.currentUser.uid;
+                email = auth.currentUser.email ?? '';
+            } else {
+                email = personalForm.email.trim().toLowerCase();
+                const cred = await createUserWithEmailAndPassword(auth, email, accountData.contrasena);
+                uid = cred.user.uid;
+                // Perfil mínimo (best-effort) para que la cuenta quede usable.
+                const parts = personalForm.nombreCompleto.trim().split(/\s+/);
+                try {
+                    await setDoc(doc(db, 'users', uid), {
+                        uid, email,
+                        firstName: parts[0] || personalForm.nombreCompleto.trim() || '—',
+                        lastName: parts.slice(1).join(' ') || parts[0] || '—',
+                        documentType: personalForm.tipoDocumento,
+                        identification: personalForm.cedula,
+                        phoneNumber: personalForm.telefono,
+                        role: 'USUARIO',
+                        isActive: true,
+                        certVerification: 'NONE',
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                    });
+                } catch (e) { console.error('user doc create failed', e); }
+            }
+
+            // 2. Guardar la orden enlazada al comprador.
             await addDoc(collection(db, 'orders'), {
                 type: 'pack-sst',
                 packSlug: pack.slug,
                 packName: pack.name,
-                userEmail: personalForm.email,
-                personal: personalForm,
+                userId: uid,
+                userEmail: email,
+                personal: isExisting ? null : personalForm,
                 payMethod: method,
                 cardLast4: method === 'card' ? card.numero.replace(/\s/g, '').slice(-4) : null,
                 bank: method === 'pse' ? pse.banco : null,
                 totalCOP: total,
+                total, // campo canónico leído por super-admin/pedidos
                 status: 'pending_payment',
                 createdAt: serverTimestamp(),
             });
-        } catch {
-            // Order save failed (e.g. permissions in demo); proceed to result anyway
+
+            router.push(`/checkout/resultado?type=pack&pack=${selectedPack}&status=approved`);
+        } catch (err: any) {
+            const code = err?.code ?? '';
+            if (code === 'auth/email-already-in-use') {
+                toast.error('Este correo ya tiene cuenta. Inicia sesión para continuar.');
+            } else {
+                toast.error(err?.message || 'No se pudo completar la compra. Intenta de nuevo.');
+            }
+        } finally {
+            setProcessing(false);
         }
-        router.push(`/checkout/resultado?type=pack&pack=${selectedPack}&status=approved`);
     };
 
     const spinner = <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.35)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />;

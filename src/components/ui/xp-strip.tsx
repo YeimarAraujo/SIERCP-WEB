@@ -24,7 +24,7 @@ function getLevelInfo(xp: number) {
 interface UserStats {
     xp: number;
     level: number;
-    totalQuizSessions: number;
+    quizzesCompleted: number;
 }
 
 interface XpStripProps {
@@ -41,7 +41,7 @@ export function XpStrip({ userId, compact = false }: XpStripProps) {
             if (snap.exists()) {
                 setStats(snap.data() as UserStats);
             } else {
-                setStats({ xp: 0, level: 1, totalQuizSessions: 0 });
+                setStats({ xp: 0, level: 1, quizzesCompleted: 0 });
             }
         });
         return () => unsub();
@@ -113,7 +113,7 @@ export function XpStrip({ userId, compact = false }: XpStripProps) {
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <Star size={11} /> {stats.totalQuizSessions ?? 0} quizzes
+                                <Star size={11} /> {stats.quizzesCompleted ?? 0} quizzes
                             </span>
                             {xpToNext > 0 && (
                                 <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>

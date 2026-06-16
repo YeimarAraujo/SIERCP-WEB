@@ -11,15 +11,15 @@ import { servicios } from "@/data/servicios";
 
 const links: Array<{ href: string; label: string; type: 'link' | 'mega' }> = [
   { href: "/", label: "Inicio", type: "link" },
-  { href: "/programas", label: "Programas", type: "mega" },
+  // { href: "/programas", label: "Programas", type: "mega" },
   { href: "/planes", label: "Planes", type: "link" },
   { href: "/acerca", label: "Software", type: "link" },
   { href: "/nosotros", label: "Nosotros", type: "link" },
   { href: "/contacto", label: "Contacto", type: "link" },
 ];
 
-const logoLight = "/assets/JOMAR/logoTextov2.png";
-const logoDark = "/assets/JOMAR/LogoTexto.png";
+const logoLight = "assets/images/SICAP/webp/logo_sicap_white.webp";
+const logoDark = "assets/images/SICAP/webp/logo_sicap.webp";
 
 export default function Navbar({ forceScrolled = false }: { forceScrolled?: boolean }) {
   const pathname = usePathname();
@@ -97,24 +97,38 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
   const handleUserMenuLeave = () => {
     userMenuTimeout.current = setTimeout(() => setUserMenuOpen(false), 150);
   };
+  const userDashboard =
+    user?.role === 'SUPER_ADMIN'
+      ? '/super-admin/dashboard'
+      : user?.role === 'ADMIN'
+        ? '/admin/dashboard'
+        : user?.role === 'INSTRUCTOR'
+          ? '/instructor/dashboard'
+          : '/student/home';
 
-  const userDashboard = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
-    ? '/admin/dashboard'
-    : user?.role === 'INSTRUCTOR' ? '/instructor/dashboard' : '/student/home';
-
-  const userProfile = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
-    ? '/admin/profile'
-    : user?.role === 'INSTRUCTOR' ? '/instructor/profile' : '/student/profile';
-
+  const userProfile =
+    user?.role === 'SUPER_ADMIN'
+      ? '/super-admin/profile'
+      : user?.role === 'ADMIN'
+        ? '/admin/profile'
+        : user?.role === 'INSTRUCTOR'
+          ? '/instructor/profile'
+          : '/student/profile';
   return (
     <>
+      <style>{`
+        .mega-scroll { scrollbar-width: thin; scrollbar-color: var(--clr-border) transparent; }
+        .mega-scroll::-webkit-scrollbar { width: 6px; }
+        .mega-scroll::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 3px; }
+        .mega-scroll::-webkit-scrollbar-track { background: transparent; }
+      `}</style>
       <nav style={navStyle}>
         <Container>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
               <img
                 src={isScrolled ? (isDark ? logoLight : logoDark) : logoLight}
-                alt="Jomar Segurid"
+                alt="SICAP"
                 style={{ height: isScrolled ? 55 : 65, width: "auto", transition: "all 0.5s ease" }}
               />
             </Link>
@@ -142,44 +156,50 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
                         boxShadow: "var(--shadow-xl)", padding: "20px", opacity: megaOpen ? 1 : 0,
                         pointerEvents: megaOpen ? "auto" : "none", transform: megaOpen ? "translateY(0)" : "translateY(-8px)",
                         transition: "all 0.25s ease", zIndex: 100,
+                        /* Limita la altura al viewport y deja el botón de catálogo siempre visible */
+                        display: "flex", flexDirection: "column",
+                        maxHeight: "min(calc(100vh - 120px), 620px)",
                       }}>
-                        <div className="mb-3">
-                          <div style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--clr-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px", paddingLeft: "8px" }}>Cursos de Formación</div>
-                          {cursos.map(c => (
-                            <Link key={c.slug} href={`/formacion/${c.slug}`} onClick={() => setMegaOpen(false)} style={{
-                              display: "flex", alignItems: "center", gap: "12px", padding: "10px 8px", borderRadius: "10px", textDecoration: "none", color: "var(--clr-text)", transition: "background 0.15s ease",
-                            }} onMouseEnter={(e) => { e.currentTarget.style.background = "var(--clr-primary-alpha)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}>
-                              <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "var(--clr-primary-alpha)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--clr-primary)", fontSize: "0.9rem", flexShrink: 0 }}>
-                                <i className={`bi ${c.icono}`} />
-                              </div>
-                              <div>
-                                <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>{c.nombre}</div>
-                                <div style={{ fontSize: "0.72rem", color: "var(--clr-muted)", lineHeight: 1.3 }}>{c.duracion} · {c.modalidad === 'presencial' ? 'Presencial' : c.modalidad}</div>
-                              </div>
-                            </Link>
-                          ))}
+                        {/* Región desplazable: cursos + servicios */}
+                        <div style={{ overflowY: "auto", flex: 1, margin: "-4px -8px 0", padding: "4px 8px 0" }} className="mega-scroll">
+                          <div className="mb-3">
+                            <div style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--clr-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px", paddingLeft: "8px" }}>Cursos de Formación</div>
+                            {cursos.map(c => (
+                              <Link key={c.slug} href={`/formacion/${c.slug}`} onClick={() => setMegaOpen(false)} style={{
+                                display: "flex", alignItems: "center", gap: "12px", padding: "10px 8px", borderRadius: "10px", textDecoration: "none", color: "var(--clr-text)", transition: "background 0.15s ease",
+                              }} onMouseEnter={(e) => { e.currentTarget.style.background = "var(--clr-primary-alpha)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}>
+                                <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "var(--clr-primary-alpha)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--clr-primary)", fontSize: "0.9rem", flexShrink: 0 }}>
+                                  <i className={`bi ${c.icono}`} />
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>{c.nombre}</div>
+                                  <div style={{ fontSize: "0.72rem", color: "var(--clr-muted)", lineHeight: 1.3 }}>{c.duracion} · {c.modalidad === 'presencial' ? 'Presencial' : c.modalidad}</div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+
+                          <div style={{ height: "1px", background: "var(--clr-border)", margin: "4px 0 12px" }} />
+
+                          <div>
+                            <div style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--clr-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px", paddingLeft: "8px" }}>Servicios Corporativos</div>
+                            {servicios.map(s => (
+                              <Link key={s.slug} href="/programas" onClick={() => setMegaOpen(false)} style={{
+                                display: "flex", alignItems: "center", gap: "12px", padding: "10px 8px", borderRadius: "10px", textDecoration: "none", color: "var(--clr-text)", transition: "background 0.15s ease",
+                              }} onMouseEnter={(e) => { e.currentTarget.style.background = "var(--clr-primary-alpha)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}>
+                                <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "var(--clr-primary-alpha)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--clr-primary)", fontSize: "0.9rem", flexShrink: 0 }}>
+                                  <i className={`bi ${s.icono}`} />
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>{s.nombre}</div>
+                                  <div style={{ fontSize: "0.72rem", color: "var(--clr-muted)" }}>Cotización personalizada</div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
                         </div>
-
-                        <div style={{ height: "1px", background: "var(--clr-border)", margin: "4px 0 12px" }} />
-
-                        <div>
-                          <div style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--clr-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px", paddingLeft: "8px" }}>Servicios Corporativos</div>
-                          {servicios.map(s => (
-                            <Link key={s.slug} href="/programas" onClick={() => setMegaOpen(false)} style={{
-                              display: "flex", alignItems: "center", gap: "12px", padding: "10px 8px", borderRadius: "10px", textDecoration: "none", color: "var(--clr-text)", transition: "background 0.15s ease",
-                            }} onMouseEnter={(e) => { e.currentTarget.style.background = "var(--clr-primary-alpha)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}>
-                              <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "var(--clr-primary-alpha)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--clr-primary)", fontSize: "0.9rem", flexShrink: 0 }}>
-                                <i className={`bi ${s.icono}`} />
-                              </div>
-                              <div>
-                                <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>{s.nombre}</div>
-                                <div style={{ fontSize: "0.72rem", color: "var(--clr-muted)" }}>Cotización personalizada</div>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-
-                        <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--clr-border)" }}>
+                        {/* Pie fijo — siempre visible aunque la lista se desborde */}
+                        <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--clr-border)", flexShrink: 0 }}>
                           <Link href="/programas" onClick={() => setMegaOpen(false)} className="btn-brand w-100" style={{ justifyContent: "center", padding: "10px", fontSize: "0.8rem" }}>
                             Ver catálogo completo
                           </Link>

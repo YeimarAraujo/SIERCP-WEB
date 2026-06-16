@@ -22,6 +22,8 @@ export default function AdminEditCoursePage() {
         description: '',
         certification: '',
         minScore: 85,
+        minAttendance: 0,
+        endDate: '',
         isActive: true,
         inviteCode: '',
     });
@@ -64,6 +66,8 @@ export default function AdminEditCoursePage() {
                     description: c.description || '',
                     certification: c.certification || '',
                     minScore: c.minScore ?? 85,
+                    minAttendance: c.minAttendance ?? 0,
+                    endDate: typeof c.endDate === 'string' ? c.endDate.slice(0, 10) : '',
                     isActive: c.isActive ?? true,
                     inviteCode: c.inviteCode || '',
                 });
@@ -177,6 +181,18 @@ export default function AdminEditCoursePage() {
                                     <div style={{ ...inputStyle, display: 'flex', alignItems: 'center', fontWeight: 700, color: 'var(--brand)', height: 42 }}>
                                         {modules.length} módulo{modules.length !== 1 ? 's' : ''} · auto-calculado
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Gating de certificación + fecha final (Fase 2/3) */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                                <div style={{ display: 'grid', gap: 8 }}>
+                                    <Field label="Asistencia mínima (%)" type="number" value={String(formData.minAttendance ?? 0)} onChange={(v) => setFormData({ ...formData, minAttendance: Math.max(0, Math.min(100, Number(v) || 0)) })} inputStyle={inputStyle} />
+                                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>0 = no exigida. Se evalúa junto al puntaje para emitir el certificado.</span>
+                                </div>
+                                <div style={{ display: 'grid', gap: 8 }}>
+                                    <Field label="Fecha final del curso" type="date" value={formData.endDate || ''} onChange={(v) => setFormData({ ...formData, endDate: v })} inputStyle={inputStyle} />
+                                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Al llegar esta fecha, el sistema emite certificados automáticamente a los aprobados.</span>
                                 </div>
                             </div>
 

@@ -82,28 +82,12 @@ export const contactItems: ContactItem[] = [
 export const offices: Office[] = [
   {
     city: "Valledupar",
-    address: "Cra. 9 #12-34, Centro Empresarial Arrecife",
+    address: "Cra. 9 #12-34, Centro Empresarial",
     phone: "(605) 123 4567",
     email: "info@jomarsegurid.co",
     hours: "Lun–Vie 7AM–6PM · Sáb 8AM–2PM",
     flag: "🇨🇴",
     isMain: true,
-  },
-  {
-    city: "Bogotá (Aliado)",
-    address: "Calle 100 #15-20, Oficina 402, Usaquén",
-    phone: "(601) 987 6543",
-    email: "bogota@jomarsegurid.co",
-    hours: "Lun–Vie 8AM–5PM",
-    flag: "🇨🇴",
-  },
-  {
-    city: "Barranquilla (Aliado)",
-    address: "Vía 40 #73-64, Piso 3, Centro Empresarial",
-    phone: "(605) 654 3210",
-    email: "barranquilla@jomarsegurid.co",
-    hours: "Lun–Vie 8AM–5PM",
-    flag: "🇨🇴",
   },
 ];
 
