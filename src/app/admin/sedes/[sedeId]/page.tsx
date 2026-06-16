@@ -8,6 +8,7 @@ import {
     doc, getDoc, updateDoc, serverTimestamp,
     collection, query, where, getDocs, getDoc as getDocFn,
 } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { db } from '@/shared/lib/firebase';
 import { useAuth } from '@/hooks/use-auth';
 import { Building2, MapPin, User, Edit2, Check, X, Search, UserCheck } from 'lucide-react';
@@ -157,12 +158,19 @@ export default function SedeDetailPage() {
     const handleAssignAdmin = async (candidate: AdminCandidate) => {
         try {
             setAssigning(true);
-            const name = fullName(candidate);
-            await updateDoc(doc(db, 'sedes', sedeId), {
-                adminId: candidate.uid,
-                adminName: name,
-                updatedAt: serverTimestamp(),
+            const idToken = await getAuth().currentUser?.getIdToken();
+            if (!idToken) { toast.error('Sesión expirada. Vuelve a iniciar sesión.'); return; }
+
+            // El backend crea el vínculo autoritativo (user.sedeId + membership.sedeId).
+            const res = await fetch(`/api/admin/sedes/${sedeId}/admin`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                body: JSON.stringify({ userId: candidate.uid }),
             });
+            const data = await res.json();
+            if (!res.ok) { toast.error(data?.error || 'Error asignando admin'); return; }
+
+            const name = data.adminName || fullName(candidate);
             setSede(prev => prev ? { ...prev, adminId: candidate.uid, adminName: name } : prev);
             setShowAssignModal(false);
             toast.success(`${name} asignado como admin de esta sede`);

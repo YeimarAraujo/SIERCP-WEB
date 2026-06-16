@@ -40,6 +40,11 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Si quien crea es un admin de sede, los instructores que cree heredan
+        // su sedeId (quedan adscritos a esa sede). El admin principal (sin sedeId)
+        // crea instructores a nivel institución.
+        const creatorSedeId = (adminUser.sedeId as string | undefined) || null;
+
         const body = await req.json();
         const { action } = body;
 
@@ -60,6 +65,7 @@ export async function POST(req: NextRequest) {
                     role: 'INSTRUCTOR',
                     status: 'approved',
                     isActive: true,
+                    ...(creatorSedeId ? { sedeId: creatorSedeId } : {}),
                     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
                 });
             } else {
@@ -70,9 +76,16 @@ export async function POST(req: NextRequest) {
                     role: 'INSTRUCTOR',
                     status: 'approved',
                     isActive: true,
+                    ...(creatorSedeId ? { sedeId: creatorSedeId } : {}),
                     createdAt: admin.firestore.FieldValue.serverTimestamp(),
                     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
                 });
+            }
+            if (creatorSedeId) {
+                await adminDb.collection('users').doc(userId).set(
+                    { sedeId: creatorSedeId, updatedAt: admin.firestore.FieldValue.serverTimestamp() },
+                    { merge: true },
+                );
             }
 
             return NextResponse.json({ success: true, membershipId });
@@ -122,6 +135,7 @@ export async function POST(req: NextRequest) {
                 specialty: specialty || 'Instructor',
                 isActive: true,
                 institutionId,
+                ...(creatorSedeId ? { sedeId: creatorSedeId } : {}),
                 status: 'approved',
                 certVerification: 'NONE',
                 coursesCreated: 0,
@@ -147,6 +161,7 @@ export async function POST(req: NextRequest) {
                 role: 'INSTRUCTOR',
                 status: 'approved',
                 isActive: true,
+                ...(creatorSedeId ? { sedeId: creatorSedeId } : {}),
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             });

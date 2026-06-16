@@ -179,9 +179,13 @@ const JOMAR_AUTO_CONFIG = {
 
 export async function POST(req: NextRequest) {
   try {
+    // SECURITY: fail-closed. Si CRON_SECRET no está configurado, NUNCA dejamos
+    // pasar la petición (antes el patrón `if (secret && ...)` abría el endpoint
+    // por completo cuando la variable faltaba, permitiendo sembrar/sobrescribir
+    // datos de instituciones sin credenciales).
     const authHeader = req.headers.get('authorization');
     const secret = process.env.CRON_SECRET;
-    if (secret && authHeader !== `Bearer ${secret}`) {
+    if (!secret || authHeader !== `Bearer ${secret}`) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

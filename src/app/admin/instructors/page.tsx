@@ -141,9 +141,15 @@ export default function AdminInstructorsPage() {
                     return;
                 }
 
+                // Scope por sede: admin de sede solo ve instructores de su sede.
+                const scopeSedeId = user?.sedeId;
+                const scopedMemDocs = scopeSedeId
+                    ? memSnap.docs.filter(m => m.data().sedeId === scopeSedeId)
+                    : memSnap.docs;
+
                 // 2. Fetch user docs en paralelo
                 const userDocs = await Promise.all(
-                    memSnap.docs.map(m => getDoc(doc(db, 'users', m.data().userId)))
+                    scopedMemDocs.map(m => getDoc(doc(db, 'users', m.data().userId)))
                 );
                 const baseUsers = userDocs
                     .filter(s => s.exists())
@@ -193,7 +199,7 @@ export default function AdminInstructorsPage() {
         fetchInstructors();
 
 
-    }, [institutionId, authLoading]);
+    }, [institutionId, authLoading, user?.sedeId]);
 
     const filteredInstructors = instructors.filter(i =>
         (i.firstName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
