@@ -292,18 +292,16 @@ export default function PlanesPage() {
     <div ref={ref} style={{ background: "var(--clr-bg)" }}>
       <Navbar forceScrolled={true} />
 
-      {/* Hero */}
       <section style={{
-        background: "var(--clr-bg-hero)", padding: "100px 0 80px",
-        position: "relative", overflow: "hidden",
+        background: "var(--clr-bg-hero)",
+        padding: "120px 0 80px",
+        position: "relative",
+        overflow: "hidden",
       }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 20% 80%, rgba(109,74,255,0.25) 0%, transparent 50%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 80% 18%, rgba(109,74,255,0.18) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255,255,255,0.05) 0%, transparent 50%)", pointerEvents: "none" }} />
         <Container style={{ position: "relative", zIndex: 1 }}>
           <div className="text-center">
-            <span className="badge-pill-white mb-4 d-inline-flex">
-              <i className="bi bi-cpu-fill" style={{ fontSize: "0.8rem" }} /> SIERCP Platform
-            </span>
-            <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 900, color: "#fff", lineHeight: 1.08, marginBottom: "20px" }}>
+            <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.8rem)", fontWeight: 900, color: "#fff", lineHeight: 1.05, marginBottom: "24px" }}>
               Planes para cada <span style={{ color: "#a5f3fc" }}>necesidad</span>
             </h1>
             <p style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, maxWidth: "580px", margin: "0 auto 24px" }}>

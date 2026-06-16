@@ -4,12 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 
 /* ── Estadísticas animadas del hero ──────────────────────────────────────── */
 const stats = [
-  { value: 2, suffix: "+", label: "Años de experiencia" },
-  { value: 40, suffix: "", label: "Est. máx por grupo" },
-  { value: 50, suffix: "+", label: "Profesionales formados" },
-  { value: 98, suffix: "%", label: "Tasa de satisfacción" },
+  { value: 40, suffix: "", label: "Cupos por grupo" },
+  { value: 100, suffix: "%", label: "Aprendizaje aplicado" },
+  { value: 24, suffix: "/7", label: "Acompañamiento" },
 ];
-
 /* ── Hook: contador animado al entrar en pantalla ─────────────────────────── */
 function useCountUp(target: number, duration = 1800, active: boolean = false) {
   const [count, setCount] = useState(0);
@@ -74,33 +72,6 @@ export default function Hero() {
     if (videoRef.current) videoRef.current.muted = isMuted;
   }, [isMuted]);
 
-  /* ── Activar sonido en el primer gesto del usuario ────────────────────── */
-  useEffect(() => {
-    const enableSound = () => {
-      const v = videoRef.current;
-      if (!v) return;
-      v.muted = false;
-      v.volume = 1;
-      setIsMuted(false);
-      // Si el navegador rechaza reproducir con sonido, volver a silenciar
-      // para que el video no se congele; el botón 🔊 sigue disponible.
-      v.play().catch(() => {
-        v.muted = true;
-        setIsMuted(true);
-        v.play().catch(() => {});
-      });
-    };
-    const opts = { once: true } as AddEventListenerOptions;
-    window.addEventListener("pointerdown", enableSound, opts);
-    window.addEventListener("keydown", enableSound, opts);
-    window.addEventListener("touchstart", enableSound, opts);
-    return () => {
-      window.removeEventListener("pointerdown", enableSound);
-      window.removeEventListener("keydown", enableSound);
-      window.removeEventListener("touchstart", enableSound);
-    };
-  }, []);
-
   /* ── Scroll suave al hacer click en el indicador ─────────────────────── */
   const scrollToNext = () => {
     const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
@@ -108,12 +79,23 @@ export default function Hero() {
   };
 
   const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !videoRef.current.muted;
-      setIsMuted(videoRef.current.muted);
+    const v = videoRef.current;
+    if (!v) return;
+
+    if (v.muted) {
+      v.muted = false;
+      v.volume = 1;
+      setIsMuted(false);
+
+      v.play().catch(() => {
+        v.muted = true;
+        setIsMuted(true);
+      });
+    } else {
+      v.muted = true;
+      setIsMuted(true);
     }
   };
-
   return (
     <section
       ref={sectionRef}
@@ -124,7 +106,7 @@ export default function Hero() {
         <video
           ref={videoRef}
           autoPlay
-          muted
+          muted={isMuted}
           loop
           playsInline
           preload="metadata"
@@ -149,12 +131,6 @@ export default function Hero() {
       <div className="hero-orb hero-orb--2" />
       <div className="hero-orb hero-orb--3" />
 
-      {/* ── LÍNEAS DECORATIVAS ─────────────────────────────────────────── */}
-      <div className="hero-grid-lines" aria-hidden="true">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="hero-grid-line" style={{ left: `${(i + 1) * 16.66}%` }} />
-        ))}
-      </div>
 
       {/* ── CONTENIDO PRINCIPAL ────────────────────────────────────────── */}
       <div className="hero-content">
@@ -192,13 +168,9 @@ export default function Hero() {
               <span className="hero-btn-bg" />
               <span className="hero-btn-content">
                 <i className="bi bi-cpu-fill" />
-                Acceder a SICAPP
+                Acceder a SICAP
               </span>
               <span className="hero-btn-shine" />
-            </a>
-            <a href="/programas" className="hero-btn-secondary">
-              <i className="bi bi-play-circle-fill" />
-              Ver Programas
             </a>
           </div>
         </div>

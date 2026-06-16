@@ -121,8 +121,6 @@ export default function AcercaPage() {
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section style={{ background: "var(--clr-bg-hero)", padding: "130px 0 90px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 80% 18%, rgba(109,74,255,0.18) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255,255,255,0.05) 0%, transparent 50%)", pointerEvents: "none" }} />
-        {/* Grid lines */}
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
         <Container style={{ position: "relative", zIndex: 1 }}>
           <Row className="align-items-center g-5">
             <Col lg={6}>

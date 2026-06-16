@@ -29,12 +29,9 @@ export default function NosotrosPage() {
                 overflow: "hidden",
             }}>
                 <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 80% 18%, rgba(109,74,255,0.18) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255,255,255,0.05) 0%, transparent 50%)", pointerEvents: "none" }} />
-                {/* Grid lines */}
-                <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
                 <Container style={{ position: "relative", zIndex: 1 }}>
                     <Row className="align-items-center g-5">
                         <Col lg={6}>
-                            <span className="badge-pill-white mb-4 d-inline-flex"><i className="bi bi-award-fill" style={{ fontSize: "0.8rem" }} /> Quiénes Somos</span>
                             <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.8rem)", fontWeight: 900, color: "#fff", lineHeight: 1.05, marginBottom: "24px" }}>
                                 20 años formando<br /><span style={{ color: "#a5f3fc" }}>héroes anónimos</span>
                             </h1>
