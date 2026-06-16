@@ -9,9 +9,12 @@ import { PageHero } from '@/components/ui/page-hero';
 import {
     Users, Plus, Search, X, Pencil, Trash2, ShieldOff,
     ShieldCheck, ChevronDown, User, Mail, Phone, Hash,
-    Building2, Shield,
+    Building2, Shield, Eye, EyeOff, MapPin,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DOCUMENT_TYPE_OPTIONS } from '@/shared/constants/document_types';
+import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
+import { SearchableSelect } from '@/app/checkout/_components/ui';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -66,17 +69,24 @@ function StatusBadge({ active }: { active: boolean }) {
 interface UserFormData {
     email: string;
     password: string;
+    confirmPassword: string;
     firstName: string;
     lastName: string;
     role: Role;
     identification: string;
+    documentType: string;
     phoneNumber: string;
     institutionId: string;
+    address: string;
+    city: string;
+    department: string;
+    country: string;
 }
 
 const EMPTY_FORM: UserFormData = {
-    email: '', password: '', firstName: '', lastName: '',
-    role: 'USUARIO', identification: '', phoneNumber: '', institutionId: '',
+    email: '', password: '', confirmPassword: '', firstName: '', lastName: '',
+    role: 'USUARIO', identification: '', documentType: '', phoneNumber: '', institutionId: '',
+    address: '', city: '', department: '', country: 'Colombia',
 };
 
 interface UserModalProps {
@@ -93,13 +103,24 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
             : EMPTY_FORM,
     );
     const [saving, setSaving] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const f = (k: keyof UserFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    const set = (k: keyof UserFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
         setForm(prev => ({ ...prev, [k]: e.target.value }));
+
+    const adminMunicipios = getMunicipalities(form.department);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
+
+        if (!isEdit && form.password !== form.confirmPassword) {
+            toast.error('Las contraseñas no coinciden');
+            setSaving(false);
+            return;
+        }
+
         try {
             if (isEdit) {
                 await updateDoc(doc(db, 'users', user!.uid), {
@@ -107,7 +128,12 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
                     lastName: form.lastName,
                     role: form.role,
                     identification: form.identification,
+                    documentType: form.documentType || null,
                     phoneNumber: form.phoneNumber,
+                    address: form.address || null,
+                    city: form.city || null,
+                    department: form.department || null,
+                    country: 'Colombia',
                     institutionId: form.institutionId || user!.uid,
                     updatedAt: serverTimestamp(),
                 });
@@ -124,7 +150,12 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
                     lastName: form.lastName,
                     role: form.role,
                     identification: form.identification,
+                    documentType: form.documentType || null,
                     phoneNumber: form.phoneNumber,
+                    address: form.address || null,
+                    city: form.city || null,
+                    department: form.department || null,
+                    country: 'Colombia',
                     institutionId: form.institutionId || cred.user.uid,
                     isActive: true,
                     status: 'ACTIVE',
@@ -164,40 +195,77 @@ function UserModal({ user, onClose, onSaved }: UserModalProps) {
                 <form onSubmit={handleSave} style={{ padding: 24, display: 'grid', gap: 16 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                         <Field label="Nombre *" icon={User}>
-                            <input value={form.firstName} onChange={f('firstName')} required placeholder="Juan" style={inputSt} />
+                            <input value={form.firstName} onChange={set('firstName')} required placeholder="Juan" style={inputSt} />
                         </Field>
                         <Field label="Apellido *" icon={User}>
-                            <input value={form.lastName} onChange={f('lastName')} required placeholder="Pérez" style={inputSt} />
+                            <input value={form.lastName} onChange={set('lastName')} required placeholder="Pérez" style={inputSt} />
                         </Field>
                     </div>
                     {!isEdit && (
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                             <Field label="Email *" icon={Mail}>
-                                <input type="email" value={form.email} onChange={f('email')} required placeholder="usuario@email.com" style={inputSt} />
+                                <input type="email" value={form.email} onChange={set('email')} required placeholder="usuario@email.com" style={inputSt} />
                             </Field>
                             <Field label="Contraseña *" icon={Shield}>
-                                <input type="password" value={form.password} onChange={f('password')} required placeholder="••••••••" minLength={6} style={inputSt} />
+                                <PasswordInput value={form.password} onChange={v => setForm(p => ({ ...p, password: v }))} show={showPassword} toggleShow={() => setShowPassword(p => !p)} />
+                            </Field>
+                            <div />
+                            <Field label="Confirmar Contraseña *" icon={Shield}>
+                                <PasswordInput value={form.confirmPassword} onChange={v => setForm(p => ({ ...p, confirmPassword: v }))} show={showConfirmPassword} toggleShow={() => setShowConfirmPassword(p => !p)} />
                             </Field>
                         </div>
                     )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                         <Field label="Cédula / ID" icon={Hash}>
-                            <input value={form.identification} onChange={f('identification')} placeholder="1.000.000.000" style={inputSt} />
+                            <input value={form.identification} onChange={set('identification')} placeholder="1.000.000.000" style={inputSt} />
                         </Field>
-                        <Field label="Teléfono" icon={Phone}>
-                            <input value={form.phoneNumber} onChange={f('phoneNumber')} placeholder="+57 300 000 0000" style={inputSt} />
+                        <Field label="Tipo Doc." icon={Hash}>
+                            <select value={form.documentType} onChange={set('documentType')} style={inputSt}>
+                                <option value="">Seleccionar...</option>
+                                {DOCUMENT_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                            </select>
                         </Field>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                        <Field label="Teléfono" icon={Phone}>
+                            <input value={form.phoneNumber} onChange={set('phoneNumber')} placeholder="+57 300 000 0000" style={inputSt} />
+                        </Field>
                         <Field label="Rol *" icon={Shield}>
-                            <select value={form.role} onChange={f('role')} style={inputSt}>
+                            <select value={form.role} onChange={set('role')} style={inputSt}>
                                 {ROLES.map(r => <option key={r} value={r}>{ROLE_META[r].label}</option>)}
                             </select>
                         </Field>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                         <Field label="ID Institución" icon={Building2}>
-                            <input value={form.institutionId} onChange={f('institutionId')} placeholder="ID o dejar vacío" style={inputSt} />
+                            <input value={form.institutionId} onChange={set('institutionId')} placeholder="ID o dejar vacío" style={inputSt} />
+                        </Field>
+                        <Field label="País" icon={MapPin}>
+                            <input value="Colombia" disabled style={{ ...inputSt, opacity: 0.6, cursor: 'not-allowed' }} />
                         </Field>
                     </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                        <Field label="Departamento" icon={MapPin}>
+                            <SearchableSelect
+                                value={form.department}
+                                onChange={(v) => setForm(p => ({ ...p, department: v, city: '' }))}
+                                options={COLOMBIA_DEPARTMENTS}
+                                placeholder="Buscar departamento..."
+                            />
+                        </Field>
+                        <Field label="Ciudad / Municipio" icon={MapPin}>
+                            <SearchableSelect
+                                value={form.city}
+                                onChange={(v) => setForm(p => ({ ...p, city: v }))}
+                                options={adminMunicipios}
+                                placeholder={form.department ? 'Buscar municipio...' : 'Selecciona un departamento'}
+                                disabled={!form.department}
+                            />
+                        </Field>
+                    </div>
+                    <Field label="Dirección" icon={MapPin}>
+                        <input value={form.address} onChange={set('address')} placeholder="Dirección" style={inputSt} />
+                    </Field>
                     <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 8 }}>
                         <button type="button" onClick={onClose} style={btnSecondary}>Cancelar</button>
                         <button type="submit" disabled={saving} style={btnPrimary}>
@@ -383,6 +451,36 @@ export default function SuperAdminUsuariosPage() {
 }
 
 // ── Shared micro-components ────────────────────────────────────────────────────
+
+function PasswordInput({ value, onChange, show, toggleShow }: {
+    value: string; onChange: (v: string) => void; show: boolean; toggleShow: () => void;
+}) {
+    return (
+        <div style={{ position: 'relative' }}>
+            <input
+                type={show ? 'text' : 'password'}
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                required
+                placeholder="••••••••"
+                minLength={6}
+                style={{ ...inputSt, paddingRight: 36 }}
+            />
+            <button
+                type="button"
+                onClick={toggleShow}
+                style={{
+                    position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--text-muted)',
+                }}
+            >
+                {show ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+        </div>
+    );
+}
 
 function Field({ label, icon: Icon, children }: { label: string; icon: typeof User; children: React.ReactNode }) {
     return (
