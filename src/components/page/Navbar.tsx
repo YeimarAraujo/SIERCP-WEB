@@ -329,18 +329,18 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
           <button onClick={() => setOpen(false)} style={{ border: "none", background: "none", fontSize: "1.5rem", color: "var(--clr-text)" }}><i className="bi bi-x-lg" /></button>
         </div>
 
-        <div style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--clr-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Cursos</div>
+        {/* <div style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--clr-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Cursos</div>
         {cursos.map(c => (
           <Link key={c.slug} href={`/formacion/${c.slug}`} onClick={() => setOpen(false)} style={{
             display: "flex", alignItems: "center", gap: "10px", padding: "10px", borderRadius: "10px", textDecoration: "none", color: "var(--clr-text)", fontSize: "0.9rem", fontWeight: 600,
           }}>
             <i className={`bi ${c.icono}`} style={{ color: "var(--clr-primary)" }} /> {c.nombre}
           </Link>
-        ))}
+        ))} */}
 
         <div style={{ height: "1px", background: "var(--clr-border)", margin: "12px 0" }} />
 
-        <div style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--clr-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Secciones</div>
+        {/* <div style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--clr-muted)", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Secciones</div> */}
         {links.filter(l => l.type === 'link').map(link => (
           <Link key={link.href} href={link.href} onClick={() => setOpen(false)} style={{
             display: "block", color: "var(--clr-text)", padding: "12px 10px", borderRadius: "10px", textDecoration: "none", fontWeight: 700, fontSize: "0.95rem",

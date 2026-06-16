@@ -49,6 +49,7 @@ function AppScreen({ visible }: { visible: boolean }) {
   const [count, setCount] = useState(0);
   const [history, setHistory] = useState<any[]>([]);
 
+
   useEffect(() => {
     if (!visible) return;
 
@@ -374,6 +375,65 @@ export default function DownloadApp() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
   const ref = useRef<HTMLElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkSize();
+
+    window.addEventListener("resize", checkSize);
+
+    return () => {
+      window.removeEventListener("resize", checkSize);
+    };
+  }, []);
+
+  const mobilePositions = [
+    {
+      bottom: "5%",
+      right: "2%",
+      width: "130px",
+      anim: "float-chip-1 4.5s ease-in-out infinite",
+    },
+    {
+      top: "20%",
+      left: "1%",
+      width: "120px",
+      anim: "float-chip-3 3.5s ease-in-out infinite",
+    },
+    {
+      bottom: "20%",
+      left: "-6%",
+      width: "160px",
+      anim: "float-chip-2 5s ease-in-out infinite",
+    },
+  ];
+
+  const desktopPositions = [
+    {
+      bottom: "0%",
+      right: "8%",
+      width: "155px",
+      anim: "float-chip-1 4.5s ease-in-out infinite",
+    },
+    {
+      bottom: "68%",
+      left: "10%",
+      width: "145px",
+      anim: "float-chip-3 3.5s ease-in-out infinite",
+    },
+    {
+      bottom: "18%",
+      left: "8%",
+      width: "148px",
+      anim: "float-chip-2 5s ease-in-out infinite",
+    },
+  ];
+
+  const positions = isMobile ? mobilePositions : desktopPositions;
 
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => {
@@ -405,14 +465,6 @@ export default function DownloadApp() {
         pointerEvents: "none",
       }} />
 
-      {/* Subtle grid */}
-      <div aria-hidden="true" style={{
-        position: "absolute", inset: 0,
-        backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-        backgroundSize: "48px 48px",
-        pointerEvents: "none",
-      }} />
 
       <Container style={{ position: "relative", zIndex: 1 }}>
 
@@ -624,19 +676,19 @@ export default function DownloadApp() {
 
                 {/* Metric chips */}
                 {metrics.map((m, i) => {
-                  const positions = [
-                    { bottom: "0%", right: "8%", width: "185px", anim: "float-chip-1 4.5s ease-in-out infinite 0.5s" },
-                    { bottom: "68%", left: "10%", width: "165px", anim: "float-chip-3 3.5s ease-in-out infinite" },
-                    { bottom: "18%", left: "8%", width: "148px", anim: "float-chip-2 5s ease-in-out infinite" },
-                  ];
                   const pos = positions[i];
+
                   return (
                     <div
                       key={i}
                       className="card-glass p-3 position-absolute"
-                      style={{ zIndex: 10, animation: pos.anim, ...pos }}
+                      style={{
+                        zIndex: 10,
+                        animation: pos.anim,
+                        ...pos,
+                      }}
                     >
-                      <div style={{ fontSize: "0.58rem", fontWeight: 800, color: m.color, marginBottom: "4px", textTransform: "uppercase" }}>
+                      <div style={{ fontSize: "clamp(0.9rem, 2vw, 1.1rem)", fontWeight: 800, color: m.color, marginBottom: "4px", textTransform: "uppercase" }}>
                         {m.label}
                       </div>
                       <div style={{ fontSize: "1.1rem", fontWeight: 900 }}>{m.value}</div>

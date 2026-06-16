@@ -54,14 +54,9 @@ export default function ContactoPage() {
                     backgroundImage: "radial-gradient(circle at 80% 18%, rgba(109,74,255,0.18) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255,255,255,0.05) 0%, transparent 50%)",
                     pointerEvents: "none",
                 }} />
-                {/* Grid lines */}
-                <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
                 <Container style={{ position: "relative", zIndex: 1 }}>
                     <Row className="align-items-center g-5">
                         <Col lg={6}>
-                            <span className="badge-pill-white mb-4 d-inline-flex">
-                                <i className="bi bi-chat-dots-fill" style={{ fontSize: "0.8rem" }} /> Soporte & Consultoría
-                            </span>
                             <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 900, color: "#fff", lineHeight: 1.08, marginBottom: "24px" }}>
                                 Estamos aquí para<br />
                                 <span style={{ color: "#a5f3fc" }}>ayudarte a crecer</span>
@@ -82,7 +77,7 @@ export default function ContactoPage() {
                             <div style={{ position: "relative", borderRadius: "24px", overflow: "hidden", boxShadow: "0 20px 50px rgba(0,0,0,0.35)", lineHeight: 0 }}>
                                 <img
                                     src="/assets/images/SICAP/webp/contacto.webp"
-                                    alt="Equipo de soporte de Jomar Segurid listo para atenderte"
+                                    alt="Equipo de soporte de sicap listo para atenderte"
                                     className="img-fluid"
                                     style={{ display: "block", width: "100%", height: "auto" }}
                                 />
@@ -90,7 +85,7 @@ export default function ContactoPage() {
                         </Col>
                     </Row>
 
-                    {/* Contactos rápidos (franja debajo del hero) */}
+                    {/* Contactos rápidos (franja debajo del hero) 
                     <Row className="g-3" style={{ marginTop: "44px" }}>
                         {contactItems.slice(0, 4).map((item, i) => (
                             <Col key={i} xs={6} lg={3}>
@@ -114,7 +109,7 @@ export default function ContactoPage() {
                                 </a>
                             </Col>
                         ))}
-                    </Row>
+                    </Row>*/}
                 </Container>
             </section>
 

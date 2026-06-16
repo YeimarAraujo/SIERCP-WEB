@@ -10,25 +10,13 @@ const steps = [
     title: "Capacitación",
     text: "La capacitación convierte la intención en competencia. Con maniquíes inteligentes SICAP, cada maniobra se evalua y se corrige hasta dominar la técnica.",
     icon: GraduationCap,
-    accent: "#10b981",
-    accentAlpha: "rgba(16,185,129,0.12)",
+    accent: "var(--clr-primary)",
+    accentAlpha: "var(--clr-primary-alpha)",
     tag: "Tecnología IoT",
     tagColor: "#065f46",
     detail: "Formarse con estándares AHA/ERC y práctica real."
   },
 
-
-  {
-    n: "04",
-    title: "Acción",
-    text: "La acción de calidad es la que sostiene la vida. Y cada acción retroalimenta una nueva decisión: el ciclo continúa.",
-    icon: HeartPulse,
-    accent: "var(--aha-danger)",
-    accentAlpha: "var(--aha-danger-bg)",
-    tag: "ISO 9001 compatible",
-    tagColor: "#78350f",
-    detail: "Ejecutar maniobras de primeros auxilios de alta calidad que salvan vidas."
-  },
   {
     n: "02",
     title: "Decisión",
@@ -46,12 +34,25 @@ const steps = [
     title: "Reacción",
     text: "La reacción es la formación hecha reflejo. Llamar, pedir un DEA, iniciar compresiones. Una persona capacitada reacciona con seguridad cuando importa.",
     icon: Zap,
-    accent: "#f59e0b",
-    accentAlpha: "rgba(245,158,11,0.12)",
+    accent: "var(--clr-primary)",
+    accentAlpha: "var(--clr-primary-alpha)",
     tag: "ISO 9001 compatible",
     tagColor: "#78350f",
     detail: "Activar la respuesta correcta sin dudar."
-  }
+  },
+  {
+    n: "04",
+    title: "Acción",
+    text: "La acción de calidad es la que sostiene la vida. Y cada acción retroalimenta una nueva decisión: el ciclo continúa.",
+    icon: HeartPulse,
+    accent: "var(--clr-primary)",
+    accentAlpha: "var(--clr-primary-alpha)",
+    tag: "ISO 9001 compatible",
+    tagColor: "#78350f",
+    detail: "Ejecutar maniobras de primeros auxilios de alta calidad que salvan vidas."
+  },
+
+
 ];
 
 const standards = [
@@ -86,21 +87,7 @@ export default function Metodologia() {
         overflow: "hidden",
       }}
     >
-      {/* Decorative background grid */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(var(--clr-border) 1px, transparent 1px),
-            linear-gradient(90deg, var(--clr-border) 1px, transparent 1px)
-          `,
-          backgroundSize: "48px 48px",
-          opacity: 0.35,
-          pointerEvents: "none",
-        }}
-      />
+
       {/* Radial fade so the grid doesn't overwhelm */}
       <div
         aria-hidden="true"
@@ -197,13 +184,18 @@ export default function Metodologia() {
 
         {/* ── 3 Steps ── */}
         <div className="max-w-6xl mx-auto px-5 py-16">
-          <div className="grid lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
             {steps.map((step, i) => (
+
               <div
                 key={step.n}
                 className={`fade-up ${isVisible ? "visible" : ""}`}
                 style={{
                   transitionDelay: `${0.2 + i * 0.15}s`,
+                  transitionProperty: "all",
+                  transitionDuration: "0.3s",
+                  transitionTimingFunction: "ease",
+
                   background: "var(--clr-bg-surface)",
                   border: `1px solid ${activeStep === i ? step.accent : "var(--clr-border)"}`,
                   borderRadius: "20px",
@@ -212,7 +204,6 @@ export default function Metodologia() {
                   display: "flex",
                   flexDirection: "column",
                   position: "relative",
-                  transition: "all 0.3s ease",
                   boxShadow: activeStep === i ? `0 8px 32px ${step.accent}22` : "var(--shadow-sm)",
                   cursor: "pointer",
                   zIndex: 1,
@@ -309,7 +300,7 @@ export default function Metodologia() {
             ))}
 
             {/* Centro del ciclo */}
-            <div className="hidden lg:flex lg:row-span-2 lg:col-start-2 lg:row-start-1 items-center justify-center" >
+            <div className="hidden lg:flex lg:row-span-2 lg:col-start-2 lg:row-start-1 items-center justify-center">
               <div style={{
                 width: "120px",
                 height: "120px",
