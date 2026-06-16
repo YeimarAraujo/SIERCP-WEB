@@ -181,7 +181,7 @@ export default function StudentDetailPage() {
                                     </div>
                                     <div>
                                         <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Identificación</div>
-                                        <div style={{ fontWeight: 700, fontSize: 14 }}>{student.identificacion || '—'}</div>
+                                        <div style={{ fontWeight: 700, fontSize: 14 }}>{student.identification || '—'}</div>
                                     </div>
                                 </div>
 

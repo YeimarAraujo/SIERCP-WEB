@@ -25,7 +25,7 @@ function RegisterSSTContent() {
   const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    firstName: '', lastName: '', identificacion: '', phoneNumber: '',
+    firstName: '', lastName: '', identification: '', phoneNumber: '',
     email: '', password: '', confirm: '',
     licenseNumber: '', issuingEntity: '',
     departamento: '', ciudad: '', direccion: '',
@@ -42,7 +42,7 @@ function RegisterSSTContent() {
   };
 
   function validate1() {
-    if (!form.firstName || !form.lastName || !form.identificacion) {
+    if (!form.firstName || !form.lastName || !form.identification) {
       setError('Completa los datos personales');
       return false;
     }
@@ -73,7 +73,7 @@ function RegisterSSTContent() {
         password: form.password,
         firstName: form.firstName,
         lastName: form.lastName,
-        identificacion: form.identificacion,
+        identification: form.identification,
         phoneNumber: form.phoneNumber || undefined,
         role: 'INSTRUCTOR',
         address: form.direccion || undefined,
@@ -175,7 +175,7 @@ function RegisterSSTContent() {
                 </div>
                 <div className="col-md-6">
                   <label style={labelStyle}>Documento de identidad *</label>
-                  <input type="text" required value={form.identificacion} onChange={e => setForm(p => ({ ...p, identificacion: e.target.value }))} placeholder="Cédula / DNI" style={inputStyle} />
+                  <input type="text" required value={form.identification} onChange={e => setForm(p => ({ ...p, identification: e.target.value }))} placeholder="Cédula / DNI" style={inputStyle} />
                 </div>
                 <div className="col-md-6">
                   <label style={labelStyle}>Teléfono / WhatsApp <span style={{ fontWeight: 400, color: 'var(--clr-muted)' }}>(opcional)</span></label>

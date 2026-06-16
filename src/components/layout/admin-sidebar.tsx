@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import toast from 'react-hot-toast';
-import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Monitor, GraduationCap, Users, Cpu,
     BookOpen, BarChart2, FileText, Settings, Shield, User, LogOut,
-    Sun, Moon, Globe, Award, Zap, CalendarDays, ShoppingBag, Building2, Clock,
+    Sun, Moon, Globe, Zap, CalendarDays, ShoppingBag, Building2, Clock,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -21,17 +20,15 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { label: 'Panel de control', href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Cursos', href: '/admin/courses', icon: BookOpen },
+    { label: 'Calendario', href: '/admin/calendar', icon: CalendarDays },
     { label: 'Sesiones en vivo', href: '/admin/live', icon: Monitor },
     { label: 'Historial de sesiones', href: '/admin/sessions', icon: Clock },
+    { label: 'Instructores', href: '/admin/instructors', icon: Users },
+    { label: 'Estudiantes', href: '/admin/students', icon: GraduationCap },
     { label: 'Sedes', href: '/admin/sedes', icon: Building2 },
-    { label: 'Instructores', href: '/admin/instructors', icon: GraduationCap },
-    { label: 'Estudiantes', href: '/admin/students', icon: Users },
     { label: 'Dispositivos', href: '/admin/devices', icon: Cpu },
-    { label: 'Cursos', href: '/admin/courses', icon: BookOpen },
     { label: 'Reportes', href: '/admin/reports', icon: BarChart2 },
-    { label: 'Certificados', href: '/admin/certificates', icon: Award },
-    { label: 'Calendario', href: '/admin/calendar', icon: CalendarDays },
-    { label: 'Mi Plan / Tienda', href: '/admin/tienda', icon: ShoppingBag },
     // { label: 'Configuración', href: '/admin/settings', icon: Settings },
 ];
 
@@ -41,7 +38,6 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
     const [hovered, setHovered] = useState(false);
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const { theme, toggleTheme } = useThemeStore();
 
     const isCollapsed = collapsed && !hovered;
 
@@ -81,48 +77,12 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
         >
             <div style={{
                 padding: '20px 20px 16px',
-                borderBottom: '1px solid var(--sidebar-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
                 gap: isCollapsed ? 0 : '10px',
                 position: 'relative',
             }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 32, height: 32,
-                    borderRadius: 'var(--radius-md)',
-                    background: 'var(--brand)',
-                    color: 'var(--text-on-brand)',
-                    fontSize: 14, fontWeight: 700,
-                    cursor: 'pointer',
-                }}
-                    onClick={onToggle}
-                    title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
-                >S</div>
-                <span style={{
-                    fontSize: '16px',
-                    fontWeight: '700',
-                    color: 'var(--sidebar-text)',
-                    letterSpacing: '-0.3px',
-                    opacity: isCollapsed ? 0 : 1,
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    transition: 'opacity 0.2s ease',
-                }}>
-                    SIERCP
-                </span>
-                {collapsed && (
-                    <div style={{
-                        position: 'absolute', bottom: -8, left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: 24, height: 2, borderRadius: 1,
-                        background: 'var(--brand)',
-                        opacity: 0.3,
-                    }} />
-                )}
             </div>
 
             <nav style={{ flex: 1, padding: '12px 12px' }}>
@@ -195,6 +155,43 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                 gap: 4,
                 alignItems: isCollapsed ? 'center' : 'stretch',
             }}>
+                <Link href="/admin/tienda" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isCollapsed ? 'center' : 'flex-start',
+                        gap: isCollapsed ? 0 : '10px',
+                        padding: isCollapsed ? '10px' : '10px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        color: 'var(--sidebar-text)',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        width: isCollapsed ? 44 : 'auto',
+                        marginLeft: isCollapsed ? 'auto' : 0,
+                        marginRight: isCollapsed ? 'auto' : 0,
+                        marginBottom: '4px',
+                    }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'var(--sidebar-text)';
+                        }}
+                        title={isCollapsed ? 'Tienda' : undefined}
+                    >
+                        <ShoppingBag size={20} />
+                        <span style={{
+                            opacity: isCollapsed ? 0 : 1,
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            maxWidth: isCollapsed ? 0 : '200px',
+                            transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                        }}>Tienda</span>
+                    </div>
+                </Link>
 
                 <Link href="/" style={{ textDecoration: 'none' }}>
                     <div style={{
@@ -271,44 +268,6 @@ export function AdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onT
                     </div>
                 </Link> */}
 
-                <button
-                    onClick={toggleTheme}
-                    style={{
-                        width: isCollapsed ? 44 : '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: isCollapsed ? 'center' : 'flex-start',
-                        gap: isCollapsed ? 0 : '10px',
-                        padding: isCollapsed ? '10px' : '10px 12px',
-                        borderRadius: 'var(--radius-md)',
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: 'var(--sidebar-text)',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        marginLeft: isCollapsed ? 'auto' : 0,
-                        marginRight: isCollapsed ? 'auto' : 0,
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                    }}
-                    title={isCollapsed ? (theme === 'dark' ? 'Modo claro' : 'Modo oscuro') : undefined}
-                >
-                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                    <span style={{
-                        opacity: isCollapsed ? 0 : 1,
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        maxWidth: isCollapsed ? 0 : '200px',
-                        transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                    }}>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-                </button>
 
                 <button
                     onClick={handleLogout}

@@ -79,7 +79,7 @@ export const JomarCourseService = {
         callback: (cursos: Curso[]) => void,
         onError?: (e: Error) => void,
     ): Unsubscribe {
-        if (!db) { callback([]); return () => {}; }
+        if (!db) { callback([]); return () => { }; }
         const q = query(collection(db, COL), where('isPublished', '==', true));
         return onSnapshot(
             q,
@@ -93,7 +93,7 @@ export const JomarCourseService = {
         callback: (docs: JomarCourseDoc[]) => void,
         onError?: (e: Error) => void,
     ): Unsubscribe {
-        if (!db) { callback([]); return () => {}; }
+        if (!db) { callback([]); return () => { }; }
         return onSnapshot(
             collection(db, COL),
             snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() } as JomarCourseDoc))),

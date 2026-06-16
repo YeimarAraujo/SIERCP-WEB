@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { useThemeStore } from '@/stores/theme-store';
 import {
     LayoutDashboard, Monitor, BookOpen, Users, Clock,
-    BarChart2, Award, Trophy, CheckSquare, User, LogOut,
+    BarChart2, Trophy, CheckSquare, User, LogOut,
     Sun, Moon, Globe, CalendarDays,
     GraduationCap
 } from 'lucide-react';
@@ -29,7 +29,6 @@ const navItems: NavItem[] = [
     { label: 'Evaluaciones', href: '/instructor/evaluations', icon: CheckSquare },
     { label: 'Historial', href: '/instructor/history', icon: Clock },
     { label: 'Reportes', href: '/instructor/reports', icon: BarChart2 },
-    { label: 'Certificados', href: '/instructor/certificates', icon: Award },
     { label: 'Ranking', href: '/instructor/ranking', icon: Trophy },
 ];
 

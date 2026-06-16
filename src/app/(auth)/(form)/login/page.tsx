@@ -154,11 +154,12 @@ function LoginContent() {
                         {loading ? 'Cargando...' : 'Iniciar Sesión'}
                     </button>
 
-                    <p className="text-center" style={{ fontSize: "0.95rem", color: "var(--clr-muted)" }}>
-                        ¿Aún no tienes cuenta?{' '}
-                        <button type="button" onClick={() => router.push('/register')} style={{ color: "var(--clr-primary)", fontWeight: 800, background: "none", border: "none", padding: 0 }}>Regístrate aquí</button>
-                    </p>
+
                 </div>
+                <p className="text-center" style={{ fontSize: "0.95rem", color: "var(--clr-muted)" }}>
+                    ¿Aún no tienes cuenta?{' '}
+                    <button type="button" onClick={() => router.push('/register')} style={{ color: "var(--clr-primary)", fontWeight: 800, background: "none", border: "none", padding: 0 }}>Regístrate aquí</button>
+                </p>
             </form>
         </div>
     );

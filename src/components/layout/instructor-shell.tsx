@@ -70,12 +70,9 @@ export function InstructorShell({ children }: { children: React.ReactNode }) {
                 return;
             }
 
-            // Sin acceso: redirigir según rol
-            if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
-                router.replace('/admin/dashboard');
-            } else {
-                router.replace('/student/home');
-            }
+            // Sin acceso de instructor: a este punto solo llegan usuarios/estudiantes
+            // (admins y super-admins ya obtuvieron acceso directo arriba).
+            router.replace('/student/home');
         };
 
         checkAuth();

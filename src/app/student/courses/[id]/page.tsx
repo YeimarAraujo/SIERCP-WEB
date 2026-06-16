@@ -46,9 +46,6 @@ export default function StudentCourseDetailPage() {
 
         const load = async () => {
             try {
-                // 1) Intentar vía API server-side (Admin SDK) — fuente canónica de
-                //    módulos (courses/{id}/modules) y progreso por curso. Evita los
-                //    problemas de reglas Firestore que ocultaban los módulos.
                 const token = await getAuth().currentUser?.getIdToken();
                 if (token) {
                     const res = await fetch(`/api/student/courses/${courseId}`, {
@@ -108,9 +105,11 @@ export default function StudentCourseDetailPage() {
             case 'evaluacion_teorica':
                 return `/student/courses/${courseId}/module/${module.id}?type=quiz`;
             case 'practica_guiada':
-                return `/student/courses/${courseId}/module/${module.id}?type=practica`;
+                return `/student/courses/${courseId}/module/${module.id}?type=practica_guiada`;
             case 'certificacion':
-                return `/student/courses/${courseId}/certificacion`;
+                // No existe una página /certificacion dedicada; los certificados se
+                // emiten automáticamente y se consultan en la sección de certificados.
+                return `/student/certificates`;
             default:
                 return '#';
         }
@@ -275,20 +274,26 @@ export default function StudentCourseDetailPage() {
                     )}
                 </div>
 
-                {/* Start Practice Button */}
-                {modules.length > 0 && (
-                    <div style={{ marginTop: 24 }}>
-                        <Link href={`/student/courses/${courseId}/start`} style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                            background: 'var(--brand)', color: 'var(--text-on-brand)', padding: '16px 24px',
-                            borderRadius: 14, fontWeight: 700, fontSize: 15, textDecoration: 'none',
-                            boxShadow: '0 4px 12px rgba(24, 0, 173, 0.3)'
-                        }}>
-                            <PlayCircle size={22} />
-                            Iniciar Práctica Guiada
-                        </Link>
-                    </div>
-                )}
+                {/* Acceso a la práctica guiada: abre el primer módulo de práctica
+                    (su vista explica que se realiza en la app SIERCP con el maniquí).
+                    Antes apuntaba a /start, que no existe → 404. */}
+                {(() => {
+                    const practica = modules.find((m) => m.type === 'practica_guiada');
+                    if (!practica) return null;
+                    return (
+                        <div style={{ marginTop: 24 }}>
+                            <Link href={`/student/courses/${courseId}/module/${practica.id}?type=practica_guiada`} style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                                background: 'var(--brand)', color: 'var(--text-on-brand)', padding: '16px 24px',
+                                borderRadius: 14, fontWeight: 700, fontSize: 15, textDecoration: 'none',
+                                boxShadow: '0 4px 12px rgba(24, 0, 173, 0.3)'
+                            }}>
+                                <PlayCircle size={22} />
+                                Ver práctica guiada
+                            </Link>
+                        </div>
+                    );
+                })()}
             </div>
         </div>
     );

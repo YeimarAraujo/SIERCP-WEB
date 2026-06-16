@@ -13,6 +13,7 @@ import {
     BookMarked, ShoppingCart, Package, Briefcase,
     ShieldCheckIcon,
     Building,
+    Bell,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -20,30 +21,25 @@ interface NavItem {
     label: string;
     href: string;
     icon: LucideIcon;
-    group?: string;
 }
 
 const navItems: NavItem[] = [
     { label: 'Dashboard', href: '/super-admin/dashboard', icon: LayoutDashboard },
-    // ── Gestión ─────────────────────────────────────────────────────────────
-    // { label: 'Instituciones', href: '/super-admin/institutions', icon: Building2, group: 'Gestión' },
-    // { label: 'Usuarios', href: '/super-admin/usuarios', icon: Users, group: 'Gestión' },
-    // { label: 'Instructores', href: '/super-admin/instructores', icon: GraduationCap, group: 'Gestión' },
-    // // ── Contenido ───────────────────────────────────────────────────────────
-    // { label: 'Cursos plataforma', href: '/super-admin/cursos', icon: BookOpen, group: 'Contenido' },
-    { label: 'Cursos Jomar', href: '/super-admin/cursos-jomar', icon: BookMarked, group: 'Contenido' },
-    { label: 'Servicios Jomar', href: '/super-admin/servicios-jomar', icon: Briefcase, group: 'Contenido' },
-    // ── Comercial ───────────────────────────────────────────────────────────
-    { label: 'Planes y licencias', href: '/super-admin/plans', icon: CreditCard, group: 'Comercial' },
-    { label: 'Pedidos y compras', href: '/super-admin/pedidos', icon: ShoppingCart, group: 'Comercial' },
-    { label: 'Stock de maniquíes', href: '/super-admin/stock', icon: Package, group: 'Comercial' },
-    // ── Pendientes ──────────────────────────────────────────────────────────
-    { label: 'Admins pendientes', href: '/super-admin/pending-admins', icon: UserCheck, group: 'Pendientes' },
-    { label: 'Instructores pendientes', href: '/super-admin/pending-instructors', icon: UserCheck, group: 'Pendientes' },
-    { label: 'Instituciones pendientes', href: '/super-admin/pending-institutions', icon: Building, group: 'Pendientes' },
-    // ── Sistema ─────────────────────────────────────────────────────────────
-    { label: 'Logs de actividad', href: '/super-admin/logs', icon: ScrollText, group: 'Sistema' },
-    { label: 'Configuración', href: '/super-admin/settings', icon: Settings, group: 'Sistema' },
+    //     { label: 'Instituciones', href: '/super-admin/institutions', icon: Building2 },
+    //     { label: 'Usuarios', href: '/super-admin/usuarios', icon: Users },
+    //     { label: 'Instructores', href: '/super-admin/instructores', icon: GraduationCap },
+    //     { label: 'Cursos plataforma', href: '/super-admin/cursos', icon: BookOpen },
+
+    { label: 'Planes y licencias', href: '/super-admin/plans', icon: CreditCard },
+    { label: 'Pedidos y compras', href: '/super-admin/pedidos', icon: ShoppingCart },
+    // { label: 'Cursos Jomar', href: '/super-admin/cursos-jomar', icon: BookMarked },
+    { label: 'Servicios Jomar', href: '/super-admin/servicios-jomar', icon: Briefcase },
+    { label: 'Stock de maniquíes', href: '/super-admin/stock', icon: Package },
+    { label: 'Instituciones pendientes', href: '/super-admin/pending-institutions', icon: Building },
+    { label: 'Admins pendientes', href: '/super-admin/pending-admins', icon: UserCheck },
+    { label: 'Instructores pendientes', href: '/super-admin/pending-instructors', icon: UserCheck },
+    { label: 'Notificaciones', href: '/super-admin/notifications', icon: Bell },
+    { label: 'Logs de actividad', href: '/super-admin/logs', icon: ScrollText },
 ];
 
 export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
@@ -91,8 +87,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
             onMouseLeave={() => setHovered(false)}
         >
             <div style={{
-                padding: '20px 20px 16px',
-                borderBottom: '1px solid var(--sidebar-border)',
+                padding: '40px 20px 16px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
@@ -112,7 +107,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                 }}
                     onClick={onToggle}
                     title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
-                ><ShieldCheckIcon size={18} />
+                ><ShieldCheckIcon size={25} />
                 </div>
                 <span style={{
                     fontSize: '16px',
@@ -137,7 +132,7 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                 )}
             </div>
 
-            <nav style={{ flex: 1, padding: '12px 12px', overflowY: 'auto' }}>
+            <nav style={{ flex: 1, padding: '22px 12px', overflowY: 'auto' }}>
                 {navItems.map((item, idx) => {
                     const active = isActive(item.href);
                     const Icon = item.icon;
@@ -261,44 +256,43 @@ export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean
                     </div>
                 </Link> */}
 
-                <button
-                    onClick={toggleTheme}
-                    style={{
-                        width: isCollapsed ? 44 : '100%',
+                <Link href="/super-admin/settings" style={{ textDecoration: 'none' }}>
+                    <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: isCollapsed ? 'center' : 'flex-start',
                         gap: isCollapsed ? 0 : '10px',
                         padding: isCollapsed ? '10px' : '10px 12px',
                         borderRadius: 'var(--radius-md)',
-                        background: 'transparent',
-                        border: 'none',
                         cursor: 'pointer',
                         color: 'var(--sidebar-text)',
                         fontSize: '14px',
-                        fontWeight: '500',
+                        fontWeight: 500,
+                        width: isCollapsed ? 44 : 'auto',
                         marginLeft: isCollapsed ? 'auto' : 0,
                         marginRight: isCollapsed ? 'auto' : 0,
+                        marginBottom: '4px',
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
-                        e.currentTarget.style.color = 'var(--sidebar-hover-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'var(--sidebar-text)';
-                    }}
-                    title={isCollapsed ? (theme === 'dark' ? 'Modo claro' : 'Modo oscuro') : undefined}
-                >
-                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                    <span style={{
-                        opacity: isCollapsed ? 0 : 1,
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        maxWidth: isCollapsed ? 0 : '200px',
-                        transition: 'opacity 0.2s ease, max-width 0.2s ease',
-                    }}>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-                </button>
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--sidebar-hover-bg)';
+                            e.currentTarget.style.color = 'var(--sidebar-hover-text)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'var(--sidebar-text)';
+                        }}
+                        title={isCollapsed ? 'Configuración' : undefined}
+                    >
+                        <Settings size={20} />
+                        <span style={{
+                            opacity: isCollapsed ? 0 : 1,
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            maxWidth: isCollapsed ? 0 : '200px',
+                            transition: 'opacity 0.2s ease, max-width 0.2s ease',
+                        }}>Configuración</span>
+                    </div>
+                </Link>
 
                 <button
                     onClick={handleLogout}

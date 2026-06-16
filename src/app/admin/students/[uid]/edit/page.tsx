@@ -24,7 +24,7 @@ export default function EditStudentPage() {
         firstName: '',
         lastName: '',
         email: '',
-        identificacion: '',
+        identification: '',
         institutionId: '',
         status: 'ACTIVE',
     });
@@ -43,7 +43,7 @@ export default function EditStudentPage() {
                     firstName: u.firstName || '',
                     lastName: u.lastName || '',
                     email: u.email || '',
-                    identificacion: u.identificacion || '',
+                    identification: u.identification || '',
                     institutionId: u.institutionId || '',
                     status: u.status || 'ACTIVE',
                 });
@@ -66,7 +66,7 @@ export default function EditStudentPage() {
             await UserService.update(uid, {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
-                identificacion: formData.identificacion,
+                identification: formData.identification,
                 institutionId: formData.institutionId,
                 status: formData.status as 'ACTIVE' | 'PENDING',
                 updatedAt: new Date(),
@@ -121,7 +121,7 @@ export default function EditStudentPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Nombres" icon={User} placeholder="Ej. Juan Andrés" required value={formData.firstName} onChange={(v: string) => setFormData({...formData, firstName: v})} />
                                     <FormInput label="Apellidos" icon={User} placeholder="Ej. Pérez García" required value={formData.lastName} onChange={(v: string) => setFormData({...formData, lastName: v})} />
-                                    <FormInput label="Identificación" icon={Fingerprint} placeholder="1.000.000.000" value={formData.identificacion} onChange={(v: string) => setFormData({...formData, identificacion: v})} />
+                                    <FormInput label="Identificación" icon={Fingerprint} placeholder="1.000.000.000" value={formData.identification} onChange={(v: string) => setFormData({...formData, identification: v})} />
                                     <FormInput label="Institución" icon={Building} placeholder="SIERCP-GENERAL" value={formData.institutionId} onChange={(v: string) => setFormData({...formData, institutionId: v})} />
                                 </div>
                                 <div style={{ marginTop: 20 }}>

@@ -63,17 +63,29 @@ export async function GET(req: NextRequest) {
 
     const snaps = await Promise.all(queries);
 
-    // Dedupe por id
-    const byId = new Map<string, any>();
+    // Dedupe por id (conservando la referencia para el conteo de inscritos)
+    const byId = new Map<string, FirebaseFirestore.QueryDocumentSnapshot>();
     for (const snap of snaps) {
       for (const doc of snap.docs) {
-        if (!byId.has(doc.id)) {
-          byId.set(doc.id, { id: doc.id, ...ts(doc.data()) });
-        }
+        if (!byId.has(doc.id)) byId.set(doc.id, doc);
       }
     }
 
-    const courses = Array.from(byId.values()).sort((a, b) => {
+    // Conteo real de inscritos desde la subcolección enrollments (el contador
+    // denormalizado studentCount se desfasa: las inscripciones por QR en Flutter
+    // no lo incrementan). El Admin SDK no está sujeto a las reglas de seguridad.
+    const courses = await Promise.all(
+      Array.from(byId.values()).map(async (doc) => {
+        let studentCount = (doc.data().studentCount as number) ?? 0;
+        try {
+          const countSnap = await doc.ref.collection('enrollments').count().get();
+          studentCount = countSnap.data().count;
+        } catch { /* fallback al valor guardado */ }
+        return { id: doc.id, ...ts(doc.data()), studentCount };
+      })
+    );
+
+    courses.sort((a: any, b: any) => {
       const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return tb - ta;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
+import type { QueryDocumentSnapshot, DocumentData, QuerySnapshot } from 'firebase/firestore';
 import {
     collection, query, where, orderBy, limit,
     getDocs, getDoc, doc, Timestamp,
@@ -60,8 +61,8 @@ export default function AdminDashboardPage() {
                 const thirtyMinsAgo = Timestamp.fromDate(new Date(Date.now() - 30 * 60 * 1000));
                 const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
 
-                const safeQuery = async (q: any) => {
-                    try { return await getDocs(q); } catch { return { docs: [], size: 0 } as any; }
+                const safeQuery = async (q: any): Promise<QuerySnapshot<DocumentData>> => {
+                    try { return await getDocs(q); } catch { return { docs: [], size: 0 } as unknown as QuerySnapshot<DocumentData>; }
                 };
 
                 const [sessionsSnap, membershipsSnap, manikinsSnap] = await Promise.all([
@@ -82,7 +83,7 @@ export default function AdminDashboardPage() {
                     safeQuery(collection(db, 'manikins')),
                 ]);
 
-                const sessions = sessionsSnap.docs.map(d => ({
+                const sessions = sessionsSnap.docs.map((d: QueryDocumentSnapshot<DocumentData>) => ({
                     ...d.data(),
                     startedAt: (d.data().startedAt as Timestamp)?.toDate?.() ?? new Date(0),
                 })) as (SessionModel & { startedAt: Date })[];
@@ -94,13 +95,13 @@ export default function AdminDashboardPage() {
                     ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
                     : 0;
 
-                const memberships = membershipsSnap.docs.map(d => d.data());
+                const memberships = membershipsSnap.docs.map((d: QueryDocumentSnapshot<DocumentData>) => d.data());
                 const instructorsCount = memberships.filter(m => m.role === 'INSTRUCTOR').length;
                 const studentsCount = memberships.filter(m =>
                     ['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL', 'STUDENT'].includes(m.role)
                 ).length;
 
-                const onlineDevices = manikinsSnap.docs.filter(d => {
+                const onlineDevices = manikinsSnap.docs.filter((d: QueryDocumentSnapshot<DocumentData>) => {
                     const last = (d.data().lastConnection as Timestamp)?.toDate?.();
                     return last && last > fiveMinsAgo;
                 }).length;

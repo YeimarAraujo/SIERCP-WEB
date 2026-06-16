@@ -20,7 +20,7 @@ export default function CoursesPage() {
     useEffect(() => {
         if (!user) return;
         const fetchFn = isInstructor
-            ? () => CourseService.getByInstructor(user.uid)
+            ? () => CourseService.getByInstructor(user.uid, true)
             : () => CourseService.getAll();
         fetchFn().then(setCourses).finally(() => setLoading(false));
     }, [user, isInstructor]);
@@ -37,7 +37,7 @@ export default function CoursesPage() {
                 studentId: user.uid,
                 studentName: `${user.firstName} ${user.lastName}`,
                 studentEmail: user.email,
-                identificacion: user.identificacion,
+                identificacion: user.identification,
                 enrolledAt: new Date(),
                 completedModules: 0,
                 avgScore: 0,

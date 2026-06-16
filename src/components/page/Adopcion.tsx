@@ -46,7 +46,7 @@ export default function Adopcion() {
           {/* Left: Narrative Symmetry */}
           <Col lg={5} className={`fade-in-left d-flex flex-column justify-content-center ${isVisible ? "visible" : ""}`}>
             <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "var(--clr-text-head)", lineHeight: 1.15 }}>
-              Lleva la tecnología <span style={{ color: 'var(--clr-primary)' }}>SIERCP</span> a tu institución
+              Lleva la tecnología <span style={{ color: 'var(--clr-primary)' }}>SICAP</span> a tu institución
             </h2>
             <p className="mt-4 mb-5" style={{ fontSize: "1rem", lineHeight: 1.7, color: "var(--clr-text)", opacity: 0.8 }}>
               Estamos expandiendo nuestra red de aliados estratégicos. Únete al programa 2025 y transforma la capacitación clínica.

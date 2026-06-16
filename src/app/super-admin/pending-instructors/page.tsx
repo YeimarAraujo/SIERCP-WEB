@@ -10,6 +10,7 @@ import {
     User, Mail, Building2, AlertTriangle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import VideoLoader from '@/components/video-loader';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -22,7 +23,7 @@ interface PendingInstructor {
     status: string;
     certVerification?: string;
     institutionId?: string;
-    identificacion?: string;
+    identification?: string;
     phoneNumber?: string;
 }
 
@@ -170,7 +171,7 @@ export default function PendingInstructorsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
                 {[
                     { label: 'Pendientes', value: instructors.length,                                                      color: '#f59e0b', icon: Clock },
-                    { label: 'Con cédula',  value: instructors.filter(u => !!u.identificacion).length,                    color: '#6366f1', icon: User },
+                    { label: 'Con cédula',  value: instructors.filter(u => !!u.identification).length,                    color: '#6366f1', icon: User },
                     { label: 'Con email',   value: instructors.filter(u => !!u.email).length,                             color: '#0ea5e9', icon: Mail },
                     { label: 'Con inst.',   value: instructors.filter(u => u.institutionId && u.institutionId !== u.uid).length, color: '#10b981', icon: Building2 },
                 ].map(s => (
@@ -199,10 +200,7 @@ export default function PendingInstructorsPage() {
 
             {/* Table */}
             {loading ? (
-                <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
-                    <GraduationCap size={32} style={{ marginBottom: 12, opacity: 0.3 }} />
-                    <p style={{ fontSize: 14 }}>Cargando solicitudes…</p>
-                </div>
+                <VideoLoader size={120} minHeight={220} />
             ) : filtered.length === 0 ? (
                 <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--bg-surface)', borderRadius: 16, border: '1px solid var(--border)' }}>
                     <GraduationCap size={48} style={{ marginBottom: 16, opacity: 0.3 }} />
@@ -240,7 +238,7 @@ export default function PendingInstructorsPage() {
                                         </div>
                                     </td>
                                     <td style={tdSt}><span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{u.email || '—'}</span></td>
-                                    <td style={tdSt}><span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.identificacion || '—'}</span></td>
+                                    <td style={tdSt}><span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.identification || '—'}</span></td>
                                     <td style={tdSt}>
                                         {u.institutionId && u.institutionId !== u.uid ? (
                                             <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}>{u.institutionId}</span>

@@ -7,8 +7,9 @@ import { PageHeader } from '@/components/ui/page-header';
 import { useAuth } from '@/hooks/use-auth';
 import { GuideService } from '@/services/firestore.service';
 import { CATEGORY_LABELS, type GuideModel } from '@/models/guide';
-import { Save, X, FileText, ShieldCheck, Loader2 } from 'lucide-react';
+import { Save, X, FileText, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+import VideoLoader from '@/components/video-loader';
 
 export default function EditGuidePage() {
     const { user } = useAuth();
@@ -59,7 +60,7 @@ export default function EditGuidePage() {
         }
     };
 
-    if (loading) return <div style={{ padding: 64, textAlign: 'center' }}><Loader2 className="animate-spin" /></div>;
+    if (loading) return <VideoLoader />;
     if (!formData) return <div style={{ padding: 64, textAlign: 'center' }}>Módulo no encontrado</div>;
 
     return (

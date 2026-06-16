@@ -72,7 +72,7 @@ export default function InstructorNewStudentPage() {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 role: 'USUARIO',
-                identificacion: formData.identificacion,
+                identification: formData.identificacion,
                 isActive: true,
                 institutionId: user?.institutionId || 'SIERCP-GENERAL',
                 status: 'ACTIVE',

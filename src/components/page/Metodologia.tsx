@@ -2,40 +2,55 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
+import { Brain, GraduationCap, Zap, HeartPulse, RefreshCw, ArrowRight } from 'lucide-react';
 
 const steps = [
   {
     n: "01",
-    title: "Teoría Rigurosa",
-    text: "Fundamentos basados en las Guías 2020–2025 de la AHA y ERC. Protocolos actualizados de SVB/SVCA con énfasis en reconocimiento temprano del paro cardíaco.",
-    icon: "bi-book-half",
-    accent: "var(--clr-primary)",
-    accentAlpha: "var(--clr-primary-alpha)",
-    tag: "Guías AHA 2025",
-    tagColor: "#1d4ed8",
-    detail: "Módulos teóricos con evaluación formativa"
-  },
-  {
-    n: "02",
-    title: "Inmersión SIERCP",
-    text: "Simulación de alta fidelidad con maniquí conectado. Feedback háptico y visual en tiempo real: profundidad, frecuencia y retroceso torácico medidos al milímetro.",
-    icon: "bi-cpu-fill",
+    title: "Capacitación",
+    text: "La capacitación convierte la intención en competencia. Con maniquíes inteligentes SICAP, cada maniobra se evalua y se corrige hasta dominar la técnica.",
+    icon: GraduationCap,
     accent: "#10b981",
     accentAlpha: "rgba(16,185,129,0.12)",
     tag: "Tecnología IoT",
     tagColor: "#065f46",
-    detail: "Sesiones de 30–45 min con datos en vivo"
+    detail: "Formarse con estándares AHA/ERC y práctica real."
+  },
+
+
+  {
+    n: "04",
+    title: "Acción",
+    text: "La acción de calidad es la que sostiene la vida. Y cada acción retroalimenta una nueva decisión: el ciclo continúa.",
+    icon: HeartPulse,
+    accent: "var(--aha-danger)",
+    accentAlpha: "var(--aha-danger-bg)",
+    tag: "ISO 9001 compatible",
+    tagColor: "#78350f",
+    detail: "Ejecutar maniobras de primeros auxilios de alta calidad que salvan vidas."
   },
   {
+    n: "02",
+    title: "Decisión",
+    text: "Todo comienza con una decisión. Identificar un paro cardíaco y activar la cadena de supervivencia. La formación reduce el miedo a actuar: quien sabe, decide.",
+    icon: Brain,
+    accent: "var(--clr-primary)",
+    accentAlpha: "var(--clr-primary-alpha)",
+    tag: "Guías AHA 2025",
+    tagColor: "#1800ad",
+    detail: "Reconocer la emergencia y decidir actuar en segundos."
+  },
+
+  {
     n: "03",
-    title: "Certificación Objetiva",
-    text: "Evaluación final basada en métricas reales, no en criterio subjetivo del instructor. El sistema certifica automáticamente cuando el alumno alcanza los estándares AHA.",
-    icon: "bi-patch-check-fill",
+    title: "Reacción",
+    text: "La reacción es la formación hecha reflejo. Llamar, pedir un DEA, iniciar compresiones. Una persona capacitada reacciona con seguridad cuando importa.",
+    icon: Zap,
     accent: "#f59e0b",
     accentAlpha: "rgba(245,158,11,0.12)",
     tag: "ISO 9001 compatible",
     tagColor: "#78350f",
-    detail: "Certificado con respaldo de datos objetivos"
+    detail: "Activar la respuesta correcta sin dudar."
   }
 ];
 
@@ -109,8 +124,8 @@ export default function Metodologia() {
               lineHeight: 1.1,
               marginBottom: 0,
             }}>
-              El Ciclo de{" "}
-              <span style={{ color: "var(--clr-primary)" }}>Aprendizaje Avanzado</span>
+              Cuatro nodos que{" "}
+              <span style={{ color: "var(--clr-primary)" }}>salvan vidas</span>
             </h2>
           </Col>
           <Col lg={6} className={`fade-in-right ${isVisible ? "visible" : ""}`} style={{ transitionDelay: "0.15s" }}>
@@ -122,14 +137,13 @@ export default function Metodologia() {
               paddingLeft: "24px",
               lineHeight: 1.75,
             }}>
-              No solo enseñamos; forjamos reflejos. Nuestro sistema de 3 fases garantiza que el
-              socorrista actúe con <strong style={{ color: "var(--clr-text-head)", fontWeight: 800 }}>precisión clínica bajo presión extrema</strong>,
-              respaldado por datos objetivos, no por intuición.
+              La metodología SICAP se basa en un ciclo continuo: <strong style={{ color: "var(--clr-text-head)", fontWeight: 800 }}>Decisión, Capacitación, Reacción y Acción.</strong>,
+              Cada nodo alimenta al siguiente, formando una cadena que se fortalece con cada repetición.
             </p>
           </Col>
         </Row>
 
-        {/* ── AHA Standards Bar ── */}
+        {/* ── AHA Standards Bar ──
         <div
           className={`fade-up ${isVisible ? "visible" : ""}`}
           style={{
@@ -179,15 +193,14 @@ export default function Metodologia() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* ── 3 Steps ── */}
-        <Row className="g-4 mb-5 position-relative">
-
-
-          {steps.map((step, i) => (
-            <Col key={i} md={4}>
+        <div className="max-w-6xl mx-auto px-5 py-16">
+          <div className="grid lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
+            {steps.map((step, i) => (
               <div
+                key={step.n}
                 className={`fade-up ${isVisible ? "visible" : ""}`}
                 style={{
                   transitionDelay: `${0.2 + i * 0.15}s`,
@@ -225,9 +238,11 @@ export default function Metodologia() {
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: step.accent,
                     transition: "transform 0.3s ease",
-                    transform: activeStep === i ? "scale(1.08)" : "scale(1)",
+                    transform: activeStep === i ? "scale(1.2)" : "scale(1)",
                   }}>
-                    <i className={`bi ${step.icon}`} style={{ fontSize: "1.5rem" }} />
+                    <div>
+                      <step.icon size={34} />
+                    </div>
                   </div>
                   <span style={{
                     fontSize: "3rem",
@@ -242,7 +257,7 @@ export default function Metodologia() {
                 </div>
 
                 {/* Tag */}
-                <div style={{ marginBottom: "12px" }}>
+                {/* <div style={{ marginBottom: "12px" }}>
                   <span style={{
                     display: "inline-block",
                     fontSize: "0.6rem",
@@ -256,7 +271,7 @@ export default function Metodologia() {
                   }}>
                     {step.tag}
                   </span>
-                </div>
+                </div> */}
 
                 <h4 style={{
                   fontWeight: 800,
@@ -291,9 +306,39 @@ export default function Metodologia() {
                   <span style={{ fontSize: "0.75rem", color: "var(--clr-muted)", fontWeight: 600 }}>{step.detail}</span>
                 </div>
               </div>
-            </Col>
-          ))}
-        </Row>
+            ))}
+
+            {/* Centro del ciclo */}
+            <div className="hidden lg:flex lg:row-span-2 lg:col-start-2 lg:row-start-1 items-center justify-center" >
+              <div style={{
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                background: "var(--clr-primary)",
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                textAlign: "center",
+              }}>
+                <div className="text-center">
+                  <RefreshCw size={26} className="mx-auto" />
+                  <span className="mt-1 block text-[11px] font-bold uppercase tracking-wide">Ciclo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-10">
+            <p className="mt-10 text-center text-slate-500 max-w-2xl mx-auto">
+              No es una línea recta, es un <strong className="text-brand-700">ciclo</strong>: cada acción
+              genera aprendizaje que mejora la próxima decisión. Así formamos comunidades preparadas para responder.
+            </p>
+          </div>
+        </div>
+
+
 
         {/* ── Bottom CTA Bridge → ProyectoIoT ── */}
         <div
@@ -346,7 +391,7 @@ export default function Metodologia() {
               marginBottom: "8px",
               lineHeight: 1.2,
             }}>
-              Conoce nuestra app SIERCP
+              Conoce nuestra app SICAP
             </h3>
             <p style={{
               color: "rgba(255,255,255,0.85)",

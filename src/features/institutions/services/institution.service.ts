@@ -26,7 +26,7 @@ export const InstitutionService = {
             resource: 'institution',
             resourceId: code,
             institutionId: code,
-            metadata: { name: data.name, plan: data.plan, status: data.status },
+            metadata: { name: data.name, plan: data.planType, status: data.status },
         });
     },
 

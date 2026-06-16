@@ -14,13 +14,14 @@ import { getAuth } from 'firebase/auth';
 import {
     Users, BookOpen, BarChart2, Clock, Plus, Trash2, FileText,
     ChevronRight, User, Mail, Settings, BarChart,
-    GraduationCap, TrendingUp, Target, Award, Download, Filter
+    GraduationCap, TrendingUp, Target, Award, Download, Filter, CalendarCheck
 } from 'lucide-react';
 import { CourseQr } from '@/components/ui/course-qr';
 import toast from 'react-hot-toast';
 import { downloadSessionPdfReport, formatReportFilename } from '@/shared/lib/export-utils';
+import { AttendancePanel } from '@/features/attendance/components/attendance-panel';
 
-type TabType = 'alumnos' | 'contenido' | 'sesiones' | 'config';
+type TabType = 'alumnos' | 'contenido' | 'asistencia' | 'sesiones' | 'config';
 
 interface Props {
     /** ID del curso a gestionar */
@@ -71,7 +72,7 @@ export function CourseManagementView({ courseId: id, basePath, monitorHref }: Pr
                 try {
                     const gds = await GuideService.getByCourse(id);
                     setGuides(gds);
-                } catch (_) {}
+                } catch (_) { }
             } catch (error) {
                 console.error('Error fetching course detail:', error);
             } finally {
@@ -104,13 +105,18 @@ export function CourseManagementView({ courseId: id, basePath, monitorHref }: Pr
 
     if (!course) return <div style={{ padding: 40, textAlign: 'center', color: '#EF4444' }}>{errorMsg || 'Curso no encontrado'}</div>;
 
+    // `score` es el campo canónico (Flutter). `qualityScore` es alias legado.
+    // Leer solo qualityScore mostraba 0% aunque la sesión sí tuviera puntaje.
+    const qscore = (s: SessionModel): number => s.metrics?.score ?? s.metrics?.qualityScore ?? 0;
+
     const avgScore = sessions.length > 0
-        ? Math.round(sessions.reduce((acc, s) => acc + (s.metrics?.qualityScore ?? 0), 0) / sessions.length)
+        ? Math.round(sessions.reduce((acc, s) => acc + qscore(s), 0) / sessions.length)
         : 0;
 
     const tabs: { id: TabType, label: string, icon: any }[] = [
         { id: 'alumnos', label: 'Estudiantes', icon: Users },
         { id: 'contenido', label: 'Contenido', icon: BookOpen },
+        { id: 'asistencia', label: 'Asistencia', icon: CalendarCheck },
         { id: 'sesiones', label: 'Sesiones', icon: BarChart2 },
         { id: 'config', label: 'Configuración', icon: Settings },
     ];
@@ -144,7 +150,7 @@ export function CourseManagementView({ courseId: id, basePath, monitorHref }: Pr
                                 rows: sessions.map(s => [
                                     s.studentName || '-',
                                     s.scenarioTitle || 'Practica libre',
-                                    `${s.metrics?.qualityScore || 0}%`,
+                                    `${qscore(s)}%`,
                                     `${s.metrics?.averageDepthMm?.toFixed(1) || 0} mm`,
                                     `${s.metrics?.averageRatePerMin?.toFixed(0) || 0} cpm`,
                                     s.startedAt.toLocaleDateString('es-CO'),
@@ -328,6 +334,17 @@ export function CourseManagementView({ courseId: id, basePath, monitorHref }: Pr
                         </div>
                     )}
 
+                    {activeTab === 'asistencia' && (
+                        <AttendancePanel
+                            courseId={id}
+                            roster={enrollments.map(e => ({
+                                studentId: e.studentId,
+                                studentName: e.studentName,
+                                attendanceRate: (e as { attendanceRate?: number }).attendanceRate,
+                            }))}
+                        />
+                    )}
+
                     {activeTab === 'sesiones' && (
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -371,20 +388,20 @@ export function CourseManagementView({ courseId: id, basePath, monitorHref }: Pr
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
                                                 <div style={{ textAlign: 'center' }}>
                                                     <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 800, letterSpacing: '0.05em', marginBottom: 4 }}>DESEMPEÑO</div>
-                                                    <div style={{ fontSize: 20, fontWeight: 900, color: (s.metrics?.qualityScore ?? 0) >= 85 ? '#10B981' : '#F59E0B' }}>{s.metrics?.qualityScore ?? 0}%</div>
+                                                    <div style={{ fontSize: 20, fontWeight: 900, color: (qscore(s)) >= 85 ? '#10B981' : '#F59E0B' }}>{Math.round(qscore(s))}%</div>
                                                 </div>
                                                 <div style={{ width: 100, height: 40, background: 'var(--muted)', borderRadius: 12, overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-end', gap: 2, padding: '4px 8px' }}>
                                                     {[40, 70, 85, 60, 95, 88].map((h, j) => (
-                                                        <div key={j} style={{ flex: 1, height: `${h}%`, background: (s.metrics?.qualityScore ?? 0) >= 85 ? '#10B981' : '#F59E0B', opacity: 0.3 + (j * 0.1), borderRadius: 2 }} />
+                                                        <div key={j} style={{ flex: 1, height: `${h}%`, background: (qscore(s)) >= 85 ? '#10B981' : '#F59E0B', opacity: 0.3 + (j * 0.1), borderRadius: 2 }} />
                                                     ))}
                                                 </div>
                                                 <div style={{
                                                     fontSize: 10, fontWeight: 900, padding: '6px 12px', borderRadius: 10,
-                                                    background: (s.metrics?.qualityScore ?? 0) >= 85 ? '#DCFCE7' : '#FEE2E2',
-                                                    color: (s.metrics?.qualityScore ?? 0) >= 85 ? '#166534' : '#991B1B',
+                                                    background: (qscore(s)) >= 85 ? '#DCFCE7' : '#FEE2E2',
+                                                    color: (qscore(s)) >= 85 ? '#166534' : '#991B1B',
                                                     letterSpacing: '0.05em'
                                                 }}>
-                                                    {(s.metrics?.qualityScore ?? 0) >= 85 ? 'CERTIFICADO' : 'FALLIDO'}
+                                                    {(qscore(s)) >= 85 ? 'CERTIFICADO' : 'FALLIDO'}
                                                 </div>
                                             </div>
                                         </div>

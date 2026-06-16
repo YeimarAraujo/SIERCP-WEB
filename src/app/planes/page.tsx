@@ -152,9 +152,11 @@ function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: bo
         color: plan.highlight ? "#fff" : "var(--clr-text)",
         border: plan.highlight ? "2px solid #1800ad" : "1px solid var(--clr-border)",
         borderRadius: "28px", padding: "36px 30px", position: "relative", overflow: "hidden",
-        transform: plan.highlight ? "scale(1.03)" : "scale(1)",
+        transform: plan.highlight ? "scale(1.02)" : "scale(1)",
         boxShadow: plan.highlight ? "0 30px 70px rgba(24,0,173,0.22)" : "var(--shadow-sm)",
         height: "100%",
+        width: "100%",
+        zIndex: plan.highlight ? 2 : 1,
       }}>
         {plan.badge && (
           <div style={{
@@ -191,7 +193,7 @@ function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: bo
         ) : (
           <>
             <div style={{ marginBottom: "4px" }}>
-              <span style={{ fontSize: "2.5rem", fontWeight: 900, lineHeight: 1 }}>
+              <span style={{ fontSize: "1.8rem", fontWeight: 900, lineHeight: 1 }}>
                 ${plan.monthlyCOP.toLocaleString("es-CO")}
               </span>
               <span style={{ fontSize: "0.85rem", opacity: 0.6 }}>
@@ -353,7 +355,7 @@ export default function PlanesPage() {
                 </Col>
               ))
               : tabPlans[tab].map((plan, i) => (
-                <Col key={plan.name} md={6} lg={tab === "corporativo" ? 3 : 4}>
+                <Col key={plan.name} md={6} lg={4}>
                   <PlanCard plan={plan} i={i} isVisible={isVisible} />
                 </Col>
               ))

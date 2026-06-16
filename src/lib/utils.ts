@@ -89,6 +89,42 @@ export function formatRelativeTime(date: string | Date): string {
   return `hace ${months} mes${months !== 1 ? 'es' : ''}`;
 }
 
+/**
+ * Calcula la "próxima entrega" de un curso a partir de las fechas límite de sus
+ * módulos (`deadlineDate`, formato 'YYYY-MM-DD'). Devuelve la fecha futura más
+ * cercana y el título de ese módulo; si no hay fechas futuras, usa la más
+ * reciente pasada; si no hay ninguna fecha, devuelve null.
+ *
+ * Se usa al crear/editar cursos para materializar `nextDeadline` /
+ * `nextDeadlineTitle` en el documento del curso (lo que ven las cards).
+ */
+export function computeNextDeadline(
+  modules: Array<{ title?: string; deadlineDate?: string | null }>,
+): { nextDeadline: Date | null; nextDeadlineTitle: string | null } {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dated = (Array.isArray(modules) ? modules : [])
+    .filter((m) => m?.deadlineDate && m.title?.trim())
+    .map((m) => ({
+      title: m.title!.trim(),
+      // 'T00:00:00' fuerza zona local y evita el corrimiento de un día por UTC.
+      date: new Date(`${m.deadlineDate}T00:00:00`),
+    }))
+    .filter((m) => !isNaN(m.date.getTime()));
+
+  if (dated.length === 0) return { nextDeadline: null, nextDeadlineTitle: null };
+
+  const upcoming = dated
+    .filter((m) => m.date >= today)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  const chosen = upcoming[0]
+    ?? [...dated].sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+
+  return { nextDeadline: chosen.date, nextDeadlineTitle: chosen.title };
+}
+
 export function getScoreColor(score: number): string {
   if (score >= EXCELLENT_SCORE) return COLOR_EXCELLENT;
   if (score >= PASS_SCORE) return COLOR_PASS;

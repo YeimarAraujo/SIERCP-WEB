@@ -131,7 +131,7 @@ export default function SuperAdminLogsPage() {
     }
 
     return (
-        <div style={{ display: 'grid', gap: 22 }}>
+        <div style={{ display: 'grid', gap: 12 }}>
             <Header />
             <PageHero
                 title="Auditoría y Observabilidad"

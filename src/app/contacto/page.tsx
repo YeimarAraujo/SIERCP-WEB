@@ -51,9 +51,11 @@ export default function ContactoPage() {
             }}>
                 <div style={{
                     position: "absolute", inset: 0,
-                    backgroundImage: "radial-gradient(circle at 20% 50%, rgba(109,74,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%)",
+                    backgroundImage: "radial-gradient(circle at 80% 18%, rgba(109,74,255,0.18) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255,255,255,0.05) 0%, transparent 50%)",
                     pointerEvents: "none",
                 }} />
+                {/* Grid lines */}
+                <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
                 <Container style={{ position: "relative", zIndex: 1 }}>
                     <Row className="align-items-center g-5">
                         <Col lg={6}>
@@ -77,28 +79,41 @@ export default function ContactoPage() {
                             </div>
                         </Col>
                         <Col lg={6}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-                                {contactItems.map((item, i) => (
-                                    <a key={i} href={item.href || "#"} style={{ textDecoration: "none" }}>
-                                        <div style={{
-                                            background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
-                                            borderRadius: "20px", padding: "22px", transition: "all 0.25s ease",
-                                            cursor: item.href ? "pointer" : "default",
-                                        }}
-                                            onMouseEnter={e => item.href && (e.currentTarget.style.background = "rgba(255,255,255,0.13)")}
-                                            onMouseLeave={e => item.href && (e.currentTarget.style.background = "rgba(255,255,255,0.07)")}
-                                        >
-                                            <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" }}>
-                                                <i className={`bi ${item.icon}`} style={{ color: "#fff", fontSize: "1.1rem" }} />
-                                            </div>
-                                            <div style={{ fontSize: "0.62rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", color: "rgba(255,255,255,0.45)", marginBottom: "4px" }}>{item.title}</div>
-                                            <div style={{ fontSize: "0.85rem", fontWeight: 800, color: "#fff", marginBottom: "3px" }}>{item.value}</div>
-                                            <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{item.desc}</div>
-                                        </div>
-                                    </a>
-                                ))}
+                            <div style={{ position: "relative", borderRadius: "24px", overflow: "hidden", boxShadow: "0 20px 50px rgba(0,0,0,0.35)", lineHeight: 0 }}>
+                                <img
+                                    src="/assets/images/SICAP/webp/contacto.webp"
+                                    alt="Equipo de soporte de Jomar Segurid listo para atenderte"
+                                    className="img-fluid"
+                                    style={{ display: "block", width: "100%", height: "auto" }}
+                                />
                             </div>
                         </Col>
+                    </Row>
+
+                    {/* Contactos rápidos (franja debajo del hero) */}
+                    <Row className="g-3" style={{ marginTop: "44px" }}>
+                        {contactItems.slice(0, 4).map((item, i) => (
+                            <Col key={i} xs={6} lg={3}>
+                                <a href={item.href || "#"} style={{ textDecoration: "none" }}>
+                                    <div style={{
+                                        background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+                                        borderRadius: "20px", padding: "22px", height: "100%",
+                                        backdropFilter: "blur(12px)", transition: "all 0.25s ease",
+                                        cursor: item.href ? "pointer" : "default",
+                                    }}
+                                        onMouseEnter={e => item.href && (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
+                                        onMouseLeave={e => item.href && (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                                    >
+                                        <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" }}>
+                                            <i className={`bi ${item.icon}`} style={{ color: "#fff", fontSize: "1.1rem" }} />
+                                        </div>
+                                        <div style={{ fontSize: "0.62rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", color: "rgba(255,255,255,0.45)", marginBottom: "4px" }}>{item.title}</div>
+                                        <div style={{ fontSize: "0.85rem", fontWeight: 800, color: "#fff", marginBottom: "3px" }}>{item.value}</div>
+                                        <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{item.desc}</div>
+                                    </div>
+                                </a>
+                            </Col>
+                        ))}
                     </Row>
                 </Container>
             </section>

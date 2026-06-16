@@ -24,6 +24,12 @@ export interface CourseModel {
     inviteCode: string;
     certification: string;
     minScore: number;
+    /** Asistencia mínima exigida (0–100) para el gating de certificación. 0 = no exigida. */
+    minAttendance?: number;
+    /** Fecha final del curso. Dispara la generación automática de certificados (Fase 3). */
+    endDate?: Date;
+    /** Marca de proceso del cron de generación automática (idempotencia). */
+    certsGeneratedAt?: Date;
     requiredScore?: number;
     totalModules?: number;
     requirements?: string[];

@@ -28,7 +28,7 @@ export default function InstructorCoursesPage() {
         const fetchCourses = async () => {
             try {
                 setLoading(true);
-                const data = await CourseService.getByInstructor(user.uid);
+                const data = await CourseService.getByInstructor(user.uid, true);
                 setCourses(data);
 
                 // Cancelar suscripciones anteriores

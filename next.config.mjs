@@ -45,6 +45,7 @@ const CSP = [
      https://securetoken.googleapis.com
      https://us-central1-siercp.cloudfunctions.net
      https://*.cloudfunctions.net
+     https://*.workers.dev
      https://www.recaptcha.net
      https://recaptcha.google.com
      https://sandbox.wompi.co

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { computeNextDeadline } from '@/lib/utils';
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
 
@@ -204,11 +205,16 @@ export async function PUT(
           });
         });
         await createBatch.commit();
-        await adminDb.collection('courses').doc(courseId).update({
-          moduleCount: body.modules.length,
-          totalModules: body.modules.length,
-        });
       }
+
+      // Próxima entrega recalculada desde las fechas límite de los módulos.
+      const { nextDeadline, nextDeadlineTitle } = computeNextDeadline(body.modules);
+      await adminDb.collection('courses').doc(courseId).update({
+        moduleCount: body.modules.length,
+        totalModules: body.modules.length,
+        nextDeadline,
+        nextDeadlineTitle,
+      });
     }
 
     return NextResponse.json({ success: true });

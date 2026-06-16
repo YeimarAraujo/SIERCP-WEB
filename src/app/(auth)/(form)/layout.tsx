@@ -35,7 +35,7 @@ export default function AuthFormLayout({ children }: { children: ReactNode }) {
                         height: '100%',
                         position: 'relative',
                         overflow: 'hidden',
-                        backgroundImage: "url('/images/login.png')",
+                        backgroundImage: "url('assets/images/login.png')",
                         backgroundSize: 'cover',
                         backgroundPosition: 'center center',
                         backgroundRepeat: 'no-repeat',
@@ -53,34 +53,32 @@ export default function AuthFormLayout({ children }: { children: ReactNode }) {
                             transition: 'background 0.5s ease',
                         }}
                     />
-                    {/* Content over overlay */}
-                    <div
-                        style={{
-                            position: 'relative',
-                            zIndex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: '100%',
-                            padding: '40px 32px',
-                            textAlign: 'center',
-                        }}
-                    >
-                        <Link href="/">
+                    <Link href="/" style={{ textDecoration: 'none' }}>
+                        {/* Content over overlay */}
+                        <div
+                            style={{
+                                position: 'relative',
+                                zIndex: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '100%',
+                                padding: '40px 32px',
+                                textAlign: 'center',
+                            }}
+                        >
                             <img
-                                src="/assets/JOMAR/LogoTextov2.png"
-                                alt="SIERCP"
+                                src="assets/images/SICAP/webp/logo_sicap_white.webp"
+                                alt="SICAP"
                                 style={{ width: '180px', height: 'auto', objectFit: 'contain', marginBottom: '24px', filter: 'brightness(0) invert(1)' }}
                             />
-                        </Link>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '8px' }}>
-                            SIERCP Portal
-                        </h2>
-                        <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.1rem', maxWidth: '300px' }}>
-                            Entrena mejor, salva más vidas con nuestra plataforma interactiva.
-                        </p>
-                    </div>
+
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', maxWidth: '500px' }}>
+                                Entrena mejor, salva más vidas con nuestra plataforma interactiva.
+                            </h2>
+                        </div>
+                    </Link>
                 </div>
 
                 {/* Right Column - Form */}

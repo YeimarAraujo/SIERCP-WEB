@@ -28,7 +28,9 @@ export default function NosotrosPage() {
                 position: "relative",
                 overflow: "hidden",
             }}>
-                <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 70% 30%, rgba(255,255,255,0.06) 0%, transparent 50%)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 80% 18%, rgba(109,74,255,0.18) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255,255,255,0.05) 0%, transparent 50%)", pointerEvents: "none" }} />
+                {/* Grid lines */}
+                <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
                 <Container style={{ position: "relative", zIndex: 1 }}>
                     <Row className="align-items-center g-5">
                         <Col lg={6}>
@@ -49,41 +51,15 @@ export default function NosotrosPage() {
                             </div>
                         </Col>
                         <Col lg={6}>
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" }}>
-                                {stats.map((n, i) => (
-                                    <div key={i} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "20px", padding: "24px 16px", textAlign: "center" }}>
-                                        <i className={`bi ${n.icon}`} style={{ color: "#a5f3fc", fontSize: "1.4rem", display: "block", marginBottom: "10px" }} />
-                                        <div style={{ fontSize: "2.2rem", fontWeight: 900, color: "#fff", lineHeight: 1 }}>
-                                            {isVisible ? n.big : "0"}{n.suffix}
-                                        </div>
-                                        <p style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 700, margin: "8px 0 0" }}>{n.label}</p>
-                                    </div>
-                                ))}
+                            <div style={{ position: "relative", borderRadius: "24px", overflow: "hidden", boxShadow: "0 20px 50px rgba(0,0,0,0.35)", lineHeight: 0 }}>
+                                <img
+                                    src="/assets/images/SICAP/webp/nosotros.webp"
+                                    alt="Equipo de instructores de Jomar Segurid en formación de emergencias"
+                                    className="img-fluid"
+                                    style={{ display: "block", width: "100%", height: "auto" }}
+                                />
                             </div>
                         </Col>
-                    </Row>
-                </Container>
-            </section>
-
-            {/* ── MISIÓN / VISIÓN ── */}
-            <section className="section-py" style={{ background: "var(--clr-bg)" }}>
-                <Container>
-                    <Row className="g-4 justify-content-center">
-                        {[
-                            { icon: "bi-compass-fill", label: "Misión", color: "#1800ad", text: "Formar personas competentes en primeros auxilios, emergencias médicas y reanimación cardiopulmonar, utilizando metodologías basadas en evidencia científica y tecnología de punta, con el fin de aumentar la tasa de supervivencia ante situaciones de emergencia en Colombia y Latinoamérica." },
-                            { icon: "bi-eye-fill", label: "Visión", color: "#6d4aff", text: "Ser el centro de formación en emergencias más innovador y reconocido de Latinoamérica al 2030, integrando tecnología IoT, inteligencia artificial y estándares internacionales AHA para transformar la cultura de respuesta ante emergencias en la región." },
-                            { icon: "bi-gem", label: "Propuesta de Valor", color: "#10b981", text: "La única academia en Colombia que certifica en estándares AHA y otorga certificados digitales verificables en blockchain, con seguimiento IoT en tiempo real de la calidad de cada maniobra de RCP realizada por sus estudiantes." },
-                        ].map((item, i) => (
-                            <Col key={i} md={4}>
-                                <div style={{ background: "var(--clr-bg-surface)", border: "1px solid var(--clr-border)", borderRadius: "24px", padding: "36px 28px", height: "100%" }}>
-                                    <div style={{ width: "52px", height: "52px", background: `${item.color}15`, borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px" }}>
-                                        <i className={`bi ${item.icon}`} style={{ color: item.color, fontSize: "1.4rem" }} />
-                                    </div>
-                                    <h4 style={{ fontWeight: 900, color: "var(--clr-text-head)", marginBottom: "14px", fontSize: "1.2rem" }}>{item.label}</h4>
-                                    <p style={{ color: "var(--clr-text)", lineHeight: 1.75, fontSize: "0.95rem", margin: 0 }}>{item.text}</p>
-                                </div>
-                            </Col>
-                        ))}
                     </Row>
                 </Container>
             </section>
@@ -122,29 +98,45 @@ export default function NosotrosPage() {
                 </Container>
             </section>
 
-            {/* ── VALORES ── */}
+            {/* ── VALORES (layout editorial asimétrico) ── */}
             <section className="section-py" style={{ background: "var(--clr-bg)" }}>
                 <Container>
-                    <div className="text-center mb-5">
-                        <span className="badge-pill mb-3">Lo que nos mueve</span>
-                        <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "var(--clr-text-head)" }}>
-                            Nuestros <span style={{ color: "var(--clr-primary)" }}>Valores</span>
-                        </h2>
-                    </div>
-                    <Row className="g-4">
-                        {values.map((v, i) => (
-                            <Col key={i} md={6} lg={4}>
-                                <div style={{ background: "var(--clr-bg-surface)", border: "1px solid var(--clr-border)", borderRadius: "24px", padding: "32px", height: "100%", transition: "all 0.3s ease" }}
-                                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.08)"; }}
-                                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-                                    <div style={{ width: "52px", height: "52px", background: `${v.color}15`, borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px" }}>
-                                        <i className={`bi ${v.icon}`} style={{ color: v.color, fontSize: "1.4rem" }} />
-                                    </div>
-                                    <h5 style={{ fontWeight: 900, color: "var(--clr-text-head)", marginBottom: "12px" }}>{v.title}</h5>
-                                    <p style={{ color: "var(--clr-muted)", fontSize: "0.92rem", lineHeight: 1.75, margin: 0 }}>{v.desc}</p>
+                    <Row className="g-5">
+                        {/* Intro a la izquierda (sticky) */}
+                        <Col lg={4}>
+                            <div style={{ position: "sticky", top: "110px" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "22px" }}>
+                                    <span style={{ width: "36px", height: "2px", background: "var(--clr-primary)" }} />
+                                    <span style={{ fontSize: "0.72rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "2px", color: "var(--clr-primary)" }}>Lo que nos mueve</span>
                                 </div>
-                            </Col>
-                        ))}
+                                <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, color: "var(--clr-text-head)", lineHeight: 1.1, marginBottom: "20px" }}>
+                                    Los principios que<br />no negociamos
+                                </h2>
+                                <p style={{ color: "var(--clr-muted)", fontSize: "1rem", lineHeight: 1.75, margin: 0 }}>
+                                    No son frases de marketing: son las reglas que aplicamos en cada curso, protocolo y línea de código.
+                                </p>
+                            </div>
+                        </Col>
+                        {/* Lista editorial numerada */}
+                        <Col lg={8}>
+                            {values.map((v, i) => (
+                                <div key={i}
+                                    style={{ display: "flex", gap: "28px", padding: "30px 8px", borderTop: i === 0 ? "none" : "1px solid var(--clr-border)", transition: "all 0.25s ease", borderRadius: "16px" }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = "var(--clr-bg-light)"; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
+                                    <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "var(--clr-primary)", opacity: 0.3, minWidth: "44px", lineHeight: 1.4 }}>
+                                        {String(i + 1).padStart(2, "0")}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
+                                            <i className={`bi ${v.icon}`} style={{ color: "var(--clr-primary)", fontSize: "1.2rem" }} />
+                                            <h5 style={{ fontWeight: 800, color: "var(--clr-text-head)", margin: 0, fontSize: "1.2rem" }}>{v.title}</h5>
+                                        </div>
+                                        <p style={{ color: "var(--clr-muted)", fontSize: "0.95rem", lineHeight: 1.75, margin: 0, maxWidth: "560px" }}>{v.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </Col>
                     </Row>
                 </Container>
             </section>

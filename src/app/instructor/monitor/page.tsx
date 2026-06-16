@@ -78,7 +78,7 @@ function DepthChart({ history }: { history: TelemetryPoint[] }) {
           <ReferenceLine y={AHA_MAX_DEPTH} stroke="#10B981" strokeDasharray="3 3" strokeOpacity={0.6} />
           <Tooltip
             contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 11 }}
-            formatter={(v: number) => [`${v.toFixed(1)} mm`, 'Profundidad']}
+            formatter={(value) => [`${Number(value).toFixed(1)} mm`, 'Profundidad']}
             labelFormatter={() => ''}
           />
           <Line
@@ -162,7 +162,7 @@ function LiveSessionCard({ session }: { session: LiveSessionEntry }) {
       }
     });
     return unsub;
-  }, [session.id]);
+  }, [session.sessionId]);
 
   const hasLive = (telemetry?.compressionCount ?? 0) > 0 || (telemetry?.depthMm ?? 0) > 0;
   const sColor  = scoreColor(telemetry?.sessionScore ?? 0);

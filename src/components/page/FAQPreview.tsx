@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 
 const faqs = [
-  { q: "¿Qué es SIERCP?", a: "SIERCP es una plataforma integral de hardware (IoT) y software para el entrenamiento y certificación en reanimación cardiopulmonar y emergencias." },
-  { q: "¿Necesito comprar maniquíes nuevos?", a: "Dependiendo del plan, puedes conectar sensores SIERCP a maniquíes estándar existentes o adquirir nuestros modelos inteligentes ya integrados." },
+  { q: "¿Qué es SICAP?", a: "SICAP es una plataforma integral de hardware (IoT) y software para el entrenamiento y certificación en reanimación cardiopulmonar y emergencias." },
+  { q: "¿Necesito comprar maniquíes nuevos?", a: "Dependiendo del plan, puedes conectar sensores SICAP a maniquíes estándar existentes o adquirir nuestros modelos inteligentes ya integrados." },
   { q: "¿Los certificados son avalados internacionalmente?", a: "La plataforma genera certificados que demuestran el cumplimiento de las métricas AHA 2020/2025 de alta calidad." },
   { q: "¿Puedo usarlo sin conexión a internet?", a: "Sí, nuestra app móvil cuenta con tecnología de persistencia de datos y Bluetooth. Las sesiones se sincronizan automáticamente en la nube cuando recuperes la conexión." },
 ];

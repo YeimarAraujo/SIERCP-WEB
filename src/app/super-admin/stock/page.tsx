@@ -13,6 +13,7 @@ import {
 import toast from 'react-hot-toast';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
+import VideoLoader from '@/components/video-loader';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -491,7 +492,7 @@ export default function StockPage() {
                 </div>
 
                 {loading ? (
-                    <div style={{ padding: 48, textAlign: 'center', color: 'var(--text-secondary,#6b7280)', fontSize: 14 }}>Cargando stock…</div>
+                    <VideoLoader size={120} minHeight={220} />
                 ) : filtered.length === 0 ? (
                     <div style={{ padding: 48, textAlign: 'center' }}>
                         <Package size={32} style={{ marginBottom: 12, opacity: 0.3, color: 'var(--text-secondary)' }} />

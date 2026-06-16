@@ -61,6 +61,14 @@ export const rateLimiter = {
     const windowKey = Math.floor(now / windowMs);
     const windowEnd = (windowKey + 1) * windowMs;
 
+    // En desarrollo NO tocamos Firestore: una sola instancia local no necesita
+    // un contador distribuido, y la transacción (1 lectura + 1 escritura) en
+    // cada request quema la cuota gratuita (Spark). Eso era lo que agotaba la
+    // cuota → login lento (RESOURCE_EXHAUSTED) y KPIs del super-admin en 0.
+    if (process.env.NODE_ENV !== 'production') {
+        return _memoryFallback(key, max, windowMs, now, windowEnd);
+    }
+
     // Sanitize the key so it is safe as a Firestore document ID
     const safeKey = key.replace(/[^a-zA-Z0-9_\-:.]/g, '_');
     const docId = `${safeKey}:${windowKey}`;

@@ -4,12 +4,13 @@ import { Suspense, useState, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { sstConLicenciaPlans } from '@/data/planes';
 import { ChevronRight, ShieldCheck, Lock } from 'lucide-react';
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/shared/lib/firebase';
+import { collection, query, where, getDocs, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, auth } from '@/shared/lib/firebase';
 import toast from 'react-hot-toast';
 import { fmt, validateEmail, validatePhone, validateCedula, IVA_RATE } from '../_lib';
 import {
-    Field, Input, SearchableSelect,
+    Field, Input, SearchableSelect, DocumentTypeSelect,
     AccountAccessSection, validateAccount, type AccountData, type AccountErrors, emptyAccountData,
     CheckoutLayout, CheckoutSuspenseFallback, PaymentForm, PaymentSummaryBox,
     OrderSummaryShell, SummaryProductCard, SummaryFeatureList, SummaryPriceBlock, SummaryBadge,
@@ -83,9 +84,9 @@ function Step1({ selected, onSelect }: { selected: string; onSelect: (s: string)
 
 // ── Step 2: Personal data ─────────────────────────────────────────────────────
 
-interface PersonalForm { nombreCompleto: string; cedula: string; email: string; telefono: string; profesion: string; departamento: string; ciudad: string; }
+interface PersonalForm { nombreCompleto: string; tipoDocumento: string; cedula: string; email: string; telefono: string; profesion: string; departamento: string; ciudad: string; }
 type PersonalErrors = Partial<Record<keyof PersonalForm, string>>;
-const emptyPersonal: PersonalForm = { nombreCompleto: '', cedula: '', email: '', telefono: '', profesion: '', departamento: '', ciudad: '' };
+const emptyPersonal: PersonalForm = { nombreCompleto: '', tipoDocumento: 'CC', cedula: '', email: '', telefono: '', profesion: '', departamento: '', ciudad: '' };
 
 function validatePersonalForm(form: PersonalForm): PersonalErrors {
     const errs: PersonalErrors = {};
@@ -123,16 +124,21 @@ function Step2({ form, setForm, errors, accountData, setAccountData, accountErro
                         <Input value={form.nombreCompleto} onChange={s('nombreCompleto')} placeholder="María García López" />
                     </Field>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                        <Field label="Cédula de ciudadanía" required error={errors.cedula}>
+                        <Field label="Tipo de documento" required>
+                            <DocumentTypeSelect value={form.tipoDocumento} onChange={v => setForm({ ...form, tipoDocumento: v })} />
+                        </Field>
+                        <Field label="Número de documento" required error={errors.cedula}>
                             <Input value={form.cedula} onChange={s('cedula')} placeholder="1000000000" />
                         </Field>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                         <Field label="Teléfono" required error={errors.telefono}>
                             <Input value={form.telefono} onChange={s('telefono')} placeholder="3001234567" />
                         </Field>
+                        <Field label="Correo electrónico" required error={errors.email}>
+                            <Input type="email" value={form.email} onChange={s('email')} placeholder="nombre@email.com" />
+                        </Field>
                     </div>
-                    <Field label="Correo electrónico" required error={errors.email}>
-                        <Input type="email" value={form.email} onChange={s('email')} placeholder="nombre@email.com" />
-                    </Field>
                     <Field label="Profesión u ocupación" required error={errors.profesion}>
                         <Input value={form.profesion} onChange={s('profesion')} placeholder="Paramédico, Médico, Enfermero…" />
                     </Field>
@@ -250,23 +256,69 @@ function Content() {
     const handlePay = async (method: PayMethod, card: CardData, pse: PseData) => {
         setProcessing(true);
         try {
+            const isExisting = accountData.mode === 'existing';
+
+            // 1. Autenticar al comprador — la regla de `orders` exige userId == uid.
+            let uid: string;
+            let email: string;
+            if (isExisting) {
+                if (!auth.currentUser) {
+                    toast.error('Tu sesión expiró. Vuelve a verificar tu cuenta.');
+                    setStep(1);
+                    return;
+                }
+                uid = auth.currentUser.uid;
+                email = auth.currentUser.email ?? '';
+            } else {
+                email = personalForm.email.trim().toLowerCase();
+                const cred = await createUserWithEmailAndPassword(auth, email, accountData.contrasena);
+                uid = cred.user.uid;
+                const parts = personalForm.nombreCompleto.trim().split(/\s+/);
+                try {
+                    await setDoc(doc(db, 'users', uid), {
+                        uid, email,
+                        firstName: parts[0] || personalForm.nombreCompleto.trim() || '—',
+                        lastName: parts.slice(1).join(' ') || parts[0] || '—',
+                        documentType: personalForm.tipoDocumento,
+                        identification: personalForm.cedula,
+                        phoneNumber: personalForm.telefono,
+                        role: 'USUARIO',
+                        isActive: true,
+                        certVerification: 'NONE',
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                    });
+                } catch (e) { console.error('user doc create failed', e); }
+            }
+
+            // 2. Guardar la orden enlazada al comprador.
             await addDoc(collection(db, 'orders'), {
                 type: 'licencia-sst',
                 planSlug: plan.slug,
                 planName: plan.name,
-                userEmail: personalForm.email,
-                personal: personalForm,
+                userId: uid,
+                userEmail: email,
+                personal: isExisting ? null : personalForm,
                 payMethod: method,
                 cardLast4: method === 'card' ? card.numero.replace(/\s/g, '').slice(-4) : null,
                 bank: method === 'pse' ? pse.banco : null,
                 totalCOP: total,
+                total, // campo canónico leído por super-admin/pedidos
                 status: 'pending_payment',
                 createdAt: serverTimestamp(),
             });
-        } catch {
-            // Order save failed (e.g. permissions in demo); proceed to result anyway
+
+            router.push(`/checkout/resultado?type=licencia-sst&plan=${selectedPlan}&status=approved`);
+        } catch (err: any) {
+            const code = err?.code ?? '';
+            if (code === 'auth/email-already-in-use') {
+                toast.error('Este correo ya tiene cuenta. Inicia sesión para continuar.');
+            } else {
+                toast.error(err?.message || 'No se pudo completar la compra. Intenta de nuevo.');
+            }
+        } finally {
+            setProcessing(false);
         }
-        router.push(`/checkout/resultado?type=licencia-sst&plan=${selectedPlan}&status=approved`);
     };
 
     const spinner = <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.35)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />;

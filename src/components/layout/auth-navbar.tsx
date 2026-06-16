@@ -80,7 +80,7 @@ export default function AuthNavbar() {
                 {/* Logo Area */}
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <img
-                        src={isDark ? "/assets/JOMAR/LogoTextov2.png" : "/assets/JOMAR/LogoTexto.png"}
+                        src={isDark ? "assets/images/SICAP/webp/logo_sicap_white.webp" : "assets/images/SICAP/webp/logo_sicap.webp"}
                         alt="SIERCP"
                         style={{ height: scrolled ? '38px' : '45px', width: 'auto', cursor: 'pointer', transition: 'all 0.3s ease' }}
                         onClick={() => router.push('/')}

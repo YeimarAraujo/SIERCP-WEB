@@ -201,10 +201,10 @@ function InstructorCourseCard({ course, liveCount }: { course: CourseModel; live
                     paddingTop: 14, borderTop: '1px solid var(--muted)',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600 }}>
+                    {/* <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600 }}>
                         <Users size={15} />
                         <span>{course.studentCount ?? 0} Estudiantes</span>
-                    </div>
+                    </div> */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: 'var(--brand)' }}>
                         Gestionar <ChevronRight size={14} />
                     </div>

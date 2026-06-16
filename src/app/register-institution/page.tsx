@@ -46,7 +46,7 @@ function RegisterInstitutionContent() {
   const [admin, setAdmin] = useState({
     firstName: '',
     lastName: '',
-    identificacion: '',
+    identification: '',
     phoneNumber: '',
     email: '',
     password: '',
@@ -74,7 +74,7 @@ function RegisterInstitutionContent() {
   }
 
   function validateStep2() {
-    if (!admin.firstName || !admin.lastName || !admin.identificacion || !admin.email || !admin.password) {
+    if (!admin.firstName || !admin.lastName || !admin.identification || !admin.email || !admin.password) {
       setError('Por favor completa todos los campos de la cuenta administradora');
       return false;
     }
@@ -103,7 +103,7 @@ function RegisterInstitutionContent() {
         password: admin.password,
         firstName: admin.firstName,
         lastName: admin.lastName,
-        identificacion: admin.identificacion,
+        identification: admin.identification,
         phoneNumber: admin.phoneNumber || undefined,
         role: 'USUARIO',
       });
@@ -345,8 +345,8 @@ function RegisterInstitutionContent() {
                 <div className="col-md-6">
                   <label style={labelStyle}>Documento de identidad <span style={{ color: '#ef4444' }}>*</span></label>
                   <input
-                    type="text" required value={admin.identificacion}
-                    onChange={e => setAdmin(p => ({ ...p, identificacion: e.target.value }))}
+                    type="text" required value={admin.identification}
+                    onChange={e => setAdmin(p => ({ ...p, identification: e.target.value }))}
                     placeholder="Cédula / DNI"
                     style={inputStyle}
                   />

@@ -19,7 +19,7 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [identificacion, setIdentificacion] = useState('');
+  const [identification, setIdentification] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [departamento, setDepartamento] = useState('');
   const [ciudad, setCiudad] = useState('');
@@ -44,7 +44,7 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
           password,
           firstName,
           lastName,
-          identificacion,
+          identification,
           phoneNumber: phoneNumber || undefined,
           role: 'USUARIO',
           address: direccion || undefined,
@@ -82,18 +82,18 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
               <div className="col-6">
                 <Form.Group>
                   <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Nombre</Form.Label>
-                  <Form.Control 
+                  <Form.Control
                     type="text" required value={firstName} onChange={e => setFirstName(e.target.value)}
-                    className="form-control-custom" placeholder="Ej: Juan" 
+                    className="form-control-custom" placeholder="Ej: Juan"
                   />
                 </Form.Group>
               </div>
               <div className="col-6">
                 <Form.Group>
                   <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Apellido</Form.Label>
-                  <Form.Control 
+                  <Form.Control
                     type="text" required value={lastName} onChange={e => setLastName(e.target.value)}
-                    className="form-control-custom" placeholder="Ej: Pérez" 
+                    className="form-control-custom" placeholder="Ej: Pérez"
                   />
                 </Form.Group>
               </div>
@@ -101,7 +101,7 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
                 <Form.Group>
                   <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Identificación</Form.Label>
                   <Form.Control
-                    type="text" required value={identificacion} onChange={e => setIdentificacion(e.target.value)}
+                    type="text" required value={identification} onChange={e => setIdentification(e.target.value)}
                     className="form-control-custom" placeholder="Cédula / DNI"
                   />
                 </Form.Group>
@@ -147,17 +147,17 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
 
           <Form.Group className="mb-3">
             <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Correo Electrónico</Form.Label>
-            <Form.Control 
+            <Form.Control
               type="email" required value={email} onChange={e => setEmail(e.target.value)}
-              className="form-control-custom" placeholder="ejemplo@correo.com" 
+              className="form-control-custom" placeholder="ejemplo@correo.com"
             />
           </Form.Group>
 
           <Form.Group className="mb-4">
             <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Contraseña</Form.Label>
-            <Form.Control 
+            <Form.Control
               type="password" required value={password} onChange={e => setPassword(e.target.value)}
-              className="form-control-custom" placeholder="••••••••" 
+              className="form-control-custom" placeholder="••••••••"
             />
           </Form.Group>
 
@@ -168,8 +168,8 @@ export default function AuthModal({ show, onHide, onSuccess, initialMode = 'logi
           <div className="text-center">
             <p className="mb-0" style={{ fontSize: "0.9rem", color: "var(--clr-muted)" }}>
               {mode === 'login' ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
                 className="ms-2"
                 style={{ background: "none", border: "none", color: "var(--clr-primary)", fontWeight: 800, padding: 0 }}

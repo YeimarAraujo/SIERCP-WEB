@@ -35,7 +35,7 @@ export default function InstructorDashboardPage() {
         const fetchDashboardData = async () => {
             try {
                 setLoading(true);
-                const courses = await CourseService.getByInstructor(user.uid);
+                const courses = await CourseService.getByInstructor(user.uid, true);
 
                 let totalStudents = 0;
                 let allSessions: SessionModel[] = [];

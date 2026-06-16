@@ -59,6 +59,7 @@ export default function StudentCreateCoursePage() {
       const courseId = await CourseService.create({
         title: title.trim(),
         description: description.trim(),
+        institutionId: user.institutionId,
         instructorId: user.uid,
         instructorName: `${user.firstName} ${user.lastName}`.trim(),
         inviteCode,

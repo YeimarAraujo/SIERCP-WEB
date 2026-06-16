@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
-import { sanitize } from '@/lib/utils';
+import { sanitize, computeNextDeadline } from '@/lib/utils';
 import admin from 'firebase-admin';
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
@@ -21,6 +21,13 @@ async function verifyAdmin(req: NextRequest) {
 
 function generateInviteCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+/** Convierte 'YYYY-MM-DD' (o ISO) a Timestamp; null si vacío/ inválido. */
+function parseEndDate(value: unknown): admin.firestore.Timestamp | null {
+  if (!value || typeof value !== 'string') return null;
+  const d = new Date(value.length === 10 ? `${value}T23:59:59` : value);
+  return isNaN(d.getTime()) ? null : admin.firestore.Timestamp.fromDate(d);
 }
 
 function serializeTimestamps(d: FirebaseFirestore.DocumentData) {
@@ -138,13 +145,26 @@ export async function GET(req: NextRequest) {
       .where('institutionId', '==', institutionId)
       .get();
 
-    const courses = snaps.docs
-      .map(doc => ({ id: doc.id, ...serializeTimestamps(doc.data()) }))
-      .sort((a: any, b: any) => {
-        const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return tb - ta;
-      });
+    // Conteo real de inscritos por curso desde la subcolección enrollments.
+    // El contador denormalizado studentCount se desfasa (las inscripciones por
+    // QR en Flutter no lo incrementan), así que lo sobreescribimos con el count
+    // exacto. El Admin SDK no está sujeto a las reglas de seguridad.
+    const courses = await Promise.all(
+      snaps.docs.map(async (doc) => {
+        let studentCount = (doc.data().studentCount as number) ?? 0;
+        try {
+          const countSnap = await doc.ref.collection('enrollments').count().get();
+          studentCount = countSnap.data().count;
+        } catch { /* fallback al valor guardado */ }
+        return { id: doc.id, ...serializeTimestamps(doc.data()), studentCount };
+      })
+    );
+
+    courses.sort((a: any, b: any) => {
+      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return tb - ta;
+    });
 
     return NextResponse.json({ courses });
   } catch (error) {
@@ -188,6 +208,9 @@ export async function POST(req: NextRequest) {
     const rawModules: any[] = Array.isArray(body.modules) ? body.modules : [];
     const validModules = rawModules.filter(m => m.title?.trim());
 
+    // Próxima entrega del curso derivada de las fechas límite de los módulos.
+    const { nextDeadline, nextDeadlineTitle } = computeNextDeadline(validModules);
+
     // Create course document (without modules array)
     const courseData = {
       title,
@@ -200,8 +223,12 @@ export async function POST(req: NextRequest) {
       instructorEmail,
       inviteCode: sanitize(body.inviteCode) || generateInviteCode(),
       minScore: Number(body.minScore) || 85,
+      minAttendance: Number(body.minAttendance) || 0,
+      endDate: parseEndDate(body.endDate),
       moduleCount: validModules.length,
       totalModules: validModules.length,
+      nextDeadline,
+      nextDeadlineTitle,
       isActive: body.isActive !== false,
       studentCount: 0,
       completedModules: 0,
@@ -295,11 +322,16 @@ export async function PUT(req: NextRequest) {
       ? body.modules.filter((m: any) => m.title?.trim())
       : [];
 
+    // Próxima entrega recalculada desde las fechas límite de los módulos.
+    const { nextDeadline, nextDeadlineTitle } = computeNextDeadline(validModules);
+
     // Update course metadata
     const updateData: Record<string, any> = {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       moduleCount: validModules.length,
       totalModules: validModules.length,
+      nextDeadline,
+      nextDeadlineTitle,
     };
 
     const allowedFields = [
@@ -308,6 +340,13 @@ export async function PUT(req: NextRequest) {
     ];
     for (const field of allowedFields) {
       if (body[field] !== undefined) updateData[field] = body[field];
+    }
+    // Gating de asistencia + fecha final (Fase 2/3).
+    if (body.minAttendance !== undefined) updateData.minAttendance = Number(body.minAttendance) || 0;
+    if (body.endDate !== undefined) {
+      updateData.endDate = parseEndDate(body.endDate);
+      // Si cambia la fecha final, permitir que el cron vuelva a procesar.
+      updateData.certsGeneratedAt = admin.firestore.FieldValue.delete();
     }
 
     await adminDb.collection('courses').doc(courseId).update(updateData);

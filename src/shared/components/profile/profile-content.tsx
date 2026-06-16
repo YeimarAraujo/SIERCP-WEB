@@ -22,7 +22,7 @@ export function ProfileContent() {
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
-        identificacion: user?.identificacion || '',
+        identification: user?.identification || '',
     });
 
     if (!user) return null;
@@ -160,7 +160,7 @@ export function ProfileContent() {
                                         <InputGroup label="Nombre" disabled={!editing} value={formData.firstName} onChange={(v: string) => setFormData(p => ({ ...p, firstName: v }))} icon={User} />
                                         <InputGroup label="Apellido" disabled={!editing} value={formData.lastName} onChange={(v: string) => setFormData(p => ({ ...p, lastName: v }))} icon={User} />
                                     </div>
-                                    <InputGroup label="Documento de Identificación" disabled={!editing} value={formData.identificacion} onChange={(v: string) => setFormData(p => ({ ...p, identificacion: v }))} icon={IdCard} />
+                                    <InputGroup label="Documento de Identificación" disabled={!editing} value={formData.identification} onChange={(v: string) => setFormData(p => ({ ...p, identification: v }))} icon={IdCard} />
                                     <InputGroup label="Correo Institucional" disabled value={user.email} onChange={() => {}} icon={Mail} />
 
                                     {editing && (
