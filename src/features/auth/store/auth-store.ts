@@ -32,6 +32,7 @@ interface AuthStore {
         firstName: string;
         lastName: string;
         identification?: string;
+        documentType?: string;
         phoneNumber?: string;
         role?: string;
         institutionCode?: string;
@@ -84,6 +85,7 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             phoneNumber: d.phoneNumber,
             isActive: d.isActive ?? true,
             institutionId: d.institutionId ?? uid,
+            sedeId: d.sedeId ?? undefined,
             status: d.status ?? 'ACTIVE',
             certVerification: d.certVerification ?? 'NONE',
             coursesCreated: d.coursesCreated ?? 0,
@@ -242,7 +244,7 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-            register: async ({ email, password, firstName, lastName, identification, phoneNumber, role, institutionCode, address, city, department, country }) => {
+            register: async ({ email, password, firstName, lastName, identification, documentType, phoneNumber, role, institutionCode, address, city, department, country }) => {
                 set({ loading: true, error: null });
                 try {
                     const roleValue = (role as UserModel['role']) ?? ROLE_STUDENT;
@@ -272,6 +274,7 @@ export const useAuthStore = create<AuthStore>()(
                         lastName,
                         role: roleValue,
                         identification,
+                        ...(documentType ? { documentType } : {}),
                         ...(phoneNumber ? { phoneNumber } : {}),
                         ...(address ? { address } : {}),
                         ...(city ? { city } : {}),

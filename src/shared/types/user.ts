@@ -81,6 +81,8 @@ export interface UserModel {
   documentType?: string;
   isActive: boolean;
   institutionId: string;
+  /** Sede a la que pertenece el usuario (multi-sede). Vacío = nivel institución. */
+  sedeId?: string;
   phoneNumber?: string;
   courses?: UserCourseRef[];
   status: 'PENDING' | 'ACTIVE';

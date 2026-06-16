@@ -37,9 +37,13 @@ export default function AdminStudentsPage() {
                     where('institutionId', '==', institutionId),
                     where('isActive', '==', true),
                 ));
+                // Scope por sede: un admin de sede (user.sedeId) solo ve estudiantes
+                // de SU sede; el admin principal (sin sedeId) ve toda la institución.
+                const scopeSedeId = user?.sedeId;
                 const studentMemberships = memSnap.docs
                     .map(d => d.data())
-                    .filter(m => STUDENT_ROLES.includes(m.role));
+                    .filter(m => STUDENT_ROLES.includes(m.role))
+                    .filter(m => !scopeSedeId || m.sedeId === scopeSedeId);
 
                 // Fetch user docs en paralelo
                 const userDocs = await Promise.all(
@@ -57,7 +61,7 @@ export default function AdminStudentsPage() {
         };
 
         fetchStudents();
-    }, [institutionId, authLoading]);
+    }, [institutionId, authLoading, user?.sedeId]);
 
     const filtered = students.filter(u =>
         getFullName(u).toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,7 +79,7 @@ export default function AdminStudentsPage() {
                     </div>
                     <div>
                         <div style={{ fontWeight: 800, color: 'var(--foreground)', fontSize: 14 }}>{getFullName(row)}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ID: {row.identificacion || '—'}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ID: {row.identification || '—'}</div>
                     </div>
                 </div>
             )
@@ -170,7 +174,7 @@ export default function AdminStudentsPage() {
                             downloadCsv(students.map(s => ({
                                 Estudiante: getFullName(s),
                                 Email: s.email,
-                                ID: s.identificacion || '—',
+                                ID: s.identification || '—',
                                 Estado: s.status === 'ACTIVE' ? 'Activo' : 'Pendiente'
                             })), 'reporte-matricula');
                             toast.success('Reporte exportado');
