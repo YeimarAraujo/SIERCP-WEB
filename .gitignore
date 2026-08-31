@@ -9,6 +9,7 @@ dist/
 firebase-debug.log
 firebase-debug*.log
 .env
+.env.example
 .env.local
 .env.development.local
 .env.test.local

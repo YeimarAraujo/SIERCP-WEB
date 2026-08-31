@@ -18,9 +18,8 @@ export default function FAQPreview() {
         <Row className="justify-content-center">
           <Col lg={8}>
             <div className="text-center mb-5">
-              <span className="badge-pill mb-3">Soporte y Ayuda</span>
               <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "var(--clr-text-head)" }}>
-                Preguntas <span style={{ color: "var(--clr-primary)" }}>Frecuentes</span>
+                Preguntas Frecuentes
               </h2>
               <p className="mx-auto mt-3" style={{ fontSize: "1.05rem" }}>
                 Respuestas rápidas a las dudas más comunes de nuestros clientes.

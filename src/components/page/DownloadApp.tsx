@@ -35,9 +35,9 @@ const appFeatures = [
 ];
 
 const metrics = [
-  { label: "COMPRESIÓN", value: "50–60 mm", sub: "Profundidad óptima", color: "var(--clr-primary)" },
-  { label: "CALIDAD", value: "80–100%", sub: "Score general", color: "#f59e0b" },
-  { label: "FRECUENCIA", value: "100–120/min", sub: "Ritmo correcto", color: "#10b981" },
+  { label: "Compresión", value: "50–60 mm", sub: "Profundidad óptima", color: "var(--clr-primary)" },
+  { label: "Calidad", value: "80–100%", sub: "Score general", color: "#f59e0b" },
+  { label: "Frecuencia", value: "100–120/min", sub: "Ritmo correcto", color: "#10b981" },
 ];
 
 
@@ -471,15 +471,13 @@ export default function DownloadApp() {
         {/* ── Header ── */}
         <Row className="mb-5">
           <Col lg={8} className={`fade-up ${isVisible ? "visible" : ""}`} style={{ margin: "0 auto", textAlign: "center" }}>
-            <span className="badge-pill-white mb-3">Ecosistema Digital SICAP</span>
             <h2 className="on-dark-title" style={{
               fontSize: "clamp(2rem, 5vw, 3.2rem)",
               fontWeight: 900,
               lineHeight: 1.1,
               marginBottom: "16px",
             }}>
-              Tu Entrenamiento,{" "}
-              <span style={{ color: "var(--clr-primary)" }}>Siempre Contigo</span>
+              Tu Entrenamiento, Siempre Contigo
             </h2>
             <p className="on-dark-text" style={{
               fontSize: "1.05rem",
@@ -622,8 +620,7 @@ export default function DownloadApp() {
                 </span>
               </div>
             </div>
-
-            {/* Secondary link */}
+            {/* 
             <a
               href="/#proyecto"
               style={{
@@ -642,7 +639,7 @@ export default function DownloadApp() {
             >
               Ver especificaciones técnicas del maniquí
               <i className="bi bi-arrow-right" />
-            </a>
+            </a> */}
           </Col>
 
           {/* Right: 3D + floating chips */}

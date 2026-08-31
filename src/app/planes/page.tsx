@@ -43,7 +43,7 @@ function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; is
         background: pkg.highlight ? "#1800ad" : "var(--clr-bg-surface)",
         color: pkg.highlight ? "#fff" : "var(--clr-text)",
         border: pkg.highlight ? "2px solid #1800ad" : "1px solid var(--clr-border)",
-        borderRadius: "28px", padding: "36px 30px", position: "relative", overflow: "hidden",
+        borderRadius: "5px", padding: "36px 30px", position: "relative", overflow: "hidden",
         transform: pkg.highlight ? "scale(1.03)" : "scale(1)",
         boxShadow: pkg.highlight ? "0 30px 70px rgba(24,0,173,0.22)" : "var(--shadow-sm)",
         height: "100%",
@@ -151,7 +151,7 @@ function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: bo
         background: plan.highlight ? "#1800ad" : "var(--clr-bg-surface)",
         color: plan.highlight ? "#fff" : "var(--clr-text)",
         border: plan.highlight ? "2px solid #1800ad" : "1px solid var(--clr-border)",
-        borderRadius: "28px", padding: "36px 30px", position: "relative", overflow: "hidden",
+        borderRadius: "5px", padding: "36px 30px", position: "relative", overflow: "hidden",
         transform: plan.highlight ? "scale(1.02)" : "scale(1)",
         boxShadow: plan.highlight ? "0 30px 70px rgba(24,0,173,0.22)" : "var(--shadow-sm)",
         height: "100%",
@@ -360,15 +360,6 @@ export default function PlanesPage() {
             }
           </Row>
 
-          {tab === "maniquies" && (
-            <div className="text-center mt-4">
-              <p style={{ fontSize: "0.88rem", color: "var(--clr-muted)" }}>
-                <i className="bi bi-info-circle me-1" />
-                Precio único de compra. Los planes de software se contratan por separado o como paquete corporativo.{" "}
-                <a href="/contacto" style={{ color: "#1800ad", fontWeight: 700 }}>Solicitar cotización integral →</a>
-              </p>
-            </div>
-          )}
 
           {tab === "sst-sin" && (
             <div className="text-center mt-4">

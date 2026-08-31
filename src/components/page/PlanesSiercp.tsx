@@ -10,7 +10,7 @@ import {
 
 const TABS = [
   { id: "corporativo", label: "Corporativo", icon: "bi-building-fill", subtitle: "Empresas · Hospitales · Instituciones" },
-  { id: "maniquies", label: "Maniquíes", icon: "bi-heart-pulse-fill", subtitle: "Compra de hardware IoT inteligente" },
+  { id: "maniquies", label: "Maniquíes", icon: "bi-heart-pulse-fill", subtitle: "Compra de simuladores inteligentes" },
   { id: "sst-con", label: "SST Profesional", icon: "bi-patch-check-fill", subtitle: "Profesionales con licencia SST vigente" },
   { id: "sst-sin", label: "Créditos", icon: "bi-wallet2", subtitle: "Sin licencia SST — pago por certificado" },
 ] as const;
@@ -27,7 +27,7 @@ function ManiquiCard({ pkg, i, isVisible }: { pkg: ManiquiPackage; i: number; is
         background: pkg.highlight ? "#1800ad" : "var(--clr-bg-surface)",
         color: pkg.highlight ? "#fff" : "var(--clr-text)",
         border: pkg.highlight ? "2px solid #1800ad" : "1px solid var(--clr-border)",
-        borderRadius: "28px", padding: "36px 30px", position: "relative", overflow: "hidden",
+        borderRadius: "5px", padding: "36px 30px", position: "relative", overflow: "hidden",
         transform: pkg.highlight ? "scale(1.03)" : "scale(1)",
         boxShadow: pkg.highlight ? "0 30px 70px rgba(24,0,173,0.22)" : "var(--shadow-sm)",
         height: "100%",
@@ -132,7 +132,7 @@ function PlanCard({ plan, i, isVisible }: { plan: Plan; i: number; isVisible: bo
         background: plan.highlight ? "#1800ad" : "var(--clr-bg-surface)",
         color: plan.highlight ? "#fff" : "var(--clr-text)",
         border: plan.highlight ? "2px solid #1800ad" : "1px solid var(--clr-border)",
-        borderRadius: "28px", padding: "36px 30px", position: "relative", overflow: "hidden",
+        borderRadius: "5px", padding: "36px 30px", position: "relative", overflow: "hidden",
         transform: plan.highlight ? "scale(1.03)" : "scale(1)",
         boxShadow: plan.highlight ? "0 30px 70px rgba(24,0,173,0.22)" : "var(--shadow-sm)",
         height: "100%",
@@ -258,13 +258,9 @@ export default function PlanesSiercp() {
       <Container>
         {/* Header */}
         <div className={`text-center mb-5 fade-up ${isVisible ? "visible" : ""}`}>
-          <span className="badge-pill mb-3">Software SIERCP</span>
           <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "var(--clr-text-head)" }}>
-            Planes para cada <span style={{ color: "var(--clr-primary)" }}>necesidad</span>
+            Planes para cada necesidad
           </h2>
-          <p className="mx-auto mt-3" style={{ maxWidth: "560px", fontSize: "1.05rem", lineHeight: 1.7 }}>
-            Desde hardware IoT hasta certificación profesional — elige la categoría que se adapta a ti.
-          </p>
         </div>
 
         {/* Tab selector */}
@@ -318,13 +314,13 @@ export default function PlanesSiercp() {
             href="/planes"
             style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
-              background: "transparent", border: "1px solid var(--clr-border)",
+              background: "transparent", border: "1px solid var(--clr-primary)",
               color: "var(--clr-text-head)", padding: "12px 32px", borderRadius: "100px",
               fontWeight: 700, fontSize: "0.9rem", textDecoration: "none",
               transition: "all 0.2s ease",
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "#1800ad"; e.currentTarget.style.background = "var(--clr-bg-surface)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--clr-border)"; e.currentTarget.style.background = "transparent"; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--clr-primary)"; e.currentTarget.style.background = "var(--clr-bg-surface)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--clr-primary)"; e.currentTarget.style.background = "transparent"; }}
           >
             Ver todos los planes <i className="bi bi-arrow-right" />
           </a>
