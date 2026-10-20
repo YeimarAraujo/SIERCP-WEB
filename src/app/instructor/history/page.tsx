@@ -7,7 +7,9 @@ import { DataTable } from '@/components/ui/data-table';
 import { useAuth } from '@/hooks/use-auth';
 import { SessionService, CourseService } from '@/services/firestore.service';
 import { formatDate } from '@/lib/utils';
-import { Clock, Search, Filter, Calendar, BookOpen, User } from 'lucide-react';
+import { downloadSessionCsv } from '@/features/sessions/utils/session-export';
+import { Clock, Search, Filter, Calendar, BookOpen, User, Download } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function InstructorHistoryPage() {
     const { user } = useAuth();
@@ -56,6 +58,30 @@ export default function InstructorHistoryPage() {
             }
         },
         { key: 'startedAt', label: 'Fecha', render: (_: unknown, row: any) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDate(row.startedAt)}</div> },
+        {
+            key: 'actions',
+            label: '',
+            render: (_: unknown, row: any) => (
+                <button
+                    title="Descargar sesión en CSV"
+                    onClick={() => {
+                        try {
+                            downloadSessionCsv(row, user ? `${user.firstName} ${user.lastName}` : undefined);
+                            toast.success('CSV descargado');
+                        } catch {
+                            toast.error('No se pudo generar el CSV');
+                        }
+                    }}
+                    style={{
+                        padding: '6px 10px', borderRadius: 8, background: 'var(--muted)', border: 'none',
+                        color: 'var(--brand)', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 4
+                    }}
+                >
+                    <Download size={13} /> CSV
+                </button>
+            ),
+        },
     ];
 
     return (

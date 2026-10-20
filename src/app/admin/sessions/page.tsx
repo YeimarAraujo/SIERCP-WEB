@@ -8,8 +8,10 @@ import { collection, query, where, getDocs, orderBy, limit, Timestamp } from 'fi
 import { db } from '@/shared/lib/firebase';
 import { useAuth } from '@/hooks/use-auth';
 import type { SessionModel } from '@/models/session';
-import { Clock, User, BookOpen, ChevronRight, Activity, Monitor } from 'lucide-react';
+import { downloadSessionCsv } from '@/features/sessions/utils/session-export';
+import { Clock, User, BookOpen, ChevronRight, Activity, Monitor, Download } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 export default function AdminSessionsPage() {
     const { user, loading: authLoading } = useAuth();
@@ -152,7 +154,29 @@ export default function AdminSessionsPage() {
         {
             key: 'actions',
             label: '',
-            render: () => <ChevronRight size={18} style={{ color: 'var(--border-strong)' }} />,
+            render: (_: unknown, row: SessionModel) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
+                    <button
+                        title="Descargar sesión en CSV"
+                        onClick={() => {
+                            try {
+                                downloadSessionCsv(row, user ? `${user.firstName} ${user.lastName}` : undefined);
+                                toast.success('CSV descargado');
+                            } catch {
+                                toast.error('No se pudo generar el CSV');
+                            }
+                        }}
+                        style={{
+                            padding: '6px 10px', borderRadius: 8, background: 'var(--muted)', border: 'none',
+                            color: 'var(--brand)', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: 4
+                        }}
+                    >
+                        <Download size={13} /> CSV
+                    </button>
+                    <ChevronRight size={18} style={{ color: 'var(--border-strong)' }} />
+                </div>
+            ),
         },
     ];
 
