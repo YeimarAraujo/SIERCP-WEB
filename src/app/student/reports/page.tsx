@@ -9,6 +9,7 @@ import { SessionService } from '@/services/firestore.service';
 import { useAuth } from '@/hooks/use-auth';
 import type { SessionModel } from '@/models/session';
 import { downloadCsvReport, downloadSessionPdfReport, formatReportFilename } from '@/shared/lib/export-utils';
+import { downloadSessionCsv } from '@/features/sessions/utils/session-export';
 import toast from 'react-hot-toast';
 
 export default function StudentReportsPage() {
@@ -105,7 +106,8 @@ export default function StudentReportsPage() {
             key: 'actions',
             label: '',
             render: (_: any, row: SessionModel) => (
-                <button onClick={async () => {
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={async () => {
                     const score = row.metrics?.qualityScore || (row.metrics as any)?.score || 0;
                     await downloadSessionPdfReport({
                         filename: formatReportFilename(`reporte-sesion-${row.id}`, 'pdf'),
@@ -137,6 +139,24 @@ export default function StudentReportsPage() {
                 }}>
                     <FileText size={14} /> PDF
                 </button>
+                <button
+                    onClick={() => {
+                        try {
+                            downloadSessionCsv(row, user ? `${user.firstName} ${user.lastName}` : undefined);
+                            toast.success('CSV descargado');
+                        } catch {
+                            toast.error('No se pudo generar el CSV');
+                        }
+                    }}
+                    style={{
+                        padding: '8px 16px', borderRadius: 10, background: 'var(--muted)', border: 'none',
+                        color: 'var(--brand)', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s'
+                    }}
+                >
+                    <Download size={14} /> CSV
+                </button>
+                </div>
             ),
         },
     ];

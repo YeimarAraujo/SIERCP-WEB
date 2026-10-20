@@ -46,10 +46,10 @@ export default function Adopcion() {
           {/* Left: Narrative Symmetry */}
           <Col lg={5} className={`fade-in-left d-flex flex-column justify-content-center ${isVisible ? "visible" : ""}`}>
             <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "var(--clr-text-head)", lineHeight: 1.15 }}>
-              Lleva la tecnología <span style={{ color: 'var(--clr-primary)' }}>SICAP</span> a tu institución
+              Lleva la tecnología a tu institución
             </h2>
             <p className="mt-4 mb-5" style={{ fontSize: "1rem", lineHeight: 1.7, color: "var(--clr-text)", opacity: 0.8 }}>
-              Estamos expandiendo nuestra red de aliados estratégicos. Únete al programa 2025 y transforma la capacitación clínica.
+              Estamos expandiendo nuestra red de aliados estratégicos. Únete al programa y transforma la capacitación clínica.
             </p>
 
             <div className="d-flex flex-column gap-4">
@@ -81,7 +81,6 @@ export default function Adopcion() {
                 padding: "48px",
                 borderRadius: "32px",
                 border: "1px solid var(--clr-border)",
-                boxShadow: "var(--shadow-xl)",
                 position: "relative",
                 overflow: "hidden"
               }}>
@@ -90,7 +89,6 @@ export default function Adopcion() {
                     <div className="mb-4">
                       <h4 style={{ fontWeight: 800, fontSize: "1.6rem", color: "var(--clr-text-head)", marginBottom: "8px" }}>Formulario de Aplicación</h4>
                       <p style={{ color: "var(--clr-muted)", fontSize: "0.9rem" }}>Cuéntanos sobre tu institución para iniciar el proceso.</p>
-                      <div style={{ width: "40px", height: "4px", background: "var(--clr-primary)", marginTop: 16, borderRadius: "2px" }} />
                     </div>
                     <Row className="g-4">
                       <Col md={12}>
@@ -123,7 +121,7 @@ export default function Adopcion() {
                       </Col>
                       <Col md={12} className="mt-5">
                         <button type="submit" className="btn-brand w-100" style={{ padding: "16px", fontSize: "1rem" }}>
-                          Enviar Aplicación <i className="bi bi-send-fill ms-2" />
+                          Enviar Aplicación
                         </button>
                       </Col>
                     </Row>

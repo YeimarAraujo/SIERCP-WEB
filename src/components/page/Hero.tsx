@@ -138,28 +138,23 @@ export default function Hero() {
 
           {/* Título principal con efecto de revelación */}
           <h1 className={`hero-h1 ${entered ? "hero-anim--title" : ""}`}>
-            <span className="hero-h1-line" style={{ animationDelay: "0.1s" }}>
-              Conecta tu formación{" "}
+            <span className="hero-h1-line">
+              Gestiona la capacitación
               <span className="hero-highlight">
-                a un sistema inteligente{" "}
-
+                en primeros auxilios y emergencias
               </span>
             </span>
-            <span className="hero-h1-line" style={{ animationDelay: "0.1s" }}>
-              de{" "}
-              <span className="hero-highlight"> capacitación
-                <svg className="hero-underline-svg" viewBox="0 0 300 12" preserveAspectRatio="none">
-                  <path d="M0,8 Q75,0 150,8 Q225,16 300,8" strokeWidth="3" fill="none" />
-                </svg>
-              </span>
-
+            <span className="hero-h1-line">
+              desde una sola plataforma
             </span>
           </h1>
 
           {/* <p className={`hero-subtitle ${entered ? "hero-anim--subtitle" : ""}`}>
-            Formación en RCP, primeros auxilios y emergencias bajo estándares AHA 2025,
-            potenciada por SIERCP: simulación clínica con sensores IoT que miden la calidad
-            de cada maniobra en tiempo real.
+            SICAP centraliza la gestión de cursos, estudiantes, instructores,
+            grupos, evaluaciones y certificados en una sola plataforma.
+            Optimiza los procesos de formación en primeros auxilios, RCP,
+            atención de emergencias y respuesta inicial con seguimiento
+            en tiempo real y trazabilidad completa del aprendizaje.
           </p> */}
 
           {/* CTAs */}
@@ -177,7 +172,7 @@ export default function Hero() {
       </div>
 
       {/* ── STATS FLOTANTES (bottom) ─────────────────────────────────────── */}
-      <div className={`hero-stats-bar ${entered ? "hero-anim--stats" : ""}`}>
+      {/* <div className={`hero-stats-bar ${entered ? "hero-anim--stats" : ""}`}>
         <div className="hero-stats-inner">
           {stats.map((s, i) => (
             <React.Fragment key={s.label}>
@@ -186,7 +181,7 @@ export default function Hero() {
             </React.Fragment>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* ── CONTROLES DE VIDEO ──────────────────────────────────────────── */}
       <button

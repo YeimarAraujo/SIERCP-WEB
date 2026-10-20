@@ -7,10 +7,15 @@ import { SessionMetricsPanel } from '@/components/sessions/session-metrics';
 import { CompressionChart } from '@/components/charts/compression-chart';
 import { SessionService } from '@/services/firestore.service';
 import { formatDate, formatDuration } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
+import { downloadSessionCsv } from '@/features/sessions/utils/session-export';
+import { Download } from 'lucide-react';
+import toast from 'react-hot-toast';
 import type { SessionModel } from '@/models/session';
 
 export default function SessionDetailPage() {
     const { id } = useParams<{ id: string }>();
+    const { user } = useAuth();
     const [session, setSession] = useState<SessionModel | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -41,7 +46,22 @@ export default function SessionDetailPage() {
 
                 {/* Session info */}
                 <div className="rounded-lg border border-border bg-card p-5 space-y-1">
-                    <h2 className="font-semibold">{session.scenarioTitle ?? 'Sesión RCP'}</h2>
+                    <div className="flex items-start justify-between gap-4">
+                        <h2 className="font-semibold">{session.scenarioTitle ?? 'Sesión RCP'}</h2>
+                        <button
+                            onClick={() => {
+                                try {
+                                    downloadSessionCsv(session, user ? `${user.firstName} ${user.lastName}` : undefined);
+                                    toast.success('CSV descargado');
+                                } catch {
+                                    toast.error('No se pudo generar el CSV');
+                                }
+                            }}
+                            className="flex shrink-0 items-center gap-2 rounded-lg border border-border bg-muted px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-accent"
+                        >
+                            <Download size={14} /> Descargar CSV
+                        </button>
+                    </div>
                     <p className="text-sm text-muted-foreground">{session.studentName}</p>
                     <div className="flex gap-4 text-xs text-muted-foreground pt-1">
                         <span>Inicio: {formatDate(session.startedAt)}</span>

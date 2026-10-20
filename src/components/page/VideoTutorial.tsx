@@ -143,12 +143,8 @@ export default function VideoTutorial() {
               fontWeight: 900, lineHeight: 1.1, marginBottom: 16,
             }}>
               Aprende a usar{" "}
-              <span style={{ color: "var(--clr-primary)" }}>SICAP en minutos</span>
+              <span style={{ color: "var(--clr-primary)" }}>SICAP</span> en minutos
             </h2>
-            <p className="on-dark-text" style={{ opacity: 0.75, fontSize: "1rem", lineHeight: 1.75 }}>
-              Video tutoriales cortos que cubren desde la configuración inicial
-              hasta la descarga de certificados.
-            </p>
           </Col>
         </Row>
 

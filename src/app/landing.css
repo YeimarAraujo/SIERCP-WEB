@@ -125,8 +125,6 @@ html {
 
 .btn-brand:hover {
   background: var(--clr-primary-light);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(24, 0, 173, 0.3);
 }
 
 .btn-brand-on-dark {
@@ -937,7 +935,7 @@ html {
 .hero-content {
   position: relative;
   z-index: 10;
-  padding: 100px 0 180px;
+  padding: 100px 0 0px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -999,7 +997,7 @@ html {
   gap: 4px;
   font-family: var(--font-head);
   font-size: clamp(2.8rem, 7.5vw, 5.2rem);
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.04em;
   color: #ffffff;

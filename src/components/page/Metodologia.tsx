@@ -82,7 +82,6 @@ export default function Metodologia() {
       className="section-py"
       style={{
         background: "var(--clr-bg)",
-        borderTop: "1px solid var(--clr-border)",
         position: "relative",
         overflow: "hidden",
       }}
@@ -111,8 +110,7 @@ export default function Metodologia() {
               lineHeight: 1.1,
               marginBottom: 0,
             }}>
-              Cuatro nodos que{" "}
-              <span style={{ color: "var(--clr-primary)" }}>salvan vidas</span>
+              Cuatro nodos que salvan vidas
             </h2>
           </Col>
           <Col lg={6} className={`fade-in-right ${isVisible ? "visible" : ""}`} style={{ transitionDelay: "0.15s" }}>
@@ -184,71 +182,58 @@ export default function Metodologia() {
 
         {/* ── 3 Steps ── */}
         <div className="max-w-6xl mx-auto px-5 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
-            {steps.map((step, i) => (
+          <div className="relative">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {steps.map((step, i) => (
 
-              <div
-                key={step.n}
-                className={`fade-up ${isVisible ? "visible" : ""}`}
-                style={{
-                  transitionDelay: `${0.2 + i * 0.15}s`,
-                  transitionProperty: "all",
-                  transitionDuration: "0.3s",
-                  transitionTimingFunction: "ease",
+                <div
+                  key={step.n}
+                  className={`fade-up ${isVisible ? "visible" : ""}`}
+                  style={{
 
-                  background: "var(--clr-bg-surface)",
-                  border: `1px solid ${activeStep === i ? step.accent : "var(--clr-border)"}`,
-                  borderRadius: "20px",
-                  padding: "28px",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  position: "relative",
-                  boxShadow: activeStep === i ? `0 8px 32px ${step.accent}22` : "var(--shadow-sm)",
-                  cursor: "pointer",
-                  zIndex: 1,
-                }}
-                onMouseEnter={() => setActiveStep(i)}
-                onMouseLeave={() => setActiveStep(null)}
-              >
-                <div style={{
-                  position: "absolute",
-                  top: 0, left: "28px", right: "28px",
-                  height: "3px",
-                  borderRadius: "0 0 4px 4px",
-                  background: step.accent,
-                  opacity: activeStep === i ? 1 : 0.3,
-                  transition: "opacity 0.3s ease",
-                }} />
-
-                {/* Icon + Number row */}
-                <div className="d-flex align-items-center justify-content-between mb-4" style={{ marginTop: "8px" }}>
-                  <div style={{
-                    width: "52px", height: "52px", borderRadius: "14px",
-                    background: step.accentAlpha,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: step.accent,
-                    transition: "transform 0.3s ease",
-                    transform: activeStep === i ? "scale(1.2)" : "scale(1)",
-                  }}>
-                    <div>
-                      <step.icon size={34} />
+                    background: "var(--clr-bg-surface)",
+                    border: `1px solid ${activeStep === i ? step.accent : "var(--clr-border)"}`,
+                    borderRadius: "20px",
+                    padding: "28px",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    position: "relative",
+                    boxShadow: activeStep === i ? `0 8px 32px ${step.accent}22` : "var(--shadow-sm)",
+                    cursor: "pointer",
+                    zIndex: 1,
+                  }}
+                  onMouseEnter={() => setActiveStep(i)}
+                  onMouseLeave={() => setActiveStep(null)}
+                >
+                  {/* Icon + Number row */}
+                  <div className="d-flex align-items-center justify-content-between mb-4" style={{ marginTop: "8px" }}>
+                    <div style={{
+                      width: "52px", height: "52px", borderRadius: "14px",
+                      background: step.accentAlpha,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: step.accent,
+                      transition: "transform 0.3s ease",
+                      transform: activeStep === i ? "scale(1.2)" : "scale(1)",
+                    }}>
+                      <div>
+                        <step.icon size={34} />
+                      </div>
                     </div>
+                    <span style={{
+                      fontSize: "3rem",
+                      fontWeight: 900,
+                      color: "var(--clr-border)",
+                      lineHeight: 1,
+                      fontVariantNumeric: "tabular-nums",
+                      letterSpacing: "-2px",
+                    }}>
+                      {step.n}
+                    </span>
                   </div>
-                  <span style={{
-                    fontSize: "3rem",
-                    fontWeight: 900,
-                    color: "var(--clr-border)",
-                    lineHeight: 1,
-                    fontVariantNumeric: "tabular-nums",
-                    letterSpacing: "-2px",
-                  }}>
-                    {step.n}
-                  </span>
-                </div>
 
-                {/* Tag */}
-                {/* <div style={{ marginBottom: "12px" }}>
+                  {/* Tag */}
+                  {/* <div style={{ marginBottom: "12px" }}>
                   <span style={{
                     display: "inline-block",
                     fontSize: "0.6rem",
@@ -264,58 +249,59 @@ export default function Metodologia() {
                   </span>
                 </div> */}
 
-                <h4 style={{
-                  fontWeight: 800,
-                  fontSize: "1.2rem",
-                  marginBottom: "12px",
-                  color: "var(--clr-text-head)",
-                  lineHeight: 1.2,
-                }}>
-                  {step.title}
-                </h4>
+                  <h4 style={{
+                    fontWeight: 800,
+                    fontSize: "1.2rem",
+                    marginBottom: "12px",
+                    color: "var(--clr-text-head)",
+                    lineHeight: 1.2,
+                  }}>
+                    {step.title}
+                  </h4>
 
-                <p style={{
-                  fontSize: "0.9rem",
-                  margin: 0,
-                  lineHeight: 1.7,
-                  color: "var(--clr-muted)",
-                  flex: 1,
-                }}>
-                  {step.text}
-                </p>
+                  <p style={{
+                    fontSize: "0.9rem",
+                    margin: 0,
+                    lineHeight: 1.7,
+                    color: "var(--clr-muted)",
+                    flex: 1,
+                  }}>
+                    {step.text}
+                  </p>
 
-                {/* Bottom detail */}
+                  {/* Bottom detail */}
+                  <div style={{
+                    marginTop: "20px",
+                    paddingTop: "16px",
+                    borderTop: "1px solid var(--clr-border)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}>
+                    <i className="bi bi-info-circle" style={{ color: step.accent, fontSize: "0.85rem" }} />
+                    <span style={{ fontSize: "0.75rem", color: "var(--clr-muted)", fontWeight: 600 }}>{step.detail}</span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Centro del ciclo */}
+              <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
                 <div style={{
-                  marginTop: "20px",
-                  paddingTop: "16px",
-                  borderTop: "1px solid var(--clr-border)",
+                  width: "120px",
+                  height: "120px",
+                  borderRadius: "50%",
+                  background: "var(--clr-primary)",
+                  color: "white",
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  textAlign: "center",
                 }}>
-                  <i className="bi bi-info-circle" style={{ color: step.accent, fontSize: "0.85rem" }} />
-                  <span style={{ fontSize: "0.75rem", color: "var(--clr-muted)", fontWeight: 600 }}>{step.detail}</span>
-                </div>
-              </div>
-            ))}
-
-            {/* Centro del ciclo */}
-            <div className="hidden lg:flex lg:row-span-2 lg:col-start-2 lg:row-start-1 items-center justify-center">
-              <div style={{
-                width: "120px",
-                height: "120px",
-                borderRadius: "50%",
-                background: "var(--clr-primary)",
-                color: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "column",
-                textAlign: "center",
-              }}>
-                <div className="text-center">
-                  <RefreshCw size={26} className="mx-auto" />
-                  <span className="mt-1 block text-[11px] font-bold uppercase tracking-wide">Ciclo</span>
+                  <div className="text-center">
+                    <RefreshCw size={28} className="mx-auto animate-spin" style={{ animationDuration: '8s' }} />
+                    <span className="mt-1 block text-[11px] font-bold uppercase tracking-wide">Ciclo</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -365,16 +351,6 @@ export default function Metodologia() {
           }} />
 
           <div style={{ position: "relative", zIndex: 1, maxWidth: "500px" }}>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: "6px",
-              background: "rgba(255,255,255,0.15)",
-              borderRadius: "8px",
-              padding: "4px 12px",
-              marginBottom: "12px",
-            }}>
-              <i className="bi bi-cpu" style={{ color: "#fff", fontSize: "0.75rem" }} />
-              <span style={{ color: "#fff", fontSize: "0.65rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em" }}>Tecnología que lo hace posible</span>
-            </div>
             <h3 style={{
               color: "#fff",
               fontWeight: 900,
@@ -397,7 +373,7 @@ export default function Metodologia() {
 
           <div style={{ position: "relative", zIndex: 1 }}>
             <a
-              href="#proyecto"
+              href="/acerca"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -413,11 +389,9 @@ export default function Metodologia() {
                 boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 8px 28px rgba(0,0,0,0.2)";
+                e.currentTarget.style.boxShadow = "0 8px 28px rgba(0,0,0,0.5)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
                 e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
               }}
             >

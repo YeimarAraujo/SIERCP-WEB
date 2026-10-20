@@ -129,7 +129,7 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
               <img
                 src={isScrolled ? (isDark ? logoLight : logoDark) : logoLight}
                 alt="SICAP"
-                style={{ height: isScrolled ? 55 : 65, width: "auto", transition: "all 0.5s ease" }}
+                style={{ height: isScrolled ? 65 : 65, width: "auto", transition: "all 0.5s ease" }}
               />
             </Link>
 
