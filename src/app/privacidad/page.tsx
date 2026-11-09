@@ -4,100 +4,105 @@ import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import Navbar from "@/components/page/Navbar";
 import Footer from "@/components/page/Footer";
+import { LEGAL_ENTITY, pending } from "@/lib/legal-entity";
+import { PRIVACY_POLICY_VERSION } from "@/lib/privacy";
+
+const POLICY_DATE = new Date(`${PRIVACY_POLICY_VERSION}T12:00:00Z`).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
+
+const E = LEGAL_ENTITY;
 
 const SECTIONS = [
   {
     icon: "bi-person-badge-fill",
-    title: "1. Responsable del Tratamiento",
-    content: `JOMAR SEGURID S.A.S., identificada con NIT 000.000.000-0, con domicilio en Valledupar, Cesar, Colombia, es la responsable del tratamiento de los datos personales recolectados a través de la plataforma SIERCP y sus canales asociados.
+    title: "1. Responsable del tratamiento",
+    content: `${E.name}, identificada con NIT ${pending(E.nit)}, con domicilio en ${E.city} y dirección ${pending(E.address)}, es la responsable del tratamiento de los datos personales recolectados en ${E.product} (aplicación móvil, sitio web, maniquí y simulador).
 
-Correo de contacto: info@jomarsegurid.co | Tel: +57 315 377 8892`,
+Correo: ${E.email} · Teléfono: ${E.phone}
+Área que atiende consultas y reclamos: ${E.privacyOffice}.`,
   },
   {
     icon: "bi-database-fill-check",
-    title: "2. Datos que Recopilamos",
-    content: `Recopilamos los siguientes tipos de información personal:
+    title: "2. Datos que tratamos",
+    content: `• Identificación: nombres, apellidos, tipo y número de documento, fecha de nacimiento.
+• Contacto: correo electrónico, teléfono, departamento y ciudad.
+• Formación: cursos, evaluaciones, asistencia, certificados e insignias.
+• Práctica de RCP: profundidad, ritmo, retroceso y pausas de las compresiones medidas por el maniquí, vinculadas a su cuenta. Son datos de desempeño en la práctica; no son datos de salud ni biométricos.
+• Navegación y seguridad: dirección IP, dispositivo y registros de acceso.
+• Pagos: los procesa Wompi. ${E.product} no almacena datos de tarjetas.
 
-• Datos de identificación: nombres, apellidos, número de documento, fecha de nacimiento.
-• Datos de contacto: correo electrónico, número de teléfono, dirección.
-• Datos académicos: historial de cursos, evaluaciones, certificados obtenidos.
-• Datos de dispositivos IoT: métricas de sesiones de práctica (profundidad de compresiones, frecuencia, ventilaciones) vinculadas a su cuenta.
-• Datos de navegación: dirección IP, tipo de dispositivo, páginas visitadas, tiempos de sesión.
-• Datos de pago: procesados directamente por Wompi (PCI-DSS Level 1); SIERCP no almacena datos de tarjetas.`,
+No solicitamos datos sensibles. Si alguna vez se pidiera uno, su respuesta sería facultativa (Ley 1581, art. 6).`,
   },
   {
     icon: "bi-bullseye",
-    title: "3. Finalidades del Tratamiento",
-    content: `Sus datos son utilizados para:
-
-• Gestionar su inscripción, matrícula y acceso a cursos de formación.
-• Emitir certificados de competencia y constancias de participación.
-• Procesar pagos y gestionar facturación.
-• Monitorear el desempeño en sesiones de práctica con el maniquí IoT y generar retroalimentación personalizada.
-• Enviar comunicaciones sobre actualizaciones de programas, nuevas fechas y contenidos AHA.
-• Cumplir obligaciones legales ante entidades regulatorias (MINSALUD, INVIMA, Ministerio del Trabajo).
-• Mejorar continuamente la plataforma mediante análisis de uso agregado y anonimizado.`,
+    title: "3. Finalidades",
+    content: `• Crear y administrar su cuenta, inscripciones y acceso a cursos.
+• Medir su práctica, darle retroalimentación y permitir el seguimiento de su instructor y de la institución a la que pertenece.
+• Emitir, verificar y revocar certificados e insignias.
+• Procesar pagos y facturación.
+• Atender consultas, reclamos y obligaciones legales.
+• Elaborar estadísticas anonimizadas para mejorar la plataforma.
+• Solo si lo autoriza aparte: enviarle novedades y ofertas de cursos.`,
   },
   {
     icon: "bi-shield-lock-fill",
-    title: "4. Base Legal del Tratamiento",
-    content: `El tratamiento de sus datos se fundamenta en:
+    title: "4. Autorización",
+    content: `Tratamos sus datos con su autorización previa, expresa e informada (Ley 1581, art. 9). La pedimos al crear la cuenta y antes de usar la plataforma, y guardamos constancia de la fecha, la versión de esta política y el canal (Decreto 1377, art. 7). La autorización para publicidad es opcional y separada.
 
-• Ejecución de un contrato: cuando adquiere un curso o plan de suscripción.
-• Consentimiento explícito: para el envío de comunicaciones de marketing y el uso de datos biométricos de práctica.
-• Obligación legal: para el reporte a entidades de salud y formación según normativa colombiana.
-• Interés legítimo: para mejorar la seguridad de la plataforma y prevenir el fraude.`,
+No se requiere autorización en los casos del art. 10 de la Ley 1581, como información solicitada por una entidad pública en ejercicio de sus funciones o datos de naturaleza pública.
+
+Si su institución o un instructor crea su cuenta, al ingresar por primera vez le pediremos su propia autorización.`,
   },
   {
-    icon: "bi-lock-fill",
-    title: "5. Seguridad de los Datos",
-    content: `Implementamos medidas técnicas y organizativas de nivel empresarial:
-
-• Cifrado en tránsito con TLS 1.3 (HTTPS obligatorio en toda la plataforma).
-• Datos en reposo cifrados en infraestructura Firebase (Google Cloud, certificado ISO 27001).
-• Control de acceso basado en roles (RBAC): cada usuario accede únicamente a sus propios datos.
-• Autenticación segura con Firebase Authentication y tokens JWT de corta duración.
-• Reglas de seguridad Firestore auditadas periódicamente.
-• Pagos procesados exclusivamente por Wompi bajo certificación PCI-DSS Level 1; los datos de tarjeta nunca tocan nuestros servidores.`,
+    icon: "bi-people-fill",
+    title: "5. Niñas, niños y adolescentes",
+    content: `Solo tratamos datos de menores de 18 años cuando responde a su interés superior y con la autorización de su representante legal (Ley 1581, art. 7, y Decreto 1377, art. 12). Al registrarse, si la fecha de nacimiento indica que es menor, pedimos los datos y la autorización de su madre, padre o tutor.`,
   },
   {
     icon: "bi-person-check-fill",
-    title: "6. Sus Derechos (Habeas Data)",
-    content: `De conformidad con la Ley 1581 de 2012 y el Decreto 1377 de 2013, usted tiene derecho a:
+    title: "6. Sus derechos",
+    content: `Según el art. 8 de la Ley 1581 de 2012, usted puede:
 
-• Conocer: acceder a los datos que tenemos sobre usted en cualquier momento.
-• Actualizar y rectificar: corregir datos inexactos o desactualizados.
-• Suprimir: solicitar la eliminación de sus datos cuando no exista obligación legal de conservarlos.
-• Revocar el consentimiento: retirar el consentimiento otorgado para finalidades específicas.
-• Presentar quejas: ante la Superintendencia de Industria y Comercio (SIC) de Colombia.
+• Conocer, actualizar y rectificar sus datos.
+• Pedir prueba de la autorización otorgada.
+• Ser informado sobre el uso que se da a sus datos.
+• Revocar la autorización y pedir la supresión de sus datos, cuando no exista un deber legal o contractual de conservarlos.
+• Acceder gratis a sus datos.
+• Presentar quejas ante la Superintendencia de Industria y Comercio, después de agotar la consulta o el reclamo ante nosotros (Ley 1581, art. 16).`,
+  },
+  {
+    icon: "bi-envelope-paper-fill",
+    title: "7. Cómo ejercer sus derechos",
+    content: `• En la plataforma: menú de usuario → "Mi privacidad" (web) o "Privacidad y datos" (app). Allí puede descargar sus datos, cambiar la autorización de publicidad y enviar solicitudes.
+• Por correo: ${E.email}, indicando nombre, documento, la solicitud y un medio de respuesta.
 
-Para ejercer estos derechos, escriba a: info@jomarsegurid.co con el asunto "Derechos ARCO".`,
+Plazos (Ley 1581, arts. 14 y 15):
+• Consultas: respuesta en máximo 10 días hábiles, prorrogables 5 días hábiles avisándole el motivo.
+• Reclamos (corrección, actualización, supresión o revocación): máximo 15 días hábiles, prorrogables 8 días hábiles avisándole el motivo.`,
+  },
+  {
+    icon: "bi-diagram-3-fill",
+    title: "8. Quién más trata los datos",
+    content: `• Su institución y sus instructores ven los datos de formación y práctica de sus estudiantes y cursos. No ven los de otras instituciones.
+• Encargados que prestan servicios tecnológicos: Google (Firebase), Vercel (alojamiento web) y Wompi (pagos). Pueden procesar datos en servidores fuera de Colombia, incluidos Estados Unidos, bajo contrato de transmisión y con medidas de seguridad (Decreto 1377, arts. 24 y 25).
+
+No vendemos ni cedemos sus datos a terceros para sus propios fines.`,
+  },
+  {
+    icon: "bi-lock-fill",
+    title: "9. Seguridad",
+    content: `• Cifrado en tránsito (HTTPS) y en reposo en la infraestructura de Google Cloud.
+• Acceso restringido: cada institución solo accede a los datos de sus miembros, y las búsquedas de personas quedan registradas.
+• Las autorizaciones y solicitudes quedan en registros que no se pueden editar.`,
   },
   {
     icon: "bi-clock-history",
-    title: "7. Conservación de Datos",
-    content: `Los datos personales se conservan durante el tiempo necesario para cumplir las finalidades descritas:
-
-• Datos académicos y certificados: 10 años desde la emisión (exigencia de entidades regulatorias de salud).
-• Datos de facturación: 5 años según normativa tributaria colombiana.
-• Datos de sesiones IoT de práctica: 2 años desde la última sesión activa.
-• Datos de marketing: hasta que revoque su consentimiento.
-
-Transcurrido el período de conservación, los datos son eliminados o anonimizados de forma irreversible.`,
-  },
-  {
-    icon: "bi-globe",
-    title: "8. Transferencias Internacionales",
-    content: `Sus datos pueden ser procesados en servidores de Google Cloud Platform (EE.UU.) a través de Firebase, que cuenta con Cláusulas Contractuales Estándar (SCC) aprobadas por la Comisión Europea y certificaciones SOC 2 / ISO 27001. Wompi procesa datos de pago bajo estándares PCI-DSS internacionales.
-
-No vendemos, arrendamos ni cedemos sus datos personales a terceros con fines comerciales propios.`,
+    title: "10. Conservación",
+    content: `Conservamos los datos mientras tenga una cuenta activa y durante el tiempo necesario para verificar los certificados emitidos y cumplir deberes legales, contables y tributarios. Después los eliminamos o anonimizamos. Los datos de publicidad se conservan hasta que revoque esa autorización.`,
   },
   {
     icon: "bi-arrow-repeat",
-    title: "9. Actualizaciones de esta Política",
-    content: `Esta política puede actualizarse para reflejar cambios en nuestra práctica de datos o en la normativa aplicable. Cuando realicemos cambios sustanciales, le notificaremos por correo electrónico y mediante un aviso destacado en la plataforma con al menos 30 días de anticipación.
-
-Fecha de última actualización: mayo 2026.`,
+    title: "11. Vigencia y cambios",
+    content: `Esta política rige desde el ${POLICY_DATE}. Si cambia de forma sustancial, se lo avisaremos y le pediremos de nuevo su autorización al ingresar. Las bases de datos estarán vigentes mientras se cumplan las finalidades descritas.`,
   },
 ];
 
@@ -119,7 +124,7 @@ export default function PrivacidadPage() {
               <span style={{ color: "#a5f3fc" }}>Tratamiento de Datos</span>
             </h1>
             <p style={{ fontSize: "1.05rem", color: "rgba(255,255,255,0.75)", maxWidth: "580px", margin: "0 auto", lineHeight: 1.7 }}>
-              Cumplimos con la Ley 1581 de 2012 (Habeas Data) y las mejores prácticas internacionales de protección de datos personales.
+              Tratamos sus datos según la Ley 1581 de 2012 y el Decreto 1377 de 2013.
             </p>
             <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "28px", flexWrap: "wrap" }}>
               {[
@@ -164,7 +169,7 @@ export default function PrivacidadPage() {
                     Nuestro equipo de privacidad responde en máximo 15 días hábiles.
                   </p>
                   <a
-                    href="mailto:info@jomarsegurid.co?subject=Derechos ARCO - Solicitud de Privacidad"
+                    href="mailto:info@jomarsegurid.co?subject=Solicitud de protección de datos"
                     style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#fff", color: "var(--clr-primary)", padding: "12px 28px", borderRadius: "12px", fontWeight: 800, textDecoration: "none", fontSize: "0.95rem" }}
                   >
                     <i className="bi bi-envelope" /> info@jomarsegurid.co

@@ -90,6 +90,8 @@ async function fetchUserModel(uid: string): Promise<UserModel | null> {
             certVerification: d.certVerification ?? 'NONE',
             coursesCreated: d.coursesCreated ?? 0,
             stats: d.stats,
+            privacy: d.privacy,
+            birthDate: d.birthDate,
             createdAt: d.createdAt?.toDate?.() ?? new Date(),
             updatedAt: d.updatedAt?.toDate?.() ?? new Date(),
         };

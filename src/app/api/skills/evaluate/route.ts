@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import admin from 'firebase-admin';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { evaluateAndIssue, updateSessionStats, type Evidence } from '@/lib/skill-engine';
+import { gradeSession } from '@/lib/session-grading-service';
 
 /**
  * POST /api/skills/evaluate  (Spark — reemplaza el trigger onSessionCompleted)
@@ -46,21 +47,25 @@ export async function POST(req: NextRequest) {
   if (s.studentId !== uid) return NextResponse.json({ error: 'No es tu sesión' }, { status: 403 });
   if (s.status !== 'completed') return NextResponse.json({ error: 'Sesión no completada' }, { status: 409 });
 
-  const score = (s.metrics?.qualityScore ?? s.metrics?.score ?? 0) as number;
-  const evidence: Evidence = {
-    type: 'TELEMETRY',
-    ref: body.sessionId,
-    score,
-    capturedAt: admin.firestore.Timestamp.now(),
-    patientType: normalizePatientType(s.patientType),
-  };
-
   try {
+    // La nota que vale es la que calcula el servidor desde la señal del maniquí,
+    // no la que envía la app.
+    const grade = await gradeSession(adminDb, body.sessionId);
+
     // 1. Stats/XP/leaderboard de la sesión (re-aloja onSessionCompleted; idempotente).
-    await updateSessionStats(uid, body.sessionId, s);
-    // 2. Emisión de skills con evidencia de telemetría.
+    await updateSessionStats(uid, body.sessionId, { ...s, officialGrade: grade ?? { unavailable: true } });
+
+    // 2. Habilidades: solo con nota oficial. Sin señal no hay evidencia verificable.
+    if (!grade) return NextResponse.json({ success: true, issued: [], officialGrade: null });
+    const evidence: Evidence = {
+      type: 'TELEMETRY',
+      ref: body.sessionId,
+      score: grade.score,
+      capturedAt: admin.firestore.Timestamp.now(),
+      patientType: normalizePatientType(s.patientType),
+    };
     const issued = await evaluateAndIssue(uid, evidence);
-    return NextResponse.json({ success: true, issued });
+    return NextResponse.json({ success: true, issued, officialGrade: grade });
   } catch (e) {
     console.error('[skills/evaluate]', e);
     return NextResponse.json({ error: 'Error al evaluar skills' }, { status: 500 });

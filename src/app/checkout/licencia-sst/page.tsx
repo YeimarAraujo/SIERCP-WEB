@@ -1,23 +1,22 @@
 'use client';
 
-import { Suspense, useState, useRef } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { sstConLicenciaPlans } from '@/data/planes';
 import { ChevronRight, ShieldCheck, Lock } from 'lucide-react';
-import { collection, query, where, getDocs, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { db, auth } from '@/shared/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
 import toast from 'react-hot-toast';
 import { fmt, validateEmail, validatePhone, validateCedula, IVA_RATE } from '../_lib';
 import {
     Field, Input, SearchableSelect, DocumentTypeSelect,
     AccountAccessSection, validateAccount, type AccountData, type AccountErrors, emptyAccountData,
-    CheckoutLayout, CheckoutSuspenseFallback, PaymentForm, PaymentSummaryBox,
+    CheckoutLayout, CheckoutSuspenseFallback, HostedPaymentStep,
     OrderSummaryShell, SummaryProductCard, SummaryFeatureList, SummaryPriceBlock, SummaryBadge,
     SelectableOption, RadioDot, OptionBadge,
     btnPrimary, btnSecondary,
-    type PayMethod, type CardData, type PseData,
 } from '../_components/ui';
+import { redirectToWompi, resolveCheckoutBuyer, splitFullName } from '../_lib/hosted-payment';
 import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
 
 // ── Order summary ─────────────────────────────────────────────────────────────
@@ -170,32 +169,27 @@ function Step2({ form, setForm, errors, accountData, setAccountData, accountErro
 
 // ── Step 3: Payment ───────────────────────────────────────────────────────────
 
-function Step3({ planSlug, personalForm, processing, paySubmitRef, onBack, onPay }: {
+function Step3({ planSlug, personalForm, processing, onBack, onPay }: {
     planSlug: string; personalForm: PersonalForm;
     processing: boolean;
-    paySubmitRef: { current: (() => void) | null };
     onBack: () => void;
-    onPay: (method: PayMethod, card: CardData, pse: PseData) => void;
+    onPay: () => void;
 }) {
     const plan = sstConLicenciaPlans.find(p => p.slug === planSlug) ?? sstConLicenciaPlans[0];
     const total = Math.round(plan.monthlyCOP * (1 + IVA_RATE));
     return (
-        <PaymentForm
-            payLabel={`Activar licencia — ${fmt(total)} COP/mes`}
+        <HostedPaymentStep
+            rows={[
+                { label: 'Plan', value: plan.name },
+                { label: 'Vigencia', value: '30 días' },
+                ...(personalForm.email ? [{ label: 'Asignada a', value: personalForm.email }] : []),
+            ]}
+            totalLabel="Total por 30 días"
+            total={fmt(total)}
+            payLabel={`Pagar ${fmt(total)} COP con Wompi`}
             processing={processing}
             onBack={onBack}
             onPay={onPay}
-            submitRef={paySubmitRef}
-            summaryContent={
-                <PaymentSummaryBox
-                    rows={[
-                        { label: 'Plan', value: plan.name },
-                        { label: 'Asignada a', value: personalForm.email },
-                    ]}
-                    totalLabel="Total / mes"
-                    total={fmt(total)}
-                />
-            }
         />
     );
 }
@@ -212,7 +206,6 @@ async function checkDuplicateSSTEmail(email: string): Promise<boolean> {
 
 function Content() {
     const searchParams = useSearchParams();
-    const router = useRouter();
     const [step, setStep] = useState(0);
     const [selectedPlan, setSelectedPlan] = useState(searchParams.get('plan') ?? sstConLicenciaPlans[0].slug);
     const [personalForm, setPersonalForm] = useState<PersonalForm>(emptyPersonal);
@@ -221,7 +214,6 @@ function Content() {
     const [accountErrors, setAccountErrors] = useState<AccountErrors>({});
     const [checking, setChecking] = useState(false);
     const [processing, setProcessing] = useState(false);
-    const paySubmitRef = useRef<(() => void) | null>(null);
 
     const plan = sstConLicenciaPlans.find(p => p.slug === selectedPlan) ?? sstConLicenciaPlans[0];
     const total = Math.round(plan.monthlyCOP * (1 + IVA_RATE));
@@ -253,70 +245,21 @@ function Content() {
         }
     };
 
-    const handlePay = async (method: PayMethod, card: CardData, pse: PseData) => {
+    const handlePay = async () => {
         setProcessing(true);
         try {
-            const isExisting = accountData.mode === 'existing';
-
-            // 1. Autenticar al comprador — la regla de `orders` exige userId == uid.
-            let uid: string;
-            let email: string;
-            if (isExisting) {
-                if (!auth.currentUser) {
-                    toast.error('Tu sesión expiró. Vuelve a verificar tu cuenta.');
-                    setStep(1);
-                    return;
-                }
-                uid = auth.currentUser.uid;
-                email = auth.currentUser.email ?? '';
-            } else {
-                email = personalForm.email.trim().toLowerCase();
-                const cred = await createUserWithEmailAndPassword(auth, email, accountData.contrasena);
-                uid = cred.user.uid;
-                const parts = personalForm.nombreCompleto.trim().split(/\s+/);
-                try {
-                    await setDoc(doc(db, 'users', uid), {
-                        uid, email,
-                        firstName: parts[0] || personalForm.nombreCompleto.trim() || '—',
-                        lastName: parts.slice(1).join(' ') || parts[0] || '—',
-                        documentType: personalForm.tipoDocumento,
-                        identification: personalForm.cedula,
-                        phoneNumber: personalForm.telefono,
-                        role: 'USUARIO',
-                        isActive: true,
-                        certVerification: 'NONE',
-                        createdAt: serverTimestamp(),
-                        updatedAt: serverTimestamp(),
-                    });
-                } catch (e) { console.error('user doc create failed', e); }
-            }
-
-            // 2. Guardar la orden enlazada al comprador.
-            await addDoc(collection(db, 'orders'), {
-                type: 'licencia-sst',
-                planSlug: plan.slug,
-                planName: plan.name,
-                userId: uid,
-                userEmail: email,
-                personal: isExisting ? null : personalForm,
-                payMethod: method,
-                cardLast4: method === 'card' ? card.numero.replace(/\s/g, '').slice(-4) : null,
-                bank: method === 'pse' ? pse.banco : null,
-                totalCOP: total,
-                total, // campo canónico leído por super-admin/pedidos
-                status: 'pending_payment',
-                createdAt: serverTimestamp(),
+            const buyer = await resolveCheckoutBuyer({ mode: accountData.mode, email: personalForm.email, password: accountData.contrasena });
+            await redirectToWompi('/api/checkout/licencia-sst', buyer, {
+                planSlug: selectedPlan,
+                profile: {
+                    ...splitFullName(personalForm.nombreCompleto),
+                    documentType: personalForm.tipoDocumento,
+                    identification: personalForm.cedula,
+                    phoneNumber: personalForm.telefono,
+                },
             });
-
-            router.push(`/checkout/resultado?type=licencia-sst&plan=${selectedPlan}&status=approved`);
         } catch (err: any) {
-            const code = err?.code ?? '';
-            if (code === 'auth/email-already-in-use') {
-                toast.error('Este correo ya tiene cuenta. Inicia sesión para continuar.');
-            } else {
-                toast.error(err?.message || 'No se pudo completar la compra. Intenta de nuevo.');
-            }
-        } finally {
+            toast.error(err?.message || 'No se pudo iniciar el pago. Intenta de nuevo.');
             setProcessing(false);
         }
     };
@@ -335,20 +278,12 @@ function Content() {
                 </button>
                 <button onClick={() => setStep(0)} disabled={checking} style={{ ...btnSecondary, width: '100%', justifyContent: 'center' }}>Atrás</button>
             </div>
-        ) : step === 2 ? (
-            <button
-                onClick={() => paySubmitRef.current?.()}
-                disabled={processing}
-                style={{ ...btnPrimary, width: '100%', justifyContent: 'center', opacity: processing ? 0.75 : 1, background: processing ? '#4b5563' : undefined, transition: 'background 0.2s, opacity 0.2s' }}
-            >
-                {processing ? <>{spinner} Procesando…</> : <><Lock size={14} /> Pagar {fmt(total)} COP/mes</>}
-            </button>
         ) : null;
 
     const steps: Record<number, React.ReactNode> = {
         0: <Step1 selected={selectedPlan} onSelect={setSelectedPlan} />,
         1: <Step2 form={personalForm} setForm={setPersonalForm} errors={personalErrors} accountData={accountData} setAccountData={setAccountData} accountErrors={accountErrors} />,
-        2: <Step3 planSlug={selectedPlan} personalForm={personalForm} processing={processing} paySubmitRef={paySubmitRef} onBack={() => setStep(1)} onPay={handlePay} />,
+        2: <Step3 planSlug={selectedPlan} personalForm={personalForm} processing={processing} onBack={() => setStep(1)} onPay={handlePay} />,
     };
 
     return (

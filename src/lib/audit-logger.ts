@@ -36,7 +36,10 @@ export type AuditEventType =
   | 'plan_subscription_activated'
   | 'plan_limit_reached'
   | 'institution_created'
-  | 'new_institution_checkout_started';
+  | 'new_institution_checkout_started'
+  | 'person_lookup'
+  | 'consent_recorded'
+  | 'privacy_request';
 
 export type AuditSeverity = 'INFO' | 'WARN' | 'CRITICAL';
 

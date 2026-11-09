@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 import {
     GripVertical, Trash2, Plus,
     FileText, Video, Link as LinkIcon, HelpCircle,
@@ -51,7 +52,7 @@ export const DEFAULT_MODULE: ModuleForm = {
     type: 'teoria',
     contentType: 'video',
     contentUrl: '',
-    passingScore: 70,
+    passingScore: COURSE_DEFAULT_MIN_SCORE,
     deadlineDate: '',
     isRequired: true,
     scenarios: [],
@@ -406,7 +407,7 @@ export function ModuleFormCard({ module: mod, index: mIdx, showRemove, onChange,
                             max="100"
                             placeholder="70"
                             value={mod.passingScore}
-                            onChange={(e) => update({ passingScore: Number(e.target.value) || 70 })}
+                            onChange={(e) => update({ passingScore: Number(e.target.value) || COURSE_DEFAULT_MIN_SCORE })}
                         />
                     </div>
                 </div>

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { getUserInitials, getFullName } from '@/models/user';
-import { ChevronDown, ChevronLeft, Bell, Search, Settings, LogOut, User as UserIcon, Sun, Moon, HeartPulseIcon } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Bell, Search, Settings, LogOut, User as UserIcon, Sun, Moon, HeartPulseIcon, ShieldCheck } from 'lucide-react';
 import { GlobalSearch } from '@/components/ui/global-search';
 import { NotificationsDrawer } from '@/components/ui/notifications-drawer';
 import Link from 'next/link';
@@ -172,6 +172,9 @@ export function Header({ title, dark = false, showBack, onBack }: HeaderProps) {
                                         </Link>
                                         <Link href={settingsHref} onClick={() => setIsProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} className="dropdown-item">
                                             <Settings size={16} /> Configuración
+                                        </Link>
+                                        <Link href="/mi-privacidad" onClick={() => setIsProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} className="dropdown-item">
+                                            <ShieldCheck size={16} /> Mi privacidad
                                         </Link>
                                     </div>
                                     <div style={{ padding: 8, borderTop: '1px solid var(--border)' }}>

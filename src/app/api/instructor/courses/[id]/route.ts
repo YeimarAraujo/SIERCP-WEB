@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { computeNextDeadline } from '@/lib/utils';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
 
@@ -177,7 +178,7 @@ export async function PUT(
         body.modules.forEach((m: any, i: number) => {
           const ref = adminDb.collection('courses').doc(courseId).collection('modules').doc();
           const cfg: Record<string, any> = {
-            passingScore: Number(m.passingScore) || 70,
+            passingScore: Number(m.passingScore) || COURSE_DEFAULT_MIN_SCORE,
             questions: [],
             requiredSessions: [],
             topics: Array.isArray(m.topics) ? m.topics.filter(Boolean) : [],
@@ -193,7 +194,7 @@ export async function PUT(
             cfg.textContent = m.contentUrl || '';
           } else if (m.type === 'practica_guiada') {
             cfg.requiredSessions = (m.scenarios || []).map((s: string) => ({
-              scenarioId: s, count: 1, minScore: Number(m.passingScore) || 70,
+              scenarioId: s, count: 1, minScore: Number(m.passingScore) || COURSE_DEFAULT_MIN_SCORE,
             }));
           }
           createBatch.set(ref, {

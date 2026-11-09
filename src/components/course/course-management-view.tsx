@@ -20,6 +20,7 @@ import { CourseQr } from '@/components/ui/course-qr';
 import toast from 'react-hot-toast';
 import { downloadSessionPdfReport, formatReportFilename } from '@/shared/lib/export-utils';
 import { AttendancePanel } from '@/features/attendance/components/attendance-panel';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 type TabType = 'alumnos' | 'contenido' | 'asistencia' | 'sesiones' | 'config';
 
@@ -429,7 +430,7 @@ export function CourseManagementView({ courseId: id, basePath, monitorHref }: Pr
                                 <div style={{ display: 'grid', gap: 24 }}>
                                     <div style={{ padding: '16px 20px', borderRadius: 16, background: 'var(--muted)', border: '1px solid var(--muted)' }}>
                                         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>UMBRAL DE APROBACIÓN</div>
-                                        <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--foreground)' }}>{course.minScore ?? 85}% <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>(Estándar AHA 2025)</span></div>
+                                        <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--foreground)' }}>{course.minScore ?? COURSE_DEFAULT_MIN_SCORE}% <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>(Estándar AHA 2025)</span></div>
                                     </div>
                                     {course.inviteCode && (
                                         <CourseQr

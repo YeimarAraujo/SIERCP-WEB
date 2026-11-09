@@ -10,6 +10,7 @@ import type { CourseModel, Enrollment } from '@/shared/types/course';
 import type { ManiquiModel } from '@/shared/types/device';
 import type { GuideModel } from '@/shared/types/guide';
 import { AuditService } from '@/features/audit/services/audit.service';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 import {
     createUserWithEmailAndPassword, signOut
 } from 'firebase/auth';
@@ -157,9 +158,19 @@ export const SessionService = {
         return parseSession(snap.id, snap.data() as Record<string, unknown>);
     },
 
-    async getByStudent(studentId: string, limitN = 20): Promise<SessionModel[]> {
+    /**
+     * Sesiones de un estudiante. El personal debe acotar por `institutionId` o
+     * `courseId`: las reglas solo le muestran registros de su institución o curso.
+     */
+    async getByStudent(
+        studentId: string,
+        limitN = 20,
+        scope: { institutionId?: string | null; courseId?: string | null } = {},
+    ): Promise<SessionModel[]> {
         const constraints: QueryConstraint[] = [
             where('studentId', '==', studentId),
+            ...(scope.institutionId ? [where('institutionId', '==', scope.institutionId)] : []),
+            ...(scope.courseId ? [where('courseId', '==', scope.courseId)] : []),
             orderBy('startedAt', 'desc'),
             limit(limitN),
         ];
@@ -221,7 +232,7 @@ function parseCourse(id: string, d: Record<string, any>): CourseModel {
     return {
         ...d,
         id,
-        minScore: d.minScore ?? d.requiredScore ?? 85,
+        minScore: d.minScore ?? d.requiredScore ?? COURSE_DEFAULT_MIN_SCORE,
         moduleCount: d.moduleCount ?? d.totalModules ?? 0,
         createdAt: tsToDate(d.createdAt),
         updatedAt: tsToDate(d.updatedAt),

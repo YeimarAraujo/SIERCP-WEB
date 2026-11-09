@@ -40,6 +40,15 @@ export const SCORE_RECOIL_WEIGHT        = 0.2;
 export const SCORE_INTERRUPTION_WEIGHT  = 0.1;
 
 export const PASS_SCORE      = 70;
+
+// Aprobación del curso y del certificado. Lo decidió el usuario el 2026-11-09;
+// debe validarlo un instructor certificado antes de usarlo en cursos oficiales.
+/** Promedio mínimo de notas oficiales; también es la nota mínima por defecto del curso. */
+export const COURSE_PASS_AVERAGE = 80;
+/** Porcentaje mínimo de compresiones correctas en profundidad, retroceso y ritmo, cada uno. */
+export const COURSE_PART_MIN_PCT = 70;
+/** Nota mínima que trae un curso si el instructor no define otra. */
+export const COURSE_DEFAULT_MIN_SCORE = COURSE_PASS_AVERAGE;
 export const EXCELLENT_SCORE = 90;
 
 // ── UI Colors ────────────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Save, ArrowLeft, AlertCircle, Plus, Layers } from 'lucide-react';
 import { getAuth } from 'firebase/auth';
 import { ModuleFormCard, DEFAULT_MODULE, type ModuleForm } from '@/components/course/module-form-card';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 interface Props {
     /** ID del curso a editar */
@@ -29,7 +30,7 @@ export function CourseEditView({ courseId: id, basePath }: Props) {
         title: '',
         description: '',
         certification: '',
-        minScore: 85,
+        minScore: COURSE_DEFAULT_MIN_SCORE,
         isActive: true,
         moduleCount: 1,
         inviteCode: '',
@@ -69,7 +70,7 @@ export function CourseEditView({ courseId: id, basePath }: Props) {
                     title: c.title || '',
                     description: c.description || '',
                     certification: c.certification || '',
-                    minScore: c.minScore ?? 85,
+                    minScore: c.minScore ?? COURSE_DEFAULT_MIN_SCORE,
                     isActive: c.isActive ?? true,
                     moduleCount: c.moduleCount ?? c.totalModules ?? 0,
                     inviteCode: c.inviteCode || '',

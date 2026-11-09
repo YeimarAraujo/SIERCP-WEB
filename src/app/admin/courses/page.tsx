@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { downloadCsv } from '@/shared/lib/export-utils';
 import toast from 'react-hot-toast';
 import { Plus, BookOpen, Users, ChevronRight, Search, FileText } from 'lucide-react';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 export default function AdminCoursesPage() {
     const router = useRouter();
@@ -158,7 +159,7 @@ export default function AdminCoursesPage() {
                                 Título: c.title,
                                 Certificación: c.certification || '',
                                 Inscritos: c.studentCount || 0,
-                                'Puntaje mín.': c.minScore || 85,
+                                'Puntaje mín.': c.minScore || COURSE_DEFAULT_MIN_SCORE,
                                 Código: c.inviteCode || '',
                                 Estado: c.isActive ? 'Activo' : 'Inactivo',
                             })), 'oferta-formativa');

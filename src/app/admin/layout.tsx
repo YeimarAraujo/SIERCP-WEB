@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { AdminShell } from '@/components/layout/admin-shell';
+import { ConsentGate } from '@/components/privacy/consent-gate';
 
 // Nunca cachear — las páginas de admin siempre requieren verificación fresca.
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
     // SuperAdmin tiene acceso total — bypassa la verificación de membership.
     if (decoded['isSuperAdmin'] === true) {
-        return <AdminShell>{children}</AdminShell>;
+        return <AdminShell><ConsentGate />{children}</AdminShell>;
     }
 
     // Para ADMIN: verificar en Firestore que el rol es ADMIN o SUPER_ADMIN.
@@ -43,5 +44,5 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         redirect('/login?error=account_disabled');
     }
 
-    return <AdminShell>{children}</AdminShell>;
+    return <AdminShell><ConsentGate />{children}</AdminShell>;
 }

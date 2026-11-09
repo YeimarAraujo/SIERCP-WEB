@@ -12,6 +12,7 @@ import type { Enrollment } from '@/models/course';
 import type { SessionModel } from '@/models/session';
 import { Mail, Calendar, User, Activity, BookOpen, Users, Award, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PeopleClient } from '@/shared/lib/people-client';
 
 export default function InstructorStudentDetailPage() {
     const params = useParams();
@@ -29,7 +30,10 @@ export default function InstructorStudentDetailPage() {
         
         const fetchData = async () => {
             try {
-                const studentData = await UserService.get(uid);
+                const studentData = await UserService.get(uid).catch(async () => {
+                    const [card] = await PeopleClient.get([uid]);
+                    return card ? ({ ...card, id: card.uid } as unknown as UserModel) : null;
+                });
                 if (!studentData || !['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(studentData.role)) {
                     router.push('/instructor/students');
                     return;
@@ -51,7 +55,13 @@ export default function InstructorStudentDetailPage() {
                     for (const en of batch) allEnrollments.push(en);
                 }
                 
-                const sessionsData = await SessionService.getByStudent(uid, 10);
+                // Solo las sesiones de los cursos de este instructor.
+                const perCourse = await Promise.all(
+                    courseIds.map((courseId) => SessionService.getByStudent(uid, 10, { courseId }).catch(() => [])),
+                );
+                const sessionsData = perCourse.flat()
+                    .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
+                    .slice(0, 10);
                 
                 setStudent(studentData as UserModel);
                 setEnrollments(allEnrollments);

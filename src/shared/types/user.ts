@@ -92,6 +92,10 @@ export interface UserModel {
   fcmTokens?: string[];
   fcmTokensUpdatedAt?: Date;
   appInstalled?: boolean;
+  /** Constancia de la autorización de datos (la escribe solo el servidor). */
+  privacy?: { policyVersion?: string; marketing?: boolean; isMinor?: boolean };
+  /** AAAA-MM-DD */
+  birthDate?: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -7,6 +7,7 @@ import type { CourseModel } from '@/shared/types/course';
 import type { PlatformEnrollment } from '@/shared/types/enrollment';
 import { getCursoBySlug } from '@/data/cursos';
 import type { StudentCourseCard, CourseCardSource } from '@/shared/types/student-course-card';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -317,7 +318,7 @@ export const StudentEnrollmentService = {
           instructorId: tData.institutionId || 'jomar-seguridad',
           instructorName: tData.institutionId === 'jomar-seguridad' ? 'Jomar Seguridad' : tData.institutionName || 'Institución',
           certification: 'SIERCP / JOMAR',
-          minScore: 80,
+          minScore: COURSE_DEFAULT_MIN_SCORE,
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ModuleFormCard, DEFAULT_MODULE, type ModuleForm } from '@/components/course/module-form-card';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 interface PersonRow { uid: string; firstName: string; lastName: string; email: string; identification: string; }
 
@@ -30,7 +31,7 @@ export default function NewCoursePage() {
         title: '',
         certification: 'BLS',
         description: '',
-        minScore: 85,
+        minScore: COURSE_DEFAULT_MIN_SCORE,
         inviteCode: '',
         isActive: true,
         instructorId: '',
@@ -162,7 +163,7 @@ export default function NewCoursePage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <FormInput label="Título del Curso" icon={Type} placeholder="Ej. RCP Básico para Adultos" required value={formData.title} onChange={(v: string) => setField('title')(v)} />
                                     <FormInput label="Certificación" icon={Award} placeholder="BLS" value={formData.certification} onChange={(v: string) => setField('certification')(v)} />
-                                    <FormInput label="Puntaje Mínimo (%)" icon={Hash} type="number" value={String(formData.minScore)} onChange={(v: string) => setField('minScore')(Number(v) || 85)} />
+                                    <FormInput label="Puntaje Mínimo (%)" icon={Hash} type="number" value={String(formData.minScore)} onChange={(v: string) => setField('minScore')(Number(v) || COURSE_DEFAULT_MIN_SCORE)} />
                                     <div>
                                         <label style={labelStyle}>Módulos</label>
                                         <div style={{ height: 52, display: 'flex', alignItems: 'center', padding: '0 16px', borderRadius: 14, border: '1px solid var(--border)', background: 'var(--muted)', fontSize: 14, fontWeight: 700, color: 'var(--brand)' }}>

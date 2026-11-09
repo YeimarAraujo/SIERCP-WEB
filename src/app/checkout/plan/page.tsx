@@ -2,26 +2,23 @@
 
 import { Suspense, useState, useRef, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuthStore } from '@/stores/auth-store';
 import { corporatePlans } from '@/data/planes';
 import { PricingPlanService, type PricingDoc } from '@/features/super-admin/services/plan.service';
 import { ChevronRight, ShieldCheck, Lock } from 'lucide-react';
-import { collection, query, where, getDocs, doc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { db, functions, auth } from '@/shared/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/shared/lib/firebase';
 import toast from 'react-hot-toast';
 import { fmt, validateEmail, validatePhone, validateNIT, IVA_RATE } from '../_lib';
 import {
     Field, Input, SearchableSelect, DocumentTypeSelect,
     AccountAccessSection, validateAccount, type AccountData, type AccountErrors, emptyAccountData,
     PasswordInput, PasswordStrengthBar, TermsRow,
-    CheckoutLayout, CheckoutSuspenseFallback, PaymentForm, PaymentSummaryBox,
+    CheckoutLayout, CheckoutSuspenseFallback, HostedPaymentStep,
     OrderSummaryShell, SummaryProductCard, SummaryFeatureList, SummaryPriceBlock, SummaryBadge,
     SelectableOption, RadioDot, OptionBadge,
     btnPrimary, btnSecondary,
-    type PayMethod, type CardData, type PseData,
 } from '../_components/ui';
+import { redirectToWompi, resolveCheckoutBuyer } from '../_lib/hosted-payment';
 import { KeyRound } from 'lucide-react';
 import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
 import { TIPOS_INSTITUCION } from '@/data/institutions';
@@ -412,32 +409,26 @@ function Step3({ adminForm, setAdminForm, adminErrors, accountData, setAccountDa
 
 // ── Step 3: Payment ───────────────────────────────────────────────────────────
 
-function Step4({ plan, companyForm, processing, paySubmitRef, onBack, onPay }: {
+function Step4({ plan, companyForm, processing, onBack, onPay }: {
     plan: PricingDoc; companyForm: CompanyForm;
     processing: boolean;
-    paySubmitRef: { current: (() => void) | null };
     onBack: () => void;
-    onPay: (method: PayMethod, card: CardData, pse: PseData) => void;
+    onPay: () => void;
 }) {
     const { total } = annualTotal(plan);
     return (
-        <PaymentForm
-            payLabel={`Contratar plan — ${fmt(total)} COP/año`}
+        <HostedPaymentStep
+            rows={[
+                { label: 'Plan', value: plan.name },
+                { label: 'Institución', value: companyForm.institucionName },
+                { label: 'Contrato', value: '12 meses · anual' },
+            ]}
+            totalLabel="Total anual a pagar"
+            total={fmt(total)}
+            payLabel={`Pagar ${fmt(total)} COP con Wompi`}
             processing={processing}
             onBack={onBack}
             onPay={onPay}
-            submitRef={paySubmitRef}
-            summaryContent={
-                <PaymentSummaryBox
-                    rows={[
-                        { label: 'Plan', value: plan.name },
-                        { label: 'Institución', value: companyForm.institucionName },
-                        { label: 'Contrato', value: '12 meses · anual' },
-                    ]}
-                    totalLabel="Total anual a pagar"
-                    total={fmt(total)}
-                />
-            }
         />
     );
 }
@@ -453,146 +444,6 @@ async function checkDuplicateNIT(nit: string): Promise<boolean> {
 async function checkDuplicateEmail(email: string): Promise<boolean> {
     const snap = await getDocs(query(collection(db, 'institutions'), where('adminEmail', '==', email.toLowerCase())));
     return !snap.empty;
-}
-
-// ── Client-side provisioning (fallback when CF unavailable) ──────────────────
-
-
-async function provisionClientSide(uid: string, company: CompanyForm, admin: AdminForm, planSlug: string, isExisting = false): Promise<string> {
-    const planExpiresDate = new Date();
-    planExpiresDate.setFullYear(planExpiresDate.getFullYear() + 1);
-    const planExpiresAt = Timestamp.fromDate(planExpiresDate);
-    const nit = company.nit.replace(/[.\s-]/g, '');
-
-    // Step 1: Create institution
-    const institutionRef = doc(collection(db, 'institutions'));
-    const institutionId = institutionRef.id;
-    await setDoc(institutionRef, {
-        name: company.institucionName,
-        nit,
-        mode: 'MANUAL',
-        code: `${company.institucionName.slice(0, 4)}-${institutionId.slice(0, 4).toUpperCase()}`,
-        type: company.tipoInstitucion,
-        status: 'active',
-        contactEmail: company.email.toLowerCase(),
-        contactPhone: company.telefono || null,
-        address: company.direccion || null,
-        city: company.ciudad || null,
-        department: company.departamento || null,
-        country: 'Colombia',
-        primaryAdminId: uid,
-        memberCount: 1,
-        activeCoursesCount: 0,
-        totalSessionsCount: 0,
-        maxDevices: 10,
-        maxInstructors: 10,
-        maxStudents: 10000,
-        planType: planSlug,
-        planActivatedAt: serverTimestamp(),
-        planExpiresAt,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        createdBy: uid,
-        adminIds: [uid],
-        config: {},
-
-    });
-
-    // Step 2: Create (new account) or promote (existing account) the ADMIN profile.
-    if (isExisting) {
-        // Existing user: promote to ADMIN of the new institution WITHOUT overwriting
-        // their profile. Las reglas (Caso 2 — auto-promoción checkout) exigen NO tocar
-        // certVerification/isActive/accountStatus/isSuperAdmin, así que se omiten aquí.
-        await setDoc(doc(db, 'users', uid), {
-            role: 'ADMIN',
-            institutionId,
-            firstName: admin.firstName,
-            lastName: admin.lastName,
-            documentType: admin.documentType || undefined,
-            identification: admin.identification,
-            phoneNumber: admin.phone,
-            address: admin.address,
-            city: admin.city,
-            department: admin.department,
-            country: 'Colombia',
-            updatedAt: serverTimestamp(),
-        }, { merge: true });
-    } else {
-        await setDoc(doc(db, 'users', uid), {
-            uid,
-            email: admin.email.toLowerCase(),
-            firstName: admin.firstName,
-            lastName: admin.lastName,
-            documentType: admin.documentType || undefined,
-            identification: admin.identification,
-            phoneNumber: admin.phone,
-            address: admin.address,
-            city: admin.city,
-            department: admin.department,
-            country: 'Colombia',
-            institutionId,
-            role: 'ADMIN',
-            isActive: true,
-            certVerification: 'NONE',
-            coursesCreated: 0,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-            stats: { totalSessions: 0, sessionsToday: 0, averageScore: 0, bestScore: 0, streakDays: 0, totalHours: 0, averageDepthMm: 0, averageRatePerMin: 0 },
-        });
-    }
-
-    // Step 3: Create admin membership
-    await setDoc(doc(db, 'memberships', `${uid}_${institutionId}`), {
-        userId: uid,
-        institutionId,
-        role: 'ADMIN',
-        status: 'approved',
-        isActive: true,
-        planType: planSlug,
-        planExpiresAt,
-        creditBalance: 0,
-        sstLicenseVerified: false,
-        usageCurrentUsers: 0,
-        usageCurrentCourses: 0,
-        usageCertificatesThisMonth: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-    });
-
-
-
-    return institutionId;
-}
-
-// ── CF types ──────────────────────────────────────────────────────────────────
-
-interface CreateOrderPayload {
-    planSlug: string;
-    company: CompanyForm;
-    payMethod: string;
-    cardLast4: string | null;
-    bank: string | null;
-}
-interface CreateOrderResult {
-    orderId: string;
-    monthlyBaseCOP: number;
-    annualFullCOP: number;
-    annualDiscountPercent: number;
-    discountAmount: number;
-    annualSubtotalCOP: number;
-    ivaCOP: number;
-    totalCOP: number;
-}
-
-interface ProvisionPayload {
-    orderId: string;
-    planSlug: string;
-    company: CompanyForm;
-    adminData: AdminForm;
-}
-interface ProvisionResult {
-    institutionId: string;
-    uid: string;
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -611,7 +462,6 @@ const staticFallback: PricingDoc[] = corporatePlans.filter(p => !p.isContact).ma
 function Content() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const updateLocalUser = useAuthStore(s => s.updateLocalUser);
     const planFromQuery = searchParams.get('plan');
     const [step, setStep] = useState(planFromQuery ? 1 : 0);
     const [selectedPlan, setSelectedPlan] = useState(
@@ -626,7 +476,6 @@ function Content() {
     const [accountErrors, setAccountErrors] = useState<AccountErrors>({});
     const [checking, setChecking] = useState(false);
     const [processing, setProcessing] = useState(false);
-    const paySubmitRef = useRef<(() => void) | null>(null);
     const accountSubmitRef = useRef<(() => Promise<boolean>) | null>(null);
 
     useEffect(() => {
@@ -642,7 +491,6 @@ function Content() {
 
     const plans = firePlans;
     const currentPlan = plans.find(p => p.slug === selectedPlan) ?? plans[0];
-    const { total: totalAnual } = annualTotal(currentPlan);
 
     const handleStep2Next = async () => {
 
@@ -750,79 +598,38 @@ function Content() {
 
         setStep(3);
     };
-    const handlePay = async (method: PayMethod, card: CardData, pse: PseData) => {
+    const handlePay = async () => {
         setProcessing(true);
         try {
-            const isExisting = accountData.mode === 'existing';
-            const email = adminForm.email.trim().toLowerCase();
+            const buyer = await resolveCheckoutBuyer({ mode: accountData.mode, email: adminForm.email, password: accountData.contrasena });
 
-            // ── 1. Resolver el usuario autenticado ──────────────────────────────
-            // Cuenta existente: ya se verificó (inició sesión) en el paso de credenciales.
-            // Cuenta nueva: se crea aquí, DENTRO del try, para capturar email-already-in-use.
-            let uid: string;
-            if (isExisting) {
-                if (!auth.currentUser) {
-                    toast.error('Tu sesión expiró. Vuelve a verificar tu cuenta.');
-                    setStep(2);
-                    return;
-                }
-                uid = auth.currentUser.uid;
-            } else {
-                const password = accountData.contrasena;
-                if (!email || password.length < 6) {
-                    toast.error('Correo o contraseña inválidos.');
-                    return;
-                }
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                uid = cred.user.uid;
-            }
+            try {
+                sessionStorage.setItem('siercp_plan_tx', JSON.stringify({ institutionName: companyForm.institucionName }));
+            } catch { /* solo mejora el texto de confirmación */ }
 
-            // ── 2. Aprovisionar institución + usuario + membership ──────────────
-            const institutionId = await provisionClientSide(
-                uid, companyForm, adminForm, currentPlan.slug, isExisting,
-            );
-
-            // ── 3. Crear la orden UNA sola vez, ya enlazada ─────────────────────
-            // Antes se creaba con institutionId:null y se hacía updateDoc después,
-            // pero la regla de `orders` solo permite update a SuperAdmin → permiso
-            // denegado. Creándola ya completa evitamos por completo ese update.
-            const orderId = crypto.randomUUID();
-            await setDoc(doc(db, 'orders', orderId), {
-                orderId,
-                userId: uid,
-                institutionId,
-                type: 'plan-corporativo',
-                total: totalAnual,
-                company: companyForm,
-                payMethod: method,
-                product: `Plan ${currentPlan.name}`,
-                cardLast4: method === 'card' ? card.numero.replace(/\s/g, '').slice(-4) : null,
-                bank: method === 'pse' ? pse.banco : null,
-                orderType: 'Plan',
-                planSlug: currentPlan.slug,
-                planName: currentPlan.name,
-                priceTotal: totalAnual,
-                PriceMonth: currentPlan.monthlyCOP,
-                admin: adminForm,
-                status: 'paid',
-                createdAt: serverTimestamp(),
+            await redirectToWompi('/api/checkout/plan', buyer, {
+                planType: currentPlan.slug,
+                institutionName: companyForm.institucionName.trim(),
+                institutionNit: companyForm.nit.replace(/[.\s]/g, ''),
+                institutionCity: companyForm.ciudad,
+                institutionDepartment: companyForm.departamento,
+                institutionAddress: companyForm.direccion,
+                institutionPhone: companyForm.telefono,
+                institutionEmail: companyForm.email.trim().toLowerCase(),
+                institutionType: companyForm.tipoInstitucion,
+                adminEmail: (buyer.email ?? adminForm.email).trim().toLowerCase(),
+                adminFirstName: adminForm.firstName.trim(),
+                adminLastName: adminForm.lastName.trim(),
+                adminPhone: adminForm.phone,
+                adminDocumentType: adminForm.documentType,
+                adminIdentification: adminForm.identification,
+                adminCity: adminForm.city,
+                adminDepartment: adminForm.department,
+                adminAddress: adminForm.address,
             });
-
-            // ── 4. Reflejar localmente y redirigir ──────────────────────────────
-            updateLocalUser({ institutionId, role: 'ADMIN' });
-            router.push(`/checkout/resultado?type=plan&plan=${currentPlan.slug}&status=approved`);
         } catch (err: any) {
             console.error('PAYMENT FLOW ERROR', err);
-            const code = err?.code ?? '';
-            const msg = err?.message ?? '';
-            if (code === 'auth/email-already-in-use') {
-                toast.error('Este correo ya tiene cuenta. Inicia sesión para continuar.');
-            } else if (code === 'permission-denied' || msg.includes('insufficient permissions')) {
-                toast.error('No se pudo completar por permisos. Intenta de nuevo o contacta a soporte.');
-            } else {
-                toast.error(msg || 'Error en el proceso. Intenta de nuevo.');
-            }
-        } finally {
+            toast.error(err?.message || 'Error en el proceso. Intenta de nuevo.');
             setProcessing(false);
         }
     };
@@ -847,21 +654,13 @@ function Content() {
                 </button>
                 <button onClick={() => setStep(1)} disabled={processing} style={{ ...btnSecondary, width: '100%', justifyContent: 'center' }}>Atrás</button>
             </div>
-        ) : step === 3 ? (
-            <button
-                onClick={() => paySubmitRef.current?.()}
-                disabled={processing}
-                style={{ ...btnPrimary, width: '100%', justifyContent: 'center', opacity: processing ? 0.75 : 1, transition: 'background 0.2s, opacity 0.2s' }}
-            >
-                {processing ? <>{spinner} Procesando…</> : <><Lock size={14} /> Completar pago</>}
-            </button>
         ) : null;
 
     const steps: Record<number, React.ReactNode> = {
         0: <Step1 plans={plans} selected={selectedPlan} onSelect={setSelectedPlan} />,
         1: <Step2 form={companyForm} setForm={setCompanyForm} errors={companyErrors} accountData={accountData} setAccountData={setAccountData} accountErrors={accountErrors} accountSubmitRef={accountSubmitRef} />,
         2: <Step3 adminForm={adminForm} setAdminForm={setAdminForm} adminErrors={adminErrors} accountData={accountData} setAccountData={setAccountData} accountErrors={accountErrors} accountSubmitRef={accountSubmitRef} />,
-        3: <Step4 plan={currentPlan} companyForm={companyForm} processing={processing} paySubmitRef={paySubmitRef} onBack={() => setStep(2)} onPay={handlePay} />,
+        3: <Step4 plan={currentPlan} companyForm={companyForm} processing={processing} onBack={() => setStep(2)} onPay={handlePay} />,
     };
 
     return (

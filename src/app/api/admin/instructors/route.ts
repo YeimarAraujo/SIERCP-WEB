@@ -59,36 +59,37 @@ export async function POST(req: NextRequest) {
             const membershipRef = adminDb.collection('memberships').doc(membershipId);
             const snap = await membershipRef.get();
 
+            // La persona ya tiene cuenta: entra a esta institución solo si acepta
+            // la invitación (Ley 1581). Si ya era miembro aprobado, solo cambia el rol.
+            const current = snap.data();
+            const alreadyMember = current?.status === 'approved' && current?.isActive === true;
             if (snap.exists) {
-                // Re-activate existing membership
                 await membershipRef.update({
                     role: 'INSTRUCTOR',
-                    status: 'approved',
-                    isActive: true,
+                    ...(alreadyMember ? {} : { status: 'invited', isActive: false }),
                     ...(creatorSedeId ? { sedeId: creatorSedeId } : {}),
                     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
                 });
             } else {
-                // Create new membership
                 await membershipRef.set({
                     userId,
                     institutionId,
                     role: 'INSTRUCTOR',
-                    status: 'approved',
-                    isActive: true,
+                    status: 'invited',
+                    isActive: false,
                     ...(creatorSedeId ? { sedeId: creatorSedeId } : {}),
                     createdAt: admin.firestore.FieldValue.serverTimestamp(),
                     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
                 });
             }
-            if (creatorSedeId) {
+            if (creatorSedeId && alreadyMember) {
                 await adminDb.collection('users').doc(userId).set(
                     { sedeId: creatorSedeId, updatedAt: admin.firestore.FieldValue.serverTimestamp() },
                     { merge: true },
                 );
             }
 
-            return NextResponse.json({ success: true, membershipId });
+            return NextResponse.json({ success: true, membershipId, invited: !alreadyMember });
         }
 
         // ── Create new instructor ──────────────────────────────────────────

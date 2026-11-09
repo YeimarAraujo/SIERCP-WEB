@@ -8,6 +8,7 @@ import { Save, ArrowLeft, AlertCircle, Plus, Layers } from 'lucide-react';
 import { ModuleFormCard, DEFAULT_MODULE, type ModuleForm } from '@/components/course/module-form-card';
 import { getAuth } from 'firebase/auth';
 import toast from 'react-hot-toast';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 export default function AdminEditCoursePage() {
     const params = useParams();
@@ -21,7 +22,7 @@ export default function AdminEditCoursePage() {
         title: '',
         description: '',
         certification: '',
-        minScore: 85,
+        minScore: COURSE_DEFAULT_MIN_SCORE,
         minAttendance: 0,
         endDate: '',
         isActive: true,
@@ -65,7 +66,7 @@ export default function AdminEditCoursePage() {
                     title: c.title || '',
                     description: c.description || '',
                     certification: c.certification || '',
-                    minScore: c.minScore ?? 85,
+                    minScore: c.minScore ?? COURSE_DEFAULT_MIN_SCORE,
                     minAttendance: c.minAttendance ?? 0,
                     endDate: typeof c.endDate === 'string' ? c.endDate.slice(0, 10) : '',
                     isActive: c.isActive ?? true,
@@ -175,7 +176,7 @@ export default function AdminEditCoursePage() {
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                                <Field label="Puntaje mínimo (%)" type="number" value={String(formData.minScore ?? 85)} onChange={(v) => setFormData({ ...formData, minScore: Number(v) })} required inputStyle={inputStyle} />
+                                <Field label="Puntaje mínimo (%)" type="number" value={String(formData.minScore ?? COURSE_DEFAULT_MIN_SCORE)} onChange={(v) => setFormData({ ...formData, minScore: Number(v) })} required inputStyle={inputStyle} />
                                 <div style={{ display: 'grid', gap: 8 }}>
                                     <label style={{ fontSize: 14, fontWeight: 700, color: 'var(--foreground)' }}>Total de módulos</label>
                                     <div style={{ ...inputStyle, display: 'flex', alignItems: 'center', fontWeight: 700, color: 'var(--brand)', height: 42 }}>

@@ -66,7 +66,8 @@ const WompiTransactionSchema = z.object({
   amount_in_cents: z.number().int().positive(),
   currency: z.string().length(3),
   payment_method_type: z.string().max(20),
-  customer_email: z.string().email().max(254).optional().default(''),
+  customer_email: z.string().max(254).nullish().transform((v) => v ?? ''),
+  payment_link_id: z.string().max(100).nullish(),
   finalized_at: z.string().nullable().optional(),
   error_code: z.string().nullable().optional(),
   status_message: z.string().nullable().optional(),
@@ -76,7 +77,8 @@ export const WompiWebhookSchema = z.object({
   event: z.string().min(1).max(80),
   data: z.object({ transaction: WompiTransactionSchema }),
   timestamp: z.number().int().positive(),
-  environment: z.enum(['test', 'production']),
+  // Wompi documenta "prod"; es informativo y no decide nada aquí.
+  environment: z.string().max(20).optional(),
   signature: z.object({
     checksum: z.string().min(10),
     properties: z.array(z.string()).min(1).max(10),
@@ -97,14 +99,23 @@ const shippingAddressSchema = z.object({
   country:    z.literal('CO'),
 });
 
+// Perfil para crear la cuenta del comprador si aún no existe.
+const buyerProfileSchema = z.object({
+  firstName:      z.string().max(80).optional(),
+  lastName:       z.string().max(80).optional(),
+  documentType:   z.string().max(10).optional(),
+  identification: z.string().max(30).optional(),
+  phoneNumber:    z.string().max(20).optional(),
+}).optional().default({});
+
 export const ManikinCheckoutRequestSchema = z.object({
   packSlug:        z.enum(['unidad', 'pack-4', 'pack-8']),
-  buyerName:       z.string().min(3, 'Nombre requerido').max(120),
-  buyerEmail:      email,
-  buyerPhone:      z.string().min(7, 'Teléfono requerido').max(20),
+  buyerType:       z.enum(['empresa', 'persona']),
+  buyerName:       z.string().max(120).optional().default(''),
+  buyerDocument:   z.string().max(30).optional().default(''),
+  buyerPhone:      z.string().max(20).optional().default(''),
   shippingAddress: shippingAddressSchema,
-  discountCode:    z.string().max(30).nullable().optional(),
-  discountCents:   z.number().int().nonnegative().optional().default(0),
+  profile:         buyerProfileSchema,
 });
 
 export type ManikinCheckoutRequestBody = z.infer<typeof ManikinCheckoutRequestSchema>;
@@ -112,9 +123,8 @@ export type ManikinCheckoutRequestBody = z.infer<typeof ManikinCheckoutRequestSc
 // ── POST /api/checkout/licencia-sst ──────────────────────────────────────────
 
 export const LicenciaSSTCheckoutRequestSchema = z.object({
-  planSlug:      z.enum(['sst-basico', 'sst-pro', 'sst-expert']),
-  discountCode:  z.string().max(30).nullable().optional(),
-  discountCents: z.number().int().nonnegative().optional().default(0),
+  planSlug: z.enum(['sst-basico', 'sst-pro', 'sst-expert']),
+  profile:  buyerProfileSchema,
 });
 
 export type LicenciaSSTCheckoutRequestBody = z.infer<typeof LicenciaSSTCheckoutRequestSchema>;
@@ -122,9 +132,8 @@ export type LicenciaSSTCheckoutRequestBody = z.infer<typeof LicenciaSSTCheckoutR
 // ── POST /api/checkout/pack ───────────────────────────────────────────────────
 
 export const PackCheckoutRequestSchema = z.object({
-  packSlug:      z.enum(['pack-5', 'pack-15', 'pack-40']),
-  discountCode:  z.string().max(30).nullable().optional(),
-  discountCents: z.number().int().nonnegative().optional().default(0),
+  packSlug: z.enum(['pack-5', 'pack-15', 'pack-40']),
+  profile:  buyerProfileSchema,
 });
 
 export type PackCheckoutRequestBody = z.infer<typeof PackCheckoutRequestSchema>;
@@ -132,17 +141,26 @@ export type PackCheckoutRequestBody = z.infer<typeof PackCheckoutRequestSchema>;
 // ── POST /api/checkout/plan ───────────────────────────────────────────────────
 
 export const PlanCheckoutRequestSchema = z.object({
-  planType: z.enum(['pyme', 'business', 'corporate', 'enterprise', 'sstSinLicencia', 'sstConLicencia']),
+  planType: z.string().min(2).max(40),
   institutionName: z.string().min(2, 'Nombre requerido').max(120),
   institutionNit: z
     .string()
-    .regex(/^\d{7,10}(-\d)?$/, 'NIT inválido — ej: 900123456 o 900123456-1'),
+    .regex(/^\d{7,10}(-?\d)?$/, 'NIT inválido — ej: 900123456 o 900123456-1'),
   institutionCity: z.string().min(2, 'Ciudad requerida').max(80),
-  institutionType: z.enum(['empresa', 'hospital', 'clinica', 'universidad', 'otro']),
+  institutionDepartment: z.string().max(80).optional().default(''),
+  institutionAddress: z.string().max(200).optional().default(''),
+  institutionPhone: z.string().max(20).optional().default(''),
+  institutionEmail: email,
+  institutionType: z.string().min(2).max(60),
   adminEmail: email,
   adminFirstName: z.string().min(2, 'Nombre requerido').max(80),
   adminLastName: z.string().min(2, 'Apellido requerido').max(80),
-  adminPhone: z.string().min(7).max(20).optional().default(''),
+  adminPhone: z.string().max(20).optional().default(''),
+  adminDocumentType: z.string().max(10).optional().default(''),
+  adminIdentification: z.string().max(30).optional().default(''),
+  adminCity: z.string().max(80).optional().default(''),
+  adminDepartment: z.string().max(80).optional().default(''),
+  adminAddress: z.string().max(200).optional().default(''),
 });
 
 export type PlanCheckoutRequestBody = z.infer<typeof PlanCheckoutRequestSchema>;

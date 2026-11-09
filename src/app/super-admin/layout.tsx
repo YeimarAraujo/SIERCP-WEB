@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { adminAuth } from '@/lib/firebase-admin';
 import { ToastProvider } from '@/components/layout/toast-provider';
 import { SuperAdminLayoutClient } from './layout-client';
+import { ConsentGate } from '@/components/privacy/consent-gate';
 
 // Never cache — SA pages always require a fresh auth check.
 export const dynamic = 'force-dynamic';
@@ -28,7 +29,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
 
     return (
         <>
-            <SuperAdminLayoutClient>{children}</SuperAdminLayoutClient>
+            <SuperAdminLayoutClient><ConsentGate />{children}</SuperAdminLayoutClient>
             <ToastProvider />
         </>
     );
