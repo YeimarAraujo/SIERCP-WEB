@@ -1,25 +1,22 @@
 'use client';
 
-import { Suspense, useState, useRef } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/page/Navbar';
 import Footer from '@/components/page/Footer';
 import { maniquiPackages } from '@/data/planes';
 import { ChevronRight, ShieldCheck, Building2, User, Lock } from 'lucide-react';
-import { collection, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { db, auth } from '@/shared/lib/firebase';
 import toast from 'react-hot-toast';
 import { fmt, validateEmail, validatePhone, validateNIT, IVA_RATE } from '../_lib';
 import {
     Field, Input, SelectInput, DocumentTypeSelect,
     AccountAccessSection, validateAccount, type AccountData, type AccountErrors, emptyAccountData,
-    CheckoutLayout, CheckoutSuspenseFallback, PaymentForm, PaymentSummaryBox,
+    CheckoutLayout, CheckoutSuspenseFallback, HostedPaymentStep,
     OrderSummaryShell, SummaryProductCard, SummaryFeatureList, SummaryPriceBlock, SummaryBadge,
     SelectableOption, RadioDot, OptionBadge,
     btnPrimary, btnSecondary,
-    type PayMethod, type CardData, type PseData,
 } from '../_components/ui';
+import { redirectToWompi, resolveCheckoutBuyer, splitFullName } from '../_lib/hosted-payment';
 
 const DEPARTMENTS = [
     'Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bogotá D.C.', 'Bolívar', 'Boyacá', 'Caldas',
@@ -264,14 +261,12 @@ function Step3({ form, setForm, errors }: { form: ShippingForm; setForm: (f: Shi
 
 // ── Step 4: Payment ───────────────────────────────────────────────────────────
 
-function Step4({ packSlug, buyerType, empresa, persona, shipping, processing, paySubmitRef, onBack, onPay }: {
+function Step4({ packSlug, buyerType, empresa, persona, processing, onBack, onPay }: {
     packSlug: string; buyerType: BuyerType;
     empresa: EmpresaForm; persona: PersonaForm;
-    shipping: ShippingForm;
     processing: boolean;
-    paySubmitRef: { current: (() => void) | null };
     onBack: () => void;
-    onPay: (method: PayMethod, card: CardData, pse: PseData) => void;
+    onPay: () => void;
 }) {
     const pkg = maniquiPackages.find(p => p.slug === packSlug) ?? maniquiPackages[0];
     const base = pkg.totalPriceCOP ?? 0;
@@ -279,23 +274,18 @@ function Step4({ packSlug, buyerType, empresa, persona, shipping, processing, pa
     const buyerName = buyerType === 'empresa' ? empresa.razonSocial : persona.nombre;
 
     return (
-        <PaymentForm
-            payLabel={`Pagar ${fmt(total)} COP`}
+        <HostedPaymentStep
+            rows={[
+                { label: 'Pack', value: pkg.name },
+                ...(buyerName ? [{ label: 'Comprador', value: buyerName }] : []),
+                { label: 'Envío', value: 'Gratis', green: true },
+            ]}
+            totalLabel="Total a pagar"
+            total={fmt(total)}
+            payLabel={`Pagar ${fmt(total)} COP con Wompi`}
             processing={processing}
             onBack={onBack}
             onPay={onPay}
-            submitRef={paySubmitRef}
-            summaryContent={
-                <PaymentSummaryBox
-                    rows={[
-                        { label: 'Pack', value: pkg.name },
-                        { label: 'Comprador', value: buyerName },
-                        { label: 'Envío', value: 'Gratis', green: true },
-                    ]}
-                    totalLabel="Total a pagar"
-                    total={fmt(total)}
-                />
-            }
         />
     );
 }
@@ -304,7 +294,6 @@ function Step4({ packSlug, buyerType, empresa, persona, shipping, processing, pa
 
 function Content() {
     const searchParams = useSearchParams();
-    const router = useRouter();
     const [step, setStep] = useState(0);
     const [selectedPack, setSelectedPack] = useState(searchParams.get('pack') ?? maniquiPackages.find(p => p.totalPriceCOP !== null)?.slug ?? '');
     const [buyerType, setBuyerType] = useState<BuyerType>('empresa');
@@ -317,7 +306,6 @@ function Content() {
     const [shipping, setShipping] = useState<ShippingForm>(emptyShipping);
     const [shippingErrors, setShippingErrors] = useState<ShippingErrors>({});
     const [processing, setProcessing] = useState(false);
-    const paySubmitRef = useRef<(() => void) | null>(null);
 
     const pkg = maniquiPackages.find(p => p.slug === selectedPack) ?? maniquiPackages[0];
     const base = pkg.totalPriceCOP ?? 0;
@@ -348,75 +336,31 @@ function Content() {
         setStep(3);
     };
 
-    const handlePay = async (method: PayMethod, card: CardData, pse: PseData) => {
+    const handlePay = async () => {
         setProcessing(true);
         try {
-            const isExisting = accountData.mode === 'existing';
+            const buyer = await resolveCheckoutBuyer({ mode: accountData.mode, email: currentEmail, password: accountData.contrasena });
+            const isCompany = buyerType === 'empresa';
+            const contactName = isCompany ? empresa.responsable : persona.nombre;
+            const phone = isCompany ? empresa.telefono : persona.telefono;
+            const document = isCompany ? empresa.nit : persona.cedula;
 
-            // 1. Autenticar al comprador — la regla de `orders` exige userId == uid.
-            let uid: string;
-            let email: string;
-            if (isExisting) {
-                if (!auth.currentUser) {
-                    toast.error('Tu sesión expiró. Vuelve a verificar tu cuenta.');
-                    setStep(1);
-                    return;
-                }
-                uid = auth.currentUser.uid;
-                email = auth.currentUser.email ?? '';
-            } else {
-                email = currentEmail.trim().toLowerCase();
-                const cred = await createUserWithEmailAndPassword(auth, email, accountData.contrasena);
-                uid = cred.user.uid;
-                const fullName = (buyerType === 'empresa' ? empresa.responsable : persona.nombre).trim();
-                const parts = fullName.split(/\s+/);
-                try {
-                    await setDoc(doc(db, 'users', uid), {
-                        uid, email,
-                        firstName: parts[0] || fullName || '—',
-                        lastName: parts.slice(1).join(' ') || parts[0] || '—',
-                        documentType: buyerType === 'persona' ? persona.tipoDocumento : 'NIT',
-                        identification: buyerType === 'empresa' ? empresa.nit : persona.cedula,
-                        phoneNumber: buyerType === 'empresa' ? empresa.telefono : persona.telefono,
-                        role: 'USUARIO',
-                        isActive: true,
-                        certVerification: 'NONE',
-                        createdAt: serverTimestamp(),
-                        updatedAt: serverTimestamp(),
-                    });
-                } catch (e) { console.error('user doc create failed', e); }
-            }
-
-            // 2. Guardar la orden enlazada al comprador.
-            await addDoc(collection(db, 'orders'), {
-                type: 'manikin',
-                packSlug: pkg.slug,
-                packName: pkg.name,
-                quantity: pkg.quantity ?? 1,
+            await redirectToWompi('/api/checkout/manikin', buyer, {
+                packSlug: selectedPack,
                 buyerType,
-                userId: uid,
-                buyer: isExisting ? null : (buyerType === 'empresa' ? empresa : persona),
-                buyerEmail: email,
-                shipping,
-                payMethod: method,
-                cardLast4: method === 'card' ? card.numero.replace(/\s/g, '').slice(-4) : null,
-                bank: method === 'pse' ? pse.banco : null,
-                totalCOP: total,
-                total, // campo canónico leído por super-admin/pedidos
-                status: 'pending_payment',
-                shippingStatus: 'pending',
-                createdAt: serverTimestamp(),
+                buyerName: isCompany ? empresa.razonSocial : persona.nombre,
+                buyerDocument: document,
+                buyerPhone: phone,
+                shippingAddress: { ...shipping, country: 'CO' },
+                profile: {
+                    ...splitFullName(contactName),
+                    documentType: isCompany ? 'NIT' : persona.tipoDocumento,
+                    identification: document,
+                    phoneNumber: phone,
+                },
             });
-
-            router.push(`/checkout/resultado?type=manikin&pack=${selectedPack}&status=approved`);
         } catch (err: any) {
-            const code = err?.code ?? '';
-            if (code === 'auth/email-already-in-use') {
-                toast.error('Este correo ya tiene cuenta. Inicia sesión para continuar.');
-            } else {
-                toast.error(err?.message || 'No se pudo completar la compra. Intenta de nuevo.');
-            }
-        } finally {
+            toast.error(err?.message || 'No se pudo iniciar el pago. Intenta de nuevo.');
             setProcessing(false);
         }
     };
@@ -459,14 +403,6 @@ function Content() {
                 </button>
                 <button onClick={() => setStep(1)} style={{ ...btnSecondary, width: '100%', justifyContent: 'center' }}>Atrás</button>
             </div>
-        ) : step === 3 ? (
-            <button
-                onClick={() => paySubmitRef.current?.()}
-                disabled={processing}
-                style={{ ...btnPrimary, width: '100%', justifyContent: 'center', opacity: processing ? 0.75 : 1, background: processing ? '#4b5563' : undefined, transition: 'background 0.2s, opacity 0.2s' }}
-            >
-                {processing ? <>{spinner} Procesando…</> : <><Lock size={14} /> Pagar {fmt(total)} COP</>}
-            </button>
         ) : null;
 
     const steps: Record<number, React.ReactNode> = {
@@ -483,9 +419,7 @@ function Content() {
         3: <Step4
             packSlug={selectedPack} buyerType={buyerType}
             empresa={empresa} persona={persona}
-            shipping={shipping}
             processing={processing}
-            paySubmitRef={paySubmitRef}
             onBack={() => setStep(2)}
             onPay={handlePay}
         />,

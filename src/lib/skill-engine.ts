@@ -156,8 +156,10 @@ export async function updateSessionStats(
   sessionId: string,
   session: admin.firestore.DocumentData
 ): Promise<void> {
-  const score = (session.metrics?.qualityScore ?? session.metrics?.score ?? 0) as number;
-  const approved = (session.metrics?.approved ?? false) as boolean;
+  // Nota oficial del servidor; sin señal guardada, la sesión no suma nota al ranking.
+  const official = session.officialGrade as { score?: number; approved?: boolean; unavailable?: boolean } | undefined;
+  const score = official && !official.unavailable ? Number(official.score ?? 0) : 0;
+  const approved = official && !official.unavailable ? official.approved === true : false;
   const durationMin = ((session.duration ?? 0) as number) / 60;
   const xpGained = 15 + (approved ? 30 : 0) + (score === 100 ? 20 : 0);
 

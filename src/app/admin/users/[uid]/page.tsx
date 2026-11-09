@@ -38,7 +38,7 @@ export default function UserDetailPage() {
             
             if (['USUARIO', 'USUARIO_SST', 'USUARIO_PROFESIONAL'].includes(u.role)) {
                 Promise.all([
-                    SessionService.getByStudent(uid, 10),
+                    u.institutionId ? SessionService.getByStudent(uid, 10, { institutionId: u.institutionId }) : Promise.resolve([]),
                     CourseService.getByStudent(uid)
                 ]).then(([sess, crs]) => {
                     setSessions(sess as SessionModel[]);

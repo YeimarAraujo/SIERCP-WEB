@@ -1,199 +1,147 @@
 /**
  * POST /api/checkout/plan
  *
- * Public endpoint (no auth required — new customer buying their first plan).
- * Creates a Wompi payment link for an institutional plan subscription and stores
- * all checkout metadata server-side. The institution and admin account are
- * created ONLY after the Wompi webhook confirms APPROVED status.
+ * Inicia la compra de un plan corporativo. La cuenta del comprador ya existe
+ * (Authorization: Bearer <ID token>) pero la institución NO se crea aquí: solo
+ * después de que el webhook de Wompi confirme APPROVED.
  *
- * SECURITY:
- *  - Price is resolved server-side; the client sends NO amount.
- *  - Institution and admin are NOT created here — only after confirmed payment.
- *  - Rate-limited: 3 requests/minute per IP.
- *  - All institution data is stored in Firestore via Admin SDK (server-only write).
- *  - Input validated with Zod before any processing.
+ * - El monto se resuelve en servidor; el cliente no lo envía.
+ * - El perfil base se crea sin privilegios; el rol ADMIN llega con el pago.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { rateLimiter, getClientIp } from '@/lib/rate-limiter';
 import { auditLog } from '@/lib/audit-logger';
 import { PlanCheckoutRequestSchema, parseBody } from '@/lib/schemas';
+import { resolvePlanQuote } from '@/lib/plan-pricing';
+import { appBaseUrl, createWompiPaymentLink } from '@/lib/wompi-link';
 
-// ── Server-side price table (COP cents) ───────────────────────────────────────
-// Client NEVER sets the amount — it's always resolved from here.
+export const dynamic = 'force-dynamic';
 
-const PLAN_PRICES_COP_CENTS: Record<string, number> = {
-  pyme:            35_000_000,   // $350 000 COP/mes
-  business:        70_000_000,   // $700 000 COP/mes
-  corporate:      150_000_000,   // $1 500 000 COP/mes
-  enterprise:     300_000_000,   // $3 000 000 COP/mes
-  sstSinLicencia:  20_000_000,   // $200 000 COP/mes
-  sstConLicencia:  45_000_000,   // $450 000 COP/mes
-};
-
-const PLAN_LABELS: Record<string, string> = {
-  pyme:            'Plan PYME',
-  business:        'Plan Business',
-  corporate:       'Plan Corporativo',
-  enterprise:      'Plan Enterprise',
-  sstSinLicencia:  'Plan SST sin Licencia',
-  sstConLicencia:  'Plan SST con Licencia',
-};
-
-// ── Route Handler ──────────────────────────────────────────────────────────────
+const REUSE_PENDING_MS = 30 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
 
-  // Rate limit: 3 checkout initiations / minute per IP (public endpoint)
-  const rl = await rateLimiter.check(`checkout-plan:${ip}`, { max: 3, windowMs: 60_000 });
+  const rl = await rateLimiter.check(`checkout-plan:${ip}`, { max: 5, windowMs: 60_000 });
   if (!rl.allowed) {
     return NextResponse.json(
       { error: 'Demasiados intentos. Espera un momento.' },
-      {
-        status: 429,
-        headers: {
-          'Retry-After': String(Math.ceil(rl.retryAfterMs / 1000)),
-        },
-      },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(rl.retryAfterMs / 1000)) } },
     );
   }
 
-  // Validate body with Zod
-  const parsed = await parseBody(req, PlanCheckoutRequestSchema);
-  if (parsed.error) return parsed.error;
-
-  const {
-    planType,
-    institutionName,
-    institutionNit,
-    institutionCity,
-    institutionType,
-    adminEmail,
-    adminFirstName,
-    adminLastName,
-    adminPhone,
-  } = parsed.data;
-
-  // Server-side price — never from client
-  const amountCents = PLAN_PRICES_COP_CENTS[planType];
-  if (!amountCents) {
-    return NextResponse.json({ error: 'Plan no válido.' }, { status: 400 });
+  const authz = req.headers.get('authorization') ?? '';
+  if (!authz.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Debes iniciar sesión para continuar.' }, { status: 401 });
+  }
+  let uid: string;
+  let tokenEmail: string;
+  try {
+    const decoded = await adminAuth.verifyIdToken(authz.slice(7));
+    uid = decoded.uid;
+    tokenEmail = (decoded.email ?? '').toLowerCase();
+  } catch {
+    return NextResponse.json({ error: 'Tu sesión expiró. Inicia sesión de nuevo.' }, { status: 401 });
   }
 
-  // Check for duplicate pending checkout by same NIT (anti-abuse)
-  const existing = await adminDb
-    .collection('transactions')
-    .where('type', '==', 'new_institution_plan')
-    .where('institutionNit', '==', institutionNit)
+  const parsed = await parseBody(req, PlanCheckoutRequestSchema);
+  if (parsed.error) return parsed.error;
+  const data = parsed.data;
+  const nit = data.institutionNit.replace(/\D/g, '');
+
+  const quote = await resolvePlanQuote(data.planType);
+  if (!quote) {
+    return NextResponse.json({ error: 'Este plan no está disponible para compra en línea.' }, { status: 400 });
+  }
+
+  const taken = await adminDb.collection('institutions').where('nit', '==', nit).limit(1).get();
+  if (!taken.empty) {
+    return NextResponse.json({ error: 'Ya existe una institución registrada con este NIT.' }, { status: 409 });
+  }
+
+  // Reintento del mismo comprador: reutiliza el enlace si el monto no cambió.
+  const pending = await adminDb.collection('transactions')
+    .where('user_id', '==', uid)
+    .where('institutionNit', '==', nit)
     .where('status', '==', 'PENDING')
     .limit(1)
     .get();
-
-  if (!existing.empty) {
-    const existingData = existing.docs[0].data();
-    // If existing pending checkout is less than 30 minutes old, return its URL
-    const createdAt: Date = existingData.createdAt?.toDate?.() ?? new Date(0);
-    const ageMs = Date.now() - createdAt.getTime();
-    if (ageMs < 30 * 60 * 1000) {
+  if (!pending.empty) {
+    const previous = pending.docs[0].data();
+    const createdAt: Date = previous.createdAt?.toDate?.() ?? new Date(0);
+    const fresh = Date.now() - createdAt.getTime() < REUSE_PENDING_MS;
+    if (fresh && previous.amount_in_cents === quote.amountCents && previous.planType === quote.slug) {
       return NextResponse.json({
-        redirectUrl: existingData.wompiCheckoutUrl ?? '',
-        sessionId: existing.docs[0].id,
-        amountCents,
+        redirectUrl: previous.wompiCheckoutUrl,
+        sessionId: pending.docs[0].id,
+        amountCents: quote.amountCents,
       });
     }
   }
 
-  const wompiEnv = process.env.WOMPI_ENV;
-  const wompiApiBase =
-    wompiEnv === 'production'
-      ? 'https://production.wompi.co/v1'
-      : 'https://sandbox.wompi.co/v1';
-  const wompiKey = process.env.WOMPI_PRIVATE_KEY;
-
-  if (!wompiKey) {
-    console.error('[checkout/plan] WOMPI_PRIVATE_KEY not set');
-    return NextResponse.json(
-      { error: 'Pasarela de pago no disponible. Intenta más tarde.' },
-      { status: 503 },
-    );
-  }
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://siercp.com';
-
-  // Call Wompi to create a single-use hosted payment link
-  let wompiPaymentLinkId: string;
-  let wompiCheckoutUrl: string;
-
+  let link: { id: string; url: string };
   try {
-    const wompiRes = await fetch(`${wompiApiBase}/payment_links`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${wompiKey}`,
-      },
-      body: JSON.stringify({
-        name: `${PLAN_LABELS[planType]} — ${institutionName}`,
-        description: `Suscripción mensual ${PLAN_LABELS[planType]} para ${institutionName}`,
-        single_use: true,
-        collect_shipping: false,
-        currency: 'COP',
-        amount_in_cents: amountCents,
-        redirect_url: `${appUrl}/pago/plan/confirmacion?plan=${encodeURIComponent(planType)}`,
-      }),
+    link = await createWompiPaymentLink({
+      name: `${quote.name} — SIERCP`,
+      description: `Contrato anual ${quote.name} para ${data.institutionName}`,
+      amountCents: quote.amountCents,
+      redirectUrl: `${appBaseUrl(req.nextUrl.origin)}/pago/plan/confirmacion?plan=${encodeURIComponent(quote.slug)}`,
     });
-
-    if (!wompiRes.ok) {
-      const errText = await wompiRes.text();
-      console.error('[checkout/plan] Wompi API error:', wompiRes.status, errText);
-      return NextResponse.json(
-        { error: 'No se pudo crear el enlace de pago. Intenta de nuevo.' },
-        { status: 502 },
-      );
-    }
-
-    const wompiData = (await wompiRes.json()) as {
-      data: { id: string; url?: string; payment_link?: { id: string; url: string } };
-    };
-
-    wompiPaymentLinkId = wompiData.data.id;
-    wompiCheckoutUrl =
-      wompiData.data.url ??
-      wompiData.data.payment_link?.url ??
-      `https://checkout.wompi.co/l/${wompiPaymentLinkId}`;
   } catch (err) {
-    console.error('[checkout/plan] fetch error:', err);
-    return NextResponse.json(
-      { error: 'Error de conexión con la pasarela de pago.' },
-      { status: 502 },
-    );
+    console.error('[checkout/plan]', err);
+    return NextResponse.json({ error: 'No se pudo conectar con la pasarela de pago.' }, { status: 502 });
   }
 
-  // Store all checkout metadata server-side at transactions/{paymentLinkId}.
-  // The webhook looks up this document when the payment link is paid.
-  // CRITICAL: institution is NOT created here — only after webhook APPROVED.
-  await adminDb.collection('transactions').doc(wompiPaymentLinkId).set({
-    id: wompiPaymentLinkId,
+  // Sin privilegios: solo garantiza que el comprador tenga perfil al volver.
+  const userRef = adminDb.collection('users').doc(uid);
+  if (!(await userRef.get()).exists) {
+    await userRef.set({
+      uid,
+      email: tokenEmail || data.adminEmail,
+      firstName: data.adminFirstName,
+      lastName: data.adminLastName,
+      phoneNumber: data.adminPhone,
+      role: 'USUARIO',
+      isActive: true,
+      certVerification: 'NONE',
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  }
+
+  await adminDb.collection('transactions').doc(link.id).set({
+    id: link.id,
     type: 'new_institution_plan',
-    planType,
-    // Institution details (stored for post-payment creation)
-    institutionName,
-    institutionNit,
-    institutionCity,
-    institutionType,
-    // Admin contact (stored for invitation email)
-    adminEmail,
-    adminFirstName,
-    adminLastName,
-    adminPhone,
-    // Payment metadata
-    amount_in_cents: amountCents,
+    planType: quote.slug,
+    planName: quote.name,
+    user_id: uid,
+    institutionName: data.institutionName,
+    institutionNit: nit,
+    institutionCity: data.institutionCity,
+    institutionDepartment: data.institutionDepartment,
+    institutionAddress: data.institutionAddress,
+    institutionPhone: data.institutionPhone,
+    institutionEmail: data.institutionEmail,
+    institutionType: data.institutionType,
+    adminEmail: tokenEmail || data.adminEmail,
+    adminFirstName: data.adminFirstName,
+    adminLastName: data.adminLastName,
+    adminPhone: data.adminPhone,
+    adminDocumentType: data.adminDocumentType,
+    adminIdentification: data.adminIdentification,
+    adminCity: data.adminCity,
+    adminDepartment: data.adminDepartment,
+    adminAddress: data.adminAddress,
+    subtotalCOP: quote.subtotalCOP,
+    ivaCOP: quote.ivaCOP,
+    amount_in_cents: quote.amountCents,
     currency: 'COP',
     status: 'PENDING',
     enrolled: false,
-    wompiCheckoutUrl,
+    wompiCheckoutUrl: link.url,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
     ip,
@@ -202,20 +150,10 @@ export async function POST(req: NextRequest) {
   await auditLog({
     type: 'new_institution_checkout_started',
     severity: 'INFO',
+    userId: uid,
     ip,
-    metadata: {
-      planType,
-      institutionNit,
-      institutionName,
-      adminEmail,
-      amountCents,
-      paymentLinkId: wompiPaymentLinkId,
-    },
+    metadata: { planType: quote.slug, institutionNit: nit, amountCents: quote.amountCents, paymentLinkId: link.id },
   });
 
-  return NextResponse.json({
-    redirectUrl: wompiCheckoutUrl,
-    sessionId: wompiPaymentLinkId,
-    amountCents,
-  });
+  return NextResponse.json({ redirectUrl: link.url, sessionId: link.id, amountCents: quote.amountCents });
 }

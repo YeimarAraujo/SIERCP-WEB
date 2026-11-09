@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/shared/lib/firebase';
 import { useAuthStore } from '@/stores/auth-store';
 import {
     UserPlus, User, Fingerprint, Phone, Key,
@@ -13,6 +11,7 @@ import {
     AlertCircle, ArrowLeft, Mail, Eye, EyeOff,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PeopleClient } from '@/shared/lib/people-client';
 import { getAuth } from 'firebase/auth';
 import { DOCUMENT_TYPE_OPTIONS } from '@/shared/constants/document_types';
 
@@ -63,17 +62,15 @@ export default function NewInstructorPage() {
         setSearching(true);
         setError(null);
         try {
-            const snap = await getDocs(
-                query(collection(db, 'users'), where('identification', '==', id))
-            );
-            if (!snap.empty) {
-                const d = snap.docs[0].data();
+            // La búsqueda la hace el servidor: las reglas no dejan leer perfiles ajenos.
+            const person = await PeopleClient.lookup({ identification: id });
+            if (person) {
                 setFoundUser({
-                    uid: snap.docs[0].id,
-                    firstName: d.firstName ?? '',
-                    lastName: d.lastName ?? '',
-                    email: d.email ?? '',
-                    role: d.role ?? '',
+                    uid: person.uid,
+                    firstName: person.firstName,
+                    lastName: person.lastName,
+                    email: person.email,
+                    role: person.role,
                 });
                 setStep('found');
             } else {

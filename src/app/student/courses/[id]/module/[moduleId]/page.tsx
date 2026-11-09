@@ -6,6 +6,7 @@ import { getAuth } from 'firebase/auth';
 import { Header } from '@/components/layout/header';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { BookOpen, CheckCircle, FileText, Video, HeartPulse, ClipboardList, Award, Smartphone } from 'lucide-react';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 import {
     normalizeScenario,
     CLINICAL_SCENARIO_LABELS,
@@ -313,7 +314,7 @@ export default function StudentModuleViewerPage({ params }: { params: Promise<{ 
                                 <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary)' }}>
                                     {module.type === 'certificacion'
                                         ? 'Al cumplir los requisitos del curso (nota y asistencia), tu certificado se emite automáticamente y podrás verlo en tu perfil.'
-                                        : `Esta evaluación se responde en la app SIERCP. Puntaje mínimo para aprobar: ${module.passingScore ?? 70}%.`}
+                                        : `Esta evaluación se responde en la app SIERCP. Puntaje mínimo para aprobar: ${module.passingScore ?? COURSE_DEFAULT_MIN_SCORE}%.`}
                                 </p>
                             </div>
                         </div>

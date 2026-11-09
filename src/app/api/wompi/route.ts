@@ -14,6 +14,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { appBaseUrl, wompiApiBase } from '@/lib/wompi-link';
 import { rateLimiter, getClientIp } from '@/lib/rate-limiter';
 import { auditLog } from '@/lib/audit-logger';
 import { WompiRequestSchema, parseBody } from '@/lib/schemas';
@@ -24,14 +25,11 @@ import {
   storeIdempotencyResult,
 } from '@/lib/idempotency';
 
-const WOMPI_API_BASE =
-  process.env.WOMPI_ENV === 'production'
-    ? 'https://production.wompi.co/v1'
-    : 'https://sandbox.wompi.co/v1';
+const WOMPI_API_BASE = wompiApiBase();
 
 const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY!;
 const WOMPI_INTEGRITY_KEY = process.env.WOMPI_INTEGRITY_KEY!;
-const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL!;
+const APP_BASE_URL = appBaseUrl();
 
 // ── Integrity signature ────────────────────────────────────────────────────
 

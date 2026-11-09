@@ -19,6 +19,7 @@ import toast from 'react-hot-toast';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 export default function AdminCourseDetailPage() {
     const params = useParams();
@@ -181,7 +182,7 @@ export default function AdminCourseDetailPage() {
             key: 'avgScore',
             label: 'Promedio',
             render: (val: any) => (
-                <span style={{ fontWeight: 700, fontSize: 14, color: val >= (course.minScore || 70) ? '#10B981' : '#F59E0B' }}>
+                <span style={{ fontWeight: 700, fontSize: 14, color: val >= (course.minScore || COURSE_DEFAULT_MIN_SCORE) ? '#10B981' : '#F59E0B' }}>
                     {val?.toFixed(1) || '0.0'}%
                 </span>
             ),

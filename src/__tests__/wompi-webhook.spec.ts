@@ -55,7 +55,7 @@ async function buildValidPayload(txData: {
   signature: { checksum: string; properties: string[] };
 }> {
   const timestamp = Math.floor(Date.now() / 1000);
-  const properties = ['data.transaction.id', 'data.transaction.amount_in_cents', 'data.transaction.status'];
+  const properties = ['transaction.id', 'transaction.amount_in_cents', 'transaction.status'];
 
   const tx = {
     id: txData.id,
@@ -78,7 +78,7 @@ async function buildValidPayload(txData: {
       timestamp,
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let val: any = payload;
+    let val: any = payload.data;
     for (const k of keys) val = val?.[k];
     return String(val ?? '');
   });
@@ -239,7 +239,7 @@ describe('POST /api/wompi-webhook', () => {
       },
       timestamp: 9999,
       environment: 'test',
-      signature: { checksum: 'invalid-checksum-xxxx-0000000000000000000', properties: ['data.transaction.id'] },
+      signature: { checksum: 'invalid-checksum-xxxx-0000000000000000000', properties: ['transaction.id'] },
     };
 
     const req = makeWebhookRequest(payload);

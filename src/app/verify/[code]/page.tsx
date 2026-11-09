@@ -64,7 +64,7 @@ export default async function VerifySkillPage({ params }: { params: Promise<{ co
         <p className="mt-1 text-teal-400 font-medium">Nivel {LEVEL_LABEL[data.level] ?? data.level}</p>
 
         <dl className="mt-6 space-y-3 text-sm">
-          <Row label="Titular" value={data.userPublicName} />
+          <Row label="Titular" value={data.userPublicName ?? 'Datos eliminados a solicitud del titular'} />
           <Row label="Institución emisora" value={data.institutionName} />
           {issued && <Row label="Fecha de emisión" value={issued.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })} />}
         </dl>

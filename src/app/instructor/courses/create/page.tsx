@@ -14,6 +14,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/shared/lib/firebase';
 import { isAdmin } from '@/models/user';
 import { ModuleFormCard, DEFAULT_MODULE, type ModuleForm } from '@/components/course/module-form-card';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 export default function CreateCoursePage() {
     const { user } = useAuth();
@@ -36,7 +37,7 @@ export default function CreateCoursePage() {
         inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
         isActive: true,
         certification: 'Certificado de Asistencia',
-        minScore: 85,
+        minScore: COURSE_DEFAULT_MIN_SCORE,
         moduleCount: 0,
         studentCount: 0,
         completedModules: 0,

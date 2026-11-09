@@ -33,6 +33,9 @@ async function recomputeOne(courseId: string, studentId: string): Promise<number
         .set({
             avgScoreServer: computed.score,
             scoreSource: computed.source,
+            // Aprobación del curso y del certificado: promedio oficial ≥ 80 y 70 % por parte.
+            courseApproved: computed.approval.approved,
+            courseApproval: computed.approval,
             scoreUpdatedAt: FieldValue.serverTimestamp(),
         }, { merge: true });
     return computed.score;

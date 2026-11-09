@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://siercp.com';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://sicapco.vercel.app';
 
 const LEVEL_LABEL: Record<string, string> = {
   BASICO: 'Básico', INTERMEDIO: 'Intermedio', AVANZADO: 'Avanzado', PROFESIONAL: 'Profesional',

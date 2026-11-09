@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Ya tienes una inscripción aprobada para este curso.' }, { status: 409 });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://siercp.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://sicapco.vercel.app';
   let link: { id: string; url: string };
   try {
     link = await createWompiPaymentLink({

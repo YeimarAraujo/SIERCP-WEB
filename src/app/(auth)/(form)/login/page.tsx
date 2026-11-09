@@ -2,6 +2,7 @@
 
 import type { FormEvent } from 'react';
 import { Suspense, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { useThemeStore } from '@/stores/theme-store';
@@ -15,7 +16,9 @@ function LoginContent() {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
-    const nextParam = searchParams.get('next');
+    const requestedNext = searchParams.get('next') ?? searchParams.get('callbackUrl');
+    // Solo rutas internas: evita redirigir fuera del sitio tras iniciar sesión.
+    const nextParam = requestedNext?.startsWith('/') && !requestedNext.startsWith('//') ? requestedNext : null;
     const { theme } = useThemeStore();
 
     useEffect(() => {
@@ -120,7 +123,7 @@ function LoginContent() {
                             <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--clr-text)", margin: 0 }} htmlFor="password">
                                 Contraseña
                             </label>
-                            <a href="#" style={{ fontSize: "0.8rem", color: "var(--clr-primary)", fontWeight: 700, textDecoration: "none" }}>¿Olvidaste tu contraseña?</a>
+                            <Link href={email ? `/recuperar?email=${encodeURIComponent(email)}` : '/recuperar'} style={{ fontSize: "0.8rem", color: "var(--clr-primary)", fontWeight: 700, textDecoration: "none" }}>¿Olvidaste tu contraseña?</Link>
                         </div>
                         <div className="position-relative">
                             <i className="bi bi-shield-lock position-absolute" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--clr-muted)' }} />

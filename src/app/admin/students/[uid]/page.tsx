@@ -24,10 +24,11 @@ export default function StudentDetailPage() {
     useEffect(() => {
         if (!uid) return;
         
-        Promise.all([
-            UserService.get(uid),
-            SessionService.getByStudent(uid, 100)
-        ]).then(([userData, sessionsData]) => {
+        UserService.get(uid).then(async (userData) => {
+            const institutionId = (userData as UserModel | null)?.institutionId;
+            const sessionsData = institutionId
+                ? await SessionService.getByStudent(uid, 100, { institutionId })
+                : [];
             setStudent(userData as UserModel);
             setSessions(sessionsData as SessionModel[]);
         }).catch(() => {

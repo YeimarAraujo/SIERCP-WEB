@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { sanitize, computeNextDeadline } from '@/lib/utils';
 import admin from 'firebase-admin';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
 
@@ -46,7 +47,7 @@ function serializeTimestamps(d: FirebaseFirestore.DocumentData) {
 
 function moduleFormToFirestore(m: any, idx: number, courseId: string) {
   const config: Record<string, any> = {
-    passingScore: Number(m.passingScore) || 70,
+    passingScore: Number(m.passingScore) || COURSE_DEFAULT_MIN_SCORE,
     questions: [],
     requiredSessions: [],
     topics: Array.isArray(m.topics) ? m.topics.filter(Boolean) : [],
@@ -62,13 +63,13 @@ function moduleFormToFirestore(m: any, idx: number, courseId: string) {
     else config.textContent = url;
   } else if (m.type === 'evaluacion_teorica') {
     config.textContent = sanitize(m.contentUrl) || '';
-    config.passingScore = Number(m.passingScore) || 70;
+    config.passingScore = Number(m.passingScore) || COURSE_DEFAULT_MIN_SCORE;
   } else if (m.type === 'practica_guiada') {
     config.requiredSessions = Array.isArray(m.scenarios)
       ? m.scenarios.map((scenarioId: string) => ({
           scenarioId,
           count: 1,
-          minScore: Number(m.passingScore) || 70,
+          minScore: Number(m.passingScore) || COURSE_DEFAULT_MIN_SCORE,
         }))
       : [];
   }
@@ -96,7 +97,7 @@ function firestoreModuleToForm(docId: string, d: any, idx: number) {
     order: d.order ?? idx,
     contentType,
     contentUrl,
-    passingScore: cfg.passingScore ?? 70,
+    passingScore: cfg.passingScore ?? COURSE_DEFAULT_MIN_SCORE,
     deadlineDate: cfg.deadlineDate || '',
     isRequired: cfg.isRequired !== false,
     topics: Array.isArray(cfg.topics) && cfg.topics.length > 0 ? cfg.topics : [''],
@@ -222,7 +223,7 @@ export async function POST(req: NextRequest) {
       instructorName,
       instructorEmail,
       inviteCode: sanitize(body.inviteCode) || generateInviteCode(),
-      minScore: Number(body.minScore) || 85,
+      minScore: Number(body.minScore) || COURSE_DEFAULT_MIN_SCORE,
       minAttendance: Number(body.minAttendance) || 0,
       endDate: parseEndDate(body.endDate),
       moduleCount: validModules.length,

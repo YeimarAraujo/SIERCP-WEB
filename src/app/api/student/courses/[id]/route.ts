@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { withAuth, isAdmin } from '@/lib/withAuth';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -28,7 +29,7 @@ function normalizeModule(id: string, d: any) {
     videoUrl: cfg.videoUrl || '',
     estimatedMinutes: parseInt(cfg.duration, 10) || 0,
     isRequired: cfg.isRequired !== false,
-    passingScore: cfg.passingScore ?? 70,
+    passingScore: cfg.passingScore ?? COURSE_DEFAULT_MIN_SCORE,
     topics: Array.isArray(cfg.topics) ? cfg.topics.filter(Boolean) : [],
     scenarios: Array.isArray(cfg.requiredSessions)
       ? cfg.requiredSessions.map((s: any) => s.scenarioId).filter(Boolean)

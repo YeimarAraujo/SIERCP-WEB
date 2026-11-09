@@ -7,6 +7,7 @@ import { CourseService } from '@/services/firestore.service';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import toast from 'react-hot-toast';
+import { COURSE_DEFAULT_MIN_SCORE } from '@/shared/lib/constants';
 import {
   BookOpen, Shield, ArrowLeft, Key, CheckCircle2, Lock,
   QrCode, ArrowRight, Copy,
@@ -65,8 +66,8 @@ export default function StudentCreateCoursePage() {
         inviteCode,
         certification,
         isActive: true,
-        minScore: 85,
-        requiredScore: 85,
+        minScore: COURSE_DEFAULT_MIN_SCORE,
+        requiredScore: COURSE_DEFAULT_MIN_SCORE,
         moduleCount: 0,
         studentCount: 0,
         completedModules: 0,

@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { PageHero } from '@/components/ui/page-hero';
-import {
-    collection, query, where, getDocs,
-    doc, setDoc, serverTimestamp,
-} from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { db, getSecondaryAuth } from '@/shared/lib/firebase';
 import { useAuthStore } from '@/stores/auth-store';
@@ -16,6 +13,7 @@ import {
     Mail, Search, CheckCircle, AlertCircle, ArrowLeft, Link2, Eye, EyeOff, MapPin,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PeopleClient } from '@/shared/lib/people-client';
 import { DOCUMENT_TYPE_OPTIONS } from '@/shared/constants/document_types';
 import { COLOMBIA_DEPARTMENTS, getMunicipalities } from '@/data/colombia-geo';
 import { SearchableSelect } from '@/app/checkout/_components/ui';
@@ -61,17 +59,15 @@ export default function NewStudentPage() {
         setSearching(true);
         setError(null);
         try {
-            const snap = await getDocs(
-                query(collection(db, 'users'), where('identification', '==', id))
-            );
-            if (!snap.empty) {
-                const d = snap.docs[0].data();
+            // La búsqueda la hace el servidor: las reglas no dejan leer perfiles ajenos.
+            const person = await PeopleClient.lookup({ identification: id });
+            if (person) {
                 setFoundUser({
-                    uid: snap.docs[0].id,
-                    firstName: d.firstName ?? '',
-                    lastName: d.lastName ?? '',
-                    email: d.email ?? '',
-                    role: d.role ?? '',
+                    uid: person.uid,
+                    firstName: person.firstName,
+                    lastName: person.lastName,
+                    email: person.email,
+                    role: person.role,
                 });
                 setStep('found');
             } else {
@@ -91,16 +87,17 @@ export default function NewStudentPage() {
         setLoading(true);
         setError(null);
         try {
+            // Ya tiene cuenta: debe aceptar la invitación para que veas sus datos (Ley 1581).
             await setDoc(doc(db, 'memberships', `${foundUser.uid}_${institutionId}`), {
                 userId: foundUser.uid,
                 institutionId,
                 role: 'USUARIO',
-                status: 'approved',
-                isActive: true,
+                status: 'invited',
+                isActive: false,
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
             });
-            toast.success('Estudiante vinculado a tu institución');
+            toast.success('Invitación enviada. El estudiante aparecerá cuando la acepte.');
             router.push('/admin/students');
         } catch (e: any) {
             setError(e.message || 'Error al vincular');

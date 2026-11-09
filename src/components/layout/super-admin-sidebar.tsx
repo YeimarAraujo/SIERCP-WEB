@@ -14,6 +14,7 @@ import {
     ShieldCheckIcon,
     Building,
     Bell,
+    ShieldCheck,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -40,6 +41,7 @@ const navItems: NavItem[] = [
     { label: 'Instructores pendientes', href: '/super-admin/pending-instructors', icon: UserCheck },
     { label: 'Notificaciones', href: '/super-admin/notifications', icon: Bell },
     { label: 'Logs de actividad', href: '/super-admin/logs', icon: ScrollText },
+    { label: 'Solicitudes de datos', href: '/super-admin/solicitudes-datos', icon: ShieldCheck },
 ];
 
 export function SuperAdminSidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {

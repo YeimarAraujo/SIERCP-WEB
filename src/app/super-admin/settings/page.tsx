@@ -45,7 +45,7 @@ const DEFAULT_CONFIG: GlobalConfig = {
     platformName: 'SIERCP',
     contactEmail: 'jomarsegurid@gmail.com',
     contactPhone: '+57 300 000 0000',
-    websiteUrl: 'https://siercp.com',
+    websiteUrl: 'https://sicapco.vercel.app',
     ahaMinScore: 80,
     ahaCertScore: 85,
     maxInstitutions: 500,

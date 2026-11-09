@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import admin from 'firebase-admin';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
-import { createWompiPaymentLink, PLAN_PRICES_COP_CENTS } from '@/lib/wompi-link';
+import { appBaseUrl, createWompiPaymentLink, PLAN_PRICES_COP_CENTS } from '@/lib/wompi-link';
 
 /**
  * POST /api/checkout/plan-subscription  (Spark — reemplaza CF createWompiPlanTransaction)
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   }
 
   const amountCents = PLAN_PRICES_COP_CENTS[planType];
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://siercp.com';
+  const appUrl = appBaseUrl(req.nextUrl.origin);
 
   let link: { id: string; url: string };
   try {
