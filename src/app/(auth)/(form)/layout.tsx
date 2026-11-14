@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import AuthNavbar from '@/components/layout/auth-navbar';
 import { useThemeStore } from '@/stores/theme-store';
+import { webAssets } from '@/generated/web-assets';
 
 export default function AuthFormLayout({ children }: { children: ReactNode }) {
     const { theme } = useThemeStore();
@@ -35,7 +36,7 @@ export default function AuthFormLayout({ children }: { children: ReactNode }) {
                         height: '100%',
                         position: 'relative',
                         overflow: 'hidden',
-                        backgroundImage: "url('assets/images/login.png')",
+                        backgroundImage: `url('${webAssets.login.src}')`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center center',
                         backgroundRepeat: 'no-repeat',
