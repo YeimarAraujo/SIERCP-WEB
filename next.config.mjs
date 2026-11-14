@@ -114,9 +114,16 @@ const nextConfig = {
           { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
         ],
       },
-      /* Cabeceras de caché para assets estáticos */
+      /* Los nombres estables se revalidan para reflejar sus actualizaciones. */
       {
         source: '/assets/(.*)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+      /* Los derivados con hash conservan caché larga sin contenido obsoleto. */
+      {
+        source: '/assets/optimized/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],

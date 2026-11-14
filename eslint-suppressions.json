@@ -1,0 +1,341 @@
+{
+  "src/app/(dashboard)/live/[sessionId]/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/courses/new/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    },
+    "react/no-unescaped-entities": {
+      "count": 2
+    }
+  },
+  "src/app/admin/courses/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/dashboard/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/instructors/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/live/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/orders/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/platform-courses/[id]/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/platform-courses/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/reports/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/sedes/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/sessions/page.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/settings/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/students/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/tienda/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/users/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/checkout/manikin/page.tsx": {
+    "@next/next/no-html-link-for-pages": {
+      "count": 2
+    }
+  },
+  "src/app/formacion/[slug]/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/inscribirse/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/instructor/courses/create/page.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    },
+    "react/no-unescaped-entities": {
+      "count": 4
+    }
+  },
+  "src/app/instructor/dashboard/page.tsx": {
+    "react/no-unescaped-entities": {
+      "count": 2
+    }
+  },
+  "src/app/pago/plan/confirmacion/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/student/courses/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/student/enrollments/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/student/ranking/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/cursos/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/dashboard/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/dashboard/skills-kpi-row.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/institutions/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/instructores/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/notifications/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/pedidos/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/pending-institutions/page.tsx": {
+    "react-hooks/immutability": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/pending-instructors/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/plans/page.tsx": {
+    "react/no-unescaped-entities": {
+      "count": 4
+    }
+  },
+  "src/app/super-admin/settings/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/solicitudes-datos/page.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/super-admin/stock/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "src/app/super-admin/usuarios/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/Reveal.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    },
+    "react-hooks/refs": {
+      "count": 6
+    }
+  },
+  "src/components/course/course-management-view.tsx": {
+    "react/no-unescaped-entities": {
+      "count": 2
+    }
+  },
+  "src/components/layout/auth-navbar.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/notifications/app-install-banner.tsx": {
+    "react-hooks/rules-of-hooks": {
+      "count": 1
+    }
+  },
+  "src/components/page/DownloadApp.tsx": {
+    "react-hooks/static-components": {
+      "count": 1
+    }
+  },
+  "src/components/page/EnrollmentFlow.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/page/Formacion.tsx": {
+    "@next/next/no-html-link-for-pages": {
+      "count": 1
+    }
+  },
+  "src/components/page/Navbar.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/page/Nosotros.tsx": {
+    "react/no-unescaped-entities": {
+      "count": 2
+    }
+  },
+  "src/components/ui/global-search.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    },
+    "react/no-unescaped-entities": {
+      "count": 2
+    }
+  },
+  "src/components/ui/notifications-drawer.tsx": {
+    "react-hooks/immutability": {
+      "count": 1
+    }
+  },
+  "src/components/video-loader.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/features/analytics/hooks/use-super-admin-analytics.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/features/attendance/components/attendance-panel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/features/operations/hooks/use-operational-metrics.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/features/super-admin/components/create-admin-modal.tsx": {
+    "react-hooks/static-components": {
+      "count": 2
+    }
+  },
+  "src/hooks/useCatalog.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/shared/components/notifications/app-install-banner.tsx": {
+    "react-hooks/rules-of-hooks": {
+      "count": 1
+    }
+  },
+  "src/shared/components/ui/global-search.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    },
+    "react/no-unescaped-entities": {
+      "count": 2
+    }
+  },
+  "src/shared/components/ui/notifications-drawer.tsx": {
+    "react-hooks/immutability": {
+      "count": 1
+    }
+  },
+  "src/shared/hooks/use-auth-minimal.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/shared/hooks/use-calendar.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "src/shared/hooks/use-plan-quota.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 3
+    }
+  },
+  "src/shared/hooks/use-push-notifications.ts": {
+    "react-hooks/preserve-manual-memoization": {
+      "count": 1
+    },
+    "react-hooks/refs": {
+      "count": 2
+    }
+  }
+}

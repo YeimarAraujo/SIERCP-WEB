@@ -1,0 +1,7 @@
+{
+  "base": "2fbef506167a6fb82efe4bc0accb0ba5b45216bf",
+  "protectedChanges": [],
+  "firebasePackagesPreserved": 221,
+  "originalPublicFilesPreserved": 118,
+  "note": "Verifica código y dependencias compartidas. No sustituye pruebas de la app móvil o del despliegue."
+}

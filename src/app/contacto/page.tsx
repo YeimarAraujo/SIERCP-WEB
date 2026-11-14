@@ -6,6 +6,7 @@ import WhatsAppFab from "@/components/page/WhatsAppFab";
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { contactItems, offices, responseTimes, faqs, reasons } from "@/data/contacto";
+import { webAssets } from '@/generated/web-assets';
 
 export default function ContactoPage() {
     const [form, setForm] = useState({ name: "", phone: "", email: "", subject: "general", message: "" });
@@ -76,7 +77,12 @@ export default function ContactoPage() {
                         <Col lg={6}>
                             <div style={{ position: "relative", borderRadius: "24px", overflow: "hidden", boxShadow: "0 20px 50px rgba(0,0,0,0.35)", lineHeight: 0 }}>
                                 <img
-                                    src="/assets/images/SICAP/webp/contacto.webp"
+                                    src={webAssets.contacto.src}
+                                    srcSet={webAssets.contacto.srcSet}
+                                    sizes="(min-width: 1400px) 636px, (min-width: 1200px) 546px, (min-width: 992px) 456px, (min-width: 768px) 696px, (min-width: 576px) 516px, calc(100vw - 24px)"
+                                    width={webAssets.contacto.width}
+                                    height={webAssets.contacto.height}
+                                    decoding="async"
                                     alt="Equipo de soporte de sicap listo para atenderte"
                                     className="img-fluid"
                                     style={{ display: "block", width: "100%", height: "auto" }}
@@ -116,7 +122,7 @@ export default function ContactoPage() {
             {/* ── FORMULARIO + MAPA ── */}
             <section className="section-py" style={{ background: "var(--clr-bg)" }}>
                 <Container>
-                    <Row className="g-5">
+                    <Row className="gy-5 gx-4 gx-lg-5">
                         {/* Formulario */}
                         <Col lg={7}>
                             <div className={`fade-up ${isVisible ? "visible" : ""}`}>

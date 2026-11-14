@@ -1,0 +1,171 @@
+{
+  "results": [
+    {
+      "route": "contacto",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "width": 390,
+      "scrollWidth": 390,
+      "fontStatus": "loaded",
+      "bodyFont": "Inter, \"Inter Fallback\"",
+      "headingFont": "\"Outfit\", \"Outfit Fallback\", \"Inter\", \"Inter Fallback\", sans-serif",
+      "images": [
+        {
+          "src": "http://127.0.0.1:3100/assets/optimized/contacto-480.9be8824054e2.webp",
+          "naturalWidth": 366,
+          "renderedWidth": 366,
+          "left": 12,
+          "right": 378,
+          "complete": true
+        }
+      ],
+      "optimizedBackgrounds": [],
+      "horizontalOverflowPx": 0,
+      "externalRequestsBlocked": 0,
+      "runtimeErrors": [],
+      "screenshot": "contacto-390.png"
+    },
+    {
+      "route": "acerca",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "width": 390,
+      "scrollWidth": 390,
+      "fontStatus": "loaded",
+      "bodyFont": "Inter, \"Inter Fallback\"",
+      "headingFont": "\"Outfit\", \"Outfit Fallback\", \"Inter\", \"Inter Fallback\", sans-serif",
+      "images": [
+        {
+          "src": "http://127.0.0.1:3100/assets/optimized/software-480.c43ff7a2644c.webp",
+          "naturalWidth": 366,
+          "renderedWidth": 364,
+          "left": 13,
+          "right": 377,
+          "complete": true
+        }
+      ],
+      "optimizedBackgrounds": [],
+      "horizontalOverflowPx": 0,
+      "externalRequestsBlocked": 0,
+      "runtimeErrors": [],
+      "screenshot": "acerca-390.png"
+    },
+    {
+      "route": "login",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "width": 390,
+      "scrollWidth": 390,
+      "fontStatus": "loaded",
+      "bodyFont": "Inter, \"Inter Fallback\"",
+      "headingFont": "\"Outfit\", \"Outfit Fallback\", \"Inter\", \"Inter Fallback\", sans-serif",
+      "images": [],
+      "optimizedBackgrounds": [
+        {
+          "background": "url(\"http://127.0.0.1:3100/assets/optimized/login-1000.b770a35c2178.webp\")",
+          "visible": false
+        }
+      ],
+      "horizontalOverflowPx": 0,
+      "externalRequestsBlocked": 0,
+      "runtimeErrors": [],
+      "screenshot": "login-390.png"
+    },
+    {
+      "route": "contacto",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "width": 1440,
+      "scrollWidth": 1440,
+      "fontStatus": "loaded",
+      "bodyFont": "Inter, \"Inter Fallback\"",
+      "headingFont": "\"Outfit\", \"Outfit Fallback\", \"Inter\", \"Inter Fallback\", sans-serif",
+      "images": [
+        {
+          "src": "http://127.0.0.1:3100/assets/optimized/contacto-768.95d1618e96e1.webp",
+          "naturalWidth": 636,
+          "renderedWidth": 624,
+          "left": 744,
+          "right": 1368,
+          "complete": true
+        }
+      ],
+      "optimizedBackgrounds": [],
+      "horizontalOverflowPx": 0,
+      "externalRequestsBlocked": 0,
+      "runtimeErrors": [],
+      "screenshot": "contacto-1440.png"
+    },
+    {
+      "route": "acerca",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "width": 1440,
+      "scrollWidth": 1440,
+      "fontStatus": "loaded",
+      "bodyFont": "Inter, \"Inter Fallback\"",
+      "headingFont": "\"Outfit\", \"Outfit Fallback\", \"Inter\", \"Inter Fallback\", sans-serif",
+      "images": [
+        {
+          "src": "http://127.0.0.1:3100/assets/optimized/software-768.28f169e42610.webp",
+          "naturalWidth": 636,
+          "renderedWidth": 622,
+          "left": 745,
+          "right": 1367,
+          "complete": true
+        }
+      ],
+      "optimizedBackgrounds": [],
+      "horizontalOverflowPx": 0,
+      "externalRequestsBlocked": 0,
+      "runtimeErrors": [],
+      "screenshot": "acerca-1440.png"
+    },
+    {
+      "route": "login",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "width": 1440,
+      "scrollWidth": 1440,
+      "fontStatus": "loaded",
+      "bodyFont": "Inter, \"Inter Fallback\"",
+      "headingFont": "\"Outfit\", \"Outfit Fallback\", \"Inter\", \"Inter Fallback\", sans-serif",
+      "images": [],
+      "optimizedBackgrounds": [
+        {
+          "background": "url(\"http://127.0.0.1:3100/assets/optimized/login-1000.b770a35c2178.webp\")",
+          "visible": true
+        }
+      ],
+      "horizontalOverflowPx": 0,
+      "externalRequestsBlocked": 0,
+      "runtimeErrors": [],
+      "screenshot": "login-1440.png"
+    }
+  ],
+  "cache": [
+    {
+      "url": "/assets/images/SICAP/webp/contacto.webp",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "url": "/assets/optimized/contacto-480.9be8824054e2.webp",
+      "status": 200,
+      "cacheControl": "public, max-age=31536000, immutable"
+    }
+  ],
+  "note": "Chrome local, sesiones nuevas, sin llamadas externas ni envío de formularios. No mide Core Web Vitals de producción."
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "name": "contacto",
+    "source": "public/assets/images/SICAP/webp/contacto.webp",
+    "originalBytes": 7359136,
+    "variants": [
+      {
+        "src": "/assets/optimized/contacto-480.9be8824054e2.webp",
+        "width": 480,
+        "height": 320,
+        "bytes": 12182
+      },
+      {
+        "src": "/assets/optimized/contacto-768.95d1618e96e1.webp",
+        "width": 768,
+        "height": 512,
+        "bytes": 21498
+      },
+      {
+        "src": "/assets/optimized/contacto-1280.2c3b5f2107de.webp",
+        "width": 1280,
+        "height": 853,
+        "bytes": 42398
+      },
+      {
+        "src": "/assets/optimized/contacto-1600.974149d15383.webp",
+        "width": 1600,
+        "height": 1067,
+        "bytes": 58234
+      }
+    ]
+  },
+  {
+    "name": "software",
+    "source": "public/assets/images/SICAP/webp/software_sicap.webp",
+    "originalBytes": 6794924,
+    "variants": [
+      {
+        "src": "/assets/optimized/software-480.c43ff7a2644c.webp",
+        "width": 480,
+        "height": 459,
+        "bytes": 18498
+      },
+      {
+        "src": "/assets/optimized/software-768.28f169e42610.webp",
+        "width": 768,
+        "height": 735,
+        "bytes": 33812
+      },
+      {
+        "src": "/assets/optimized/software-1280.ab50c4bf8989.webp",
+        "width": 1280,
+        "height": 1224,
+        "bytes": 66612
+      },
+      {
+        "src": "/assets/optimized/software-1600.f166e24297ae.webp",
+        "width": 1600,
+        "height": 1530,
+        "bytes": 90062
+      }
+    ]
+  },
+  {
+    "name": "login",
+    "source": "public/assets/images/login.png",
+    "originalBytes": 987357,
+    "variants": [
+      {
+        "src": "/assets/optimized/login-1000.b770a35c2178.webp",
+        "width": 1000,
+        "height": 1500,
+        "bytes": 84388
+      }
+    ]
+  }
+]

@@ -1,0 +1,202 @@
+{
+  "scope": "public; coincidencias textuales de rutas relativas a public dentro de src",
+  "caveat": "Una coincidencia puede estar en código inactivo o comentarios. La ausencia no prueba desuso: puede haber URLs dinámicas o clientes externos. Bytes de disco, no transferencia de una página.",
+  "dimensionsAvailable": true,
+  "files": 127,
+  "totalBytes": 109280973,
+  "over1MiB": 14,
+  "withoutTextReferenceBytes": 103983398,
+  "duplicates": [
+    {
+      "paths": [
+        "public/assets/images/SICAP/jpg/sicap_border_white.jpg",
+        "public/assets/images/SICAP/png/sicap_border_white.png",
+        "public/assets/images/SICAP/svg/sicap_border_white.svg",
+        "public/assets/images/SICAP/webp/sicap_border_white.webp"
+      ],
+      "bytesPerCopy": 17538
+    }
+  ],
+  "largest": [
+    {
+      "path": "public/assets/images/background.png",
+      "bytes": 27215819,
+      "mib": 25.955,
+      "dimensions": "7360x4912",
+      "sha256": "c38ea52daa8e5e97bc3882bf78e136757e8590e471317337b5d985eaedd6ad08",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/RCP_Hero.original.webm",
+      "bytes": 18483610,
+      "mib": 17.6273,
+      "dimensions": "",
+      "sha256": "fe26e6862c82077cbbb62ecb7e9741db2c617cc3a77a815afa49538e3c1611e1",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/Animation/intro.mov",
+      "bytes": 14742724,
+      "mib": 14.0598,
+      "dimensions": "",
+      "sha256": "6784f9d6966dbdeb2492df38b4faf6449396aebf0b03d5f513273ff2e1707462",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/Animation/SICAP_LOGO.mov",
+      "bytes": 13855908,
+      "mib": 13.214,
+      "dimensions": "",
+      "sha256": "dfd9f6c0c2f9c016bbd670757b875dfa329c879d4a798ef0e7d208f619e559f5",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/SICAP/webp/contacto.webp",
+      "bytes": 7359136,
+      "mib": 7.0182,
+      "dimensions": "3936x2624",
+      "sha256": "9f57070e0ed98c391d49973236f3b2eabbd6368b7f6ad96a0502b4df16e57035",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/SICAP/webp/software_sicap.webp",
+      "bytes": 6794924,
+      "mib": 6.4801,
+      "dimensions": "4159x3978",
+      "sha256": "265ba8372077e0e1f681b4002935d6e3c9deb338f2ff54eaf2c99ad6cfcf9e89",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/background-mid.png",
+      "bytes": 3640133,
+      "mib": 3.4715,
+      "dimensions": "6144x3456",
+      "sha256": "938991b8d3a6a049f7e17e0102c44e967a02f8f4c5b2dd0d246d32f1acd8ffb7",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/SICAP/jpg/nosotros.jpg",
+      "bytes": 2381676,
+      "mib": 2.2713,
+      "dimensions": "5474x3654",
+      "sha256": "e4dc6d80d4d0abf3075097fd653768a5f75a69e3213eb84045aea4e9e2a5dac8",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/RCP_Hero.mp4",
+      "bytes": 2243183,
+      "mib": 2.1393,
+      "dimensions": "",
+      "sha256": "04dae787f3d557ff1b5383c15ea8c6d272d0973a3c2686d7ccf58809b3e17cd6",
+      "referenceStatus": "referencia_textual",
+      "references": "src/components/page/Hero.tsx:118"
+    },
+    {
+      "path": "public/assets/img_dashboard_siercp.png",
+      "bytes": 1459829,
+      "mib": 1.3922,
+      "dimensions": "1314x986",
+      "sha256": "a8ff278dc5034a5d579c799f2815cd2947fc6a111bf979949656b9419238e586",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/RCP_Hero.webm",
+      "bytes": 1348174,
+      "mib": 1.2857,
+      "dimensions": "",
+      "sha256": "8bf4f349d6e822fa81ea8f25a57f21c20240548783d8ef7af59d4c5adad417f1",
+      "referenceStatus": "referencia_textual",
+      "references": "src/components/page/Hero.tsx:117"
+    },
+    {
+      "path": "public/assets/img_sesion_siercp.png",
+      "bytes": 1165766,
+      "mib": 1.1118,
+      "dimensions": "832x1040",
+      "sha256": "b2a7459d7d63a7f4ac37ccb0c32b75595a0831e392e61b28275df1b05131eea3",
+      "referenceStatus": "referencia_textual",
+      "references": "src/components/page/SoftwareSiercp.tsx:115"
+    },
+    {
+      "path": "public/assets/Animation/intro.mp4",
+      "bytes": 1086182,
+      "mib": 1.0359,
+      "dimensions": "",
+      "sha256": "78138c44a18266f601bdcc3d922b900d4c8458c88fed7d6b3447661f763de635",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/register.png",
+      "bytes": 1058568,
+      "mib": 1.0095,
+      "dimensions": "1000x1500",
+      "sha256": "9a41f2fccccdb0deeb4c8766a6ac132856718a75dd014f91793223767265a788",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/login.png",
+      "bytes": 987357,
+      "mib": 0.9416,
+      "dimensions": "1000x1500",
+      "sha256": "b341839a762bcd982d08d6cdf320fa03a869b59679715c1d60cd6caf14593a20",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/SICAP/jpg/contacto.jpg",
+      "bytes": 778809,
+      "mib": 0.7427,
+      "dimensions": "3936x2624",
+      "sha256": "3da978d6aa9c7233458948b0b4b9c04722ad440904cfcade75289c8e1a9505b8",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/vector-login.png",
+      "bytes": 755000,
+      "mib": 0.72,
+      "dimensions": "1200x896",
+      "sha256": "f4fe7bca64914cb400f49638b6e05a48f49e00959c133333cd7d2ead42975ac6",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/siercp-app.png",
+      "bytes": 666524,
+      "mib": 0.6356,
+      "dimensions": "1024x1024",
+      "sha256": "1324101ccebc29a25ae433b0773dbaf7ccf40eef1f7b9b4e5b75b93080191d1d",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/Animation/intro_1.mp4",
+      "bytes": 409500,
+      "mib": 0.3905,
+      "dimensions": "",
+      "sha256": "922b11f7d84478e9ac6f36e9b5441e7bc65d895f8e4af0dad409643cd7daa11a",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    },
+    {
+      "path": "public/assets/images/SICAP/jpg/logo_sicap_border.jpg",
+      "bytes": 97267,
+      "mib": 0.0928,
+      "dimensions": "1532x676",
+      "sha256": "aae2f97978b0fd308d501896dc561f07d597e7f59002c56e328957790af3b3c2",
+      "referenceStatus": "sin_referencia_textual",
+      "references": ""
+    }
+  ]
+}

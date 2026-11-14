@@ -1,0 +1,455 @@
+{
+  "base": "2fbef50",
+  "preexistingErrors": 97,
+  "files": [
+    {
+      "file": "src/app/(dashboard)/live/[sessionId]/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/courses/new/page.tsx",
+      "errors": 3,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1,
+        "react/no-unescaped-entities": 2
+      }
+    },
+    {
+      "file": "src/app/admin/courses/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/dashboard/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/instructors/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/live/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/orders/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/platform-courses/[id]/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/platform-courses/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/reports/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/sedes/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/sessions/page.tsx",
+      "errors": 2,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1,
+        "react-hooks/purity": 1
+      }
+    },
+    {
+      "file": "src/app/admin/settings/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/students/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/tienda/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/admin/users/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/checkout/manikin/page.tsx",
+      "errors": 2,
+      "rules": {
+        "@next/next/no-html-link-for-pages": 2
+      }
+    },
+    {
+      "file": "src/app/formacion/[slug]/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/inscribirse/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/instructor/courses/create/page.tsx",
+      "errors": 5,
+      "rules": {
+        "react-hooks/purity": 1,
+        "react/no-unescaped-entities": 4
+      }
+    },
+    {
+      "file": "src/app/instructor/dashboard/page.tsx",
+      "errors": 2,
+      "rules": {
+        "react/no-unescaped-entities": 2
+      }
+    },
+    {
+      "file": "src/app/pago/plan/confirmacion/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/student/courses/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/student/enrollments/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/student/ranking/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/cursos/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/dashboard/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/dashboard/skills-kpi-row.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/institutions/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/instructores/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/notifications/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/pedidos/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/pending-institutions/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/immutability": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/pending-instructors/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/plans/page.tsx",
+      "errors": 4,
+      "rules": {
+        "react/no-unescaped-entities": 4
+      }
+    },
+    {
+      "file": "src/app/super-admin/settings/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/solicitudes-datos/page.tsx",
+      "errors": 2,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1,
+        "react-hooks/purity": 1
+      }
+    },
+    {
+      "file": "src/app/super-admin/stock/page.tsx",
+      "errors": 2,
+      "rules": {
+        "react-hooks/set-state-in-effect": 2
+      }
+    },
+    {
+      "file": "src/app/super-admin/usuarios/page.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/components/Reveal.tsx",
+      "errors": 7,
+      "rules": {
+        "react-hooks/purity": 1,
+        "react-hooks/refs": 6
+      }
+    },
+    {
+      "file": "src/components/course/course-management-view.tsx",
+      "errors": 2,
+      "rules": {
+        "react/no-unescaped-entities": 2
+      }
+    },
+    {
+      "file": "src/components/layout/auth-navbar.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/components/notifications/app-install-banner.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/rules-of-hooks": 1
+      }
+    },
+    {
+      "file": "src/components/page/DownloadApp.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/static-components": 1
+      }
+    },
+    {
+      "file": "src/components/page/EnrollmentFlow.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/components/page/Formacion.tsx",
+      "errors": 1,
+      "rules": {
+        "@next/next/no-html-link-for-pages": 1
+      }
+    },
+    {
+      "file": "src/components/page/Navbar.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/components/page/Nosotros.tsx",
+      "errors": 2,
+      "rules": {
+        "react/no-unescaped-entities": 2
+      }
+    },
+    {
+      "file": "src/components/ui/global-search.tsx",
+      "errors": 4,
+      "rules": {
+        "react-hooks/set-state-in-effect": 2,
+        "react/no-unescaped-entities": 2
+      }
+    },
+    {
+      "file": "src/components/ui/notifications-drawer.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/immutability": 1
+      }
+    },
+    {
+      "file": "src/components/video-loader.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/features/analytics/hooks/use-super-admin-analytics.ts",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/features/attendance/components/attendance-panel.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/features/operations/hooks/use-operational-metrics.ts",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/features/super-admin/components/create-admin-modal.tsx",
+      "errors": 2,
+      "rules": {
+        "react-hooks/static-components": 2
+      }
+    },
+    {
+      "file": "src/hooks/useCatalog.ts",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/shared/components/notifications/app-install-banner.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/rules-of-hooks": 1
+      }
+    },
+    {
+      "file": "src/shared/components/ui/global-search.tsx",
+      "errors": 4,
+      "rules": {
+        "react-hooks/set-state-in-effect": 2,
+        "react/no-unescaped-entities": 2
+      }
+    },
+    {
+      "file": "src/shared/components/ui/notifications-drawer.tsx",
+      "errors": 1,
+      "rules": {
+        "react-hooks/immutability": 1
+      }
+    },
+    {
+      "file": "src/shared/hooks/use-auth-minimal.ts",
+      "errors": 1,
+      "rules": {
+        "react-hooks/set-state-in-effect": 1
+      }
+    },
+    {
+      "file": "src/shared/hooks/use-calendar.ts",
+      "errors": 2,
+      "rules": {
+        "react-hooks/set-state-in-effect": 2
+      }
+    },
+    {
+      "file": "src/shared/hooks/use-plan-quota.ts",
+      "errors": 3,
+      "rules": {
+        "react-hooks/set-state-in-effect": 3
+      }
+    },
+    {
+      "file": "src/shared/hooks/use-push-notifications.ts",
+      "errors": 3,
+      "rules": {
+        "react-hooks/preserve-manual-memoization": 1,
+        "react-hooks/refs": 2
+      }
+    }
+  ]
+}
