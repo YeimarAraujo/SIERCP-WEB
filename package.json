@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "assets:optimize": "node scripts/optimize-web-assets.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -40,7 +41,7 @@
     "jspdf-autotable": "^5.0.7",
     "lottie-web": "^5.13.0",
     "lucide-react": "^1.11.0",
-    "next": "^16.2.4",
+    "next": "16.4.6",
     "papaparse": "^5.5.3",
     "postcss": "^8.5.10",
     "qrcode.react": "^4.2.0",
@@ -57,9 +58,17 @@
     "zod": "^4.4.3",
     "zustand": "^5.0.12"
   },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
+  },
   "devDependencies": {
     "@types/papaparse": "^5.5.2",
     "@vitest/coverage-v8": "^4.1.7",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.6",
+    "sharp": "0.35.5",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.7"
   }

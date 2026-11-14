@@ -16,7 +16,7 @@ export default function Footer() {
       borderTop: "1px solid rgba(255,255,255,0.05)"
     }}>
       <Container>
-        <Row className="g-5 mb-5">
+        <Row className="gy-5 gx-4 gx-lg-5 mb-5">
           <Col lg={4}>
             <img src={logo} alt="Sicap" style={{ height: "55px", marginBottom: "28px", filter: "brightness(0) invert(1)" }} />
             <p style={{ fontSize: "0.95rem", lineHeight: "1.8", maxWidth: "340px", marginBottom: "32px" }}>

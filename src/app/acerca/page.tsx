@@ -6,6 +6,7 @@ import Navbar from "@/components/page/Navbar";
 import Footer from "@/components/page/Footer";
 import WhatsAppFab from "@/components/page/WhatsAppFab";
 import Link from "next/link";
+import { webAssets } from '@/generated/web-assets';
 
 const FEATURES = [
   {
@@ -122,7 +123,7 @@ export default function AcercaPage() {
       <section style={{ background: "var(--clr-bg-hero)", padding: "130px 0 90px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 80% 18%, rgba(109,74,255,0.18) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255,255,255,0.05) 0%, transparent 50%)", pointerEvents: "none" }} />
         <Container style={{ position: "relative", zIndex: 1 }}>
-          <Row className="align-items-center g-5">
+          <Row className="align-items-center gy-5 gx-4 gx-lg-5">
             <Col lg={6}>
               <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.8rem)", fontWeight: 900, color: "#fff", lineHeight: 1.05, marginBottom: "24px" }}>
                 El sistema que<br />
@@ -144,7 +145,12 @@ export default function AcercaPage() {
             <Col lg={6}>
               <div style={{ position: "relative", borderRadius: "24px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 30px 70px rgba(0,0,0,0.45)" }}>
                 <img
-                  src="/assets/images/SICAP/webp/software_sicap.webp"
+                  src={webAssets.software.src}
+                  srcSet={webAssets.software.srcSet}
+                  sizes="(min-width: 1400px) 636px, (min-width: 1200px) 546px, (min-width: 992px) 456px, (min-width: 768px) 696px, (min-width: 576px) 516px, calc(100vw - 24px)"
+                  width={webAssets.software.width}
+                  height={webAssets.software.height}
+                  decoding="async"
                   alt="Plataforma de software SIERCP en uso"
                   className="img-fluid"
                   style={{ display: "block", width: "100%", height: "auto" }}
@@ -240,7 +246,7 @@ export default function AcercaPage() {
       {/* ── ARQUITECTURA TÉCNICA ──────────────────────────────────────────── */}
       <section className="section-py" style={{ background: "var(--clr-bg)" }}>
         <Container>
-          <Row className="align-items-center g-5">
+          <Row className="align-items-center gy-5 gx-4 gx-lg-5">
             <Col lg={5}>
               <span className="badge-pill mb-3">Stack tecnológico</span>
               <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, color: "var(--clr-text-head)", marginBottom: "24px" }}>
