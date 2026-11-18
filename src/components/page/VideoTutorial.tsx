@@ -4,36 +4,25 @@ import React, { useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 
 // ── Video data ────────────────────────────────────────────────────────────────
-// Replace `youtubeId` values with real YouTube video IDs when published.
-// The thumbnail will fall back to the YouTube auto-generated image.
+// The thumbnail uses the YouTube auto-generated image.
+// `vertical: true` is for YouTube Shorts (9:16 player).
 
 const VIDEOS = [
   {
-    id: "intro",
-    youtubeId: "dQw4w9WgXcQ",
-    title: "¿Qué es SICAP?",
-    desc: "Conoce el sistema inteligente de entrenamiento en RCP y cómo funciona el maniquí IoT.",
-    duration: "2:34",
-    tag: "Introducción",
+    id: "iot-short",
+    youtubeId: "CzH7re4pBnc",
+    title: "SICAP: Transformando el aprendizaje de primeros auxilios mediante tecnología IoT",
+    tag: "Proyecto",
     tagColor: "var(--clr-primary)",
+    vertical: true,
   },
   {
-    id: "app",
-    youtubeId: "dQw4w9WgXcQ",
-    title: "Primeros pasos con la App Móvil",
-    desc: "Descarga la aplicación, conéctate al maniquí por BLE y revisa tus métricas en tiempo real.",
-    duration: "3:12",
+    id: "rcp-app",
+    youtubeId: "lrikPZPoY8Q",
+    title: "SICAP: Monitoreo y visualización de una sesión de RCP desde la aplicación móvil",
     tag: "App Móvil",
     tagColor: "#10b981",
-  },
-  {
-    id: "session",
-    youtubeId: "dQw4w9WgXcQ",
-    title: "Cómo realizar una sesión de RCP",
-    desc: "Guía paso a paso: configurar el escenario, practicar con feedback inmediato y revisar resultados.",
-    duration: "4:50",
-    tag: "Entrenamiento",
-    tagColor: "#f59e0b",
+    vertical: false,
   },
 ];
 
@@ -98,13 +87,9 @@ function VideoCard({
           {video.tag}
         </div>
         <div style={{
-          fontWeight: 700, fontSize: "0.82rem", color: "#fff",
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          fontWeight: 700, fontSize: "0.82rem", color: "#fff", lineHeight: 1.35,
         }}>
           {video.title}
-        </div>
-        <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.45)", marginTop: 2 }}>
-          {video.duration}
         </div>
       </div>
 
@@ -156,7 +141,9 @@ export default function VideoTutorial() {
               borderRadius: 20, overflow: "hidden",
               border: "1px solid rgba(255,255,255,0.1)",
               background: "#0f0f2e",
-              aspectRatio: "16/9",
+              aspectRatio: active.vertical ? "9/16" : "16/9",
+              maxHeight: active.vertical ? "min(75vh, 640px)" : undefined,
+              margin: active.vertical ? "0 auto" : undefined,
               position: "relative",
             }}>
               <iframe
@@ -178,16 +165,10 @@ export default function VideoTutorial() {
                 }}>
                   {active.tag}
                 </span>
-                <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)" }}>
-                  <i className="bi bi-clock" style={{ marginRight: 4 }} />{active.duration}
-                </span>
               </div>
-              <h3 style={{ fontWeight: 800, fontSize: "1.15rem", color: "#fff", marginBottom: 8 }}>
+              <h3 style={{ fontWeight: 800, fontSize: "1.15rem", color: "#fff", marginBottom: 0 }}>
                 {active.title}
               </h3>
-              <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.65, margin: 0 }}>
-                {active.desc}
-              </p>
             </div>
           </Col>
 
